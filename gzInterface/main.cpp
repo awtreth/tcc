@@ -25,13 +25,10 @@ int main(int _argc, char **_argv)
     // Create a a vector3 message
     gz_interface_msgs::msg::GzDxlRequest msg;
 
+    msg.set_requestitem(gz_interface_msgs::msg::GzDxlRequest_RequestItem_VEL);
+    msg.set_requesttype(gz_interface_msgs::msg::GzDxlRequest_RequestType_WRITE);
     msg.add_motorid(0);
-    msg.add_pos(1);
-    msg.add_torque(2);
-    msg.add_torque(3);
-    msg.set_nmotors(2);
-    msg.set_requestitem(gz_interface_msgs::msg::GzDxlRequest_RequestItem_POS_VEL);
-    msg.set_requesttype(gz_interface_msgs::msg::GzDxlRequest_RequestType_READ);
+    msg.add_vel(1);
 
     // Send the message
     pub->Publish(msg);

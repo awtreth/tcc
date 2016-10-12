@@ -31,10 +31,11 @@ namespace gazebo
         /// \brief Pointer to the model.
         private: physics::ModelPtr model;
 
+        /// \brief Pointer to the joints (std::vector<JointPtr>)
         private: physics::Joint_V joints;
 
+        /// \brief Pointer to the JointController
         private: physics::JointControllerPtr jointController;
-
 
         public:
 
@@ -42,7 +43,19 @@ namespace gazebo
 
         public: void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf);
 
-        public: void HandleCommand(GzDxlRequestPtr &_msg);
+        private: void HandleCommand(GzDxlRequestPtr &_msg);
+
+        private: void SetPositions(GzDxlRequestPtr &_msg);
+
+        private: void SetVelocities(GzDxlRequestPtr &_msg);
+
+        private: void SetTorques(GzDxlRequestPtr &_msg);
+
+        //private: void GetPositions();
+
+        //private: void GetVelocities();
+
+        //private: void GetTorques();
 
     };
     GZ_REGISTER_MODEL_PLUGIN(GzDxlPlugin);
