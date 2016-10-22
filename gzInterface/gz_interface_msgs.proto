@@ -1,6 +1,6 @@
 package gz_interface_msgs.msg;
 
-message GzDxlRequest {
+message GzSimpleRequest {
 
 	enum RequestType{
 		READ  = 0;

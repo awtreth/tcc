@@ -1,5 +1,5 @@
-#ifndef SIMPLEARMPLUGIN_H
-#define SIMPLEARMPLUGIN_H
+#ifndef GZSIMPLEPLUGIN_H
+#define GZSIMPLEPLUGIN_H
 
 
 #include <gazebo/gazebo.hh>
@@ -12,10 +12,10 @@
 namespace gazebo
 {
     typedef const boost::shared_ptr<
-    const gz_interface_msgs::msg::GzDxlRequest>
-    GzDxlRequestPtr;
+    const gz_interface_msgs::msg::GzSimpleRequest>
+    GzSimpleRequestPtr;
 
-    class GzDxlPlugin :public ModelPlugin
+    class GzSimplePlugin :public ModelPlugin
     {
         private:
 
@@ -39,17 +39,17 @@ namespace gazebo
 
         public:
 
-        public: GzDxlPlugin();
+        public: GzSimplePlugin();
 
         public: void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf);
 
-        private: void HandleCommand(GzDxlRequestPtr &_msg);
+        private: void HandleCommand(GzSimpleRequestPtr &_msg);
 
-        private: void SetPositions(GzDxlRequestPtr &_msg);
+        private: void SetPositions(GzSimpleRequestPtr &_msg);
 
-        private: void SetVelocities(GzDxlRequestPtr &_msg);
+        private: void SetVelocities(GzSimpleRequestPtr &_msg);
 
-        private: void SetTorques(GzDxlRequestPtr &_msg);
+        private: void SetTorques(GzSimpleRequestPtr &_msg);
 
         //private: void GetPositions();
 
@@ -58,7 +58,7 @@ namespace gazebo
         //private: void GetTorques();
 
     };
-    GZ_REGISTER_MODEL_PLUGIN(GzDxlPlugin);
+    GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);
 }
 
-#endif // SIMPLEARMPLUGIN_H
+#endif // GZSIMPLEPLUGIN_H

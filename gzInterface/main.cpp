@@ -17,18 +17,18 @@ int main(int _argc, char **_argv)
 
     // Publish to the  velodyne topic
     gazebo::transport::PublisherPtr pub =
-            node->Advertise<gz_interface_msgs::msg::GzDxlRequest>("~/simple_arm/dxl_cmd");
+            node->Advertise<gz_interface_msgs::msg::GzSimpleRequest>("~/simple_arm/dxl_cmd");
 
     // Wait for a subscriber to connect to this publisher
     pub->WaitForConnection();
 
     // Create a a vector3 message
-    gz_interface_msgs::msg::GzDxlRequest msg;
+    gz_interface_msgs::msg::GzSimpleRequest msg;
 
-    msg.set_requestitem(gz_interface_msgs::msg::GzDxlRequest_RequestItem_VEL);
-    msg.set_requesttype(gz_interface_msgs::msg::GzDxlRequest_RequestType_WRITE);
+    msg.set_requestitem(gz_interface_msgs::msg::GzSimpleRequest_RequestItem_POS);
+    msg.set_requesttype(gz_interface_msgs::msg::GzSimpleRequest_RequestType_WRITE);
     msg.add_motorid(0);
-    msg.add_vel(1);
+    msg.add_pos(45*3.1415/180.);
 
     // Send the message
     pub->Publish(msg);

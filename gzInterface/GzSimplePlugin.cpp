@@ -1,13 +1,13 @@
-#include "GzDxlPlugin.h"
+#include "GzSimplePlugin.h"
 #include <iostream>
 
 namespace gazebo
 {
-    GzDxlPlugin::GzDxlPlugin():ModelPlugin()
+    GzSimplePlugin::GzSimplePlugin():ModelPlugin()
     {
     }
 
-    void GzDxlPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
+    void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
         // Safety check
         if (_model->GetJointCount() == 0)
@@ -31,7 +31,7 @@ namespace gazebo
 
         for(unsigned int i = 0; i < this->model->GetJointCount(); i++){
             std::string jointName = this->joints.at(i)->GetScopedName();
-            this->jointController->SetVelocityPID(jointName,defaultPID);
+            this->jointController->SetVelocityPID(jointName,common::PID(0));
             this->jointController->SetPositionPID(jointName,defaultPID);
             this->jointController->SetPositionTarget(jointName,0);
             this->jointController->SetVelocityTarget(jointName,0);
@@ -46,36 +46,36 @@ namespace gazebo
 
         // Subscribe to the topic, and register a callback
         this->cmdSub = this->node->Subscribe(topicName,
-                                             &GzDxlPlugin::HandleCommand, this);
+                                             &GzSimplePlugin::HandleCommand, this);
 
     }
 
-    void GzDxlPlugin::HandleCommand(GzDxlRequestPtr &_msg)
+    void GzSimplePlugin::HandleCommand(GzSimpleRequestPtr &_msg)
     {
-        if(_msg->requesttype()==gz_interface_msgs::msg::GzDxlRequest_RequestType_WRITE){
+        if(_msg->requesttype()==gz_interface_msgs::msg::GzSimpleRequest_RequestType_WRITE){
             std::cout << "WRITE\n";
             switch(_msg->requestitem()){
-                case gz_interface_msgs::msg::GzDxlRequest_RequestItem_POS:
+                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_POS:
                     std::cout << "POS\n";
                     SetPositions(_msg);
                     break;
-                case gz_interface_msgs::msg::GzDxlRequest_RequestItem_VEL:
+                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_VEL:
                     std::cout << "VEL\n";
                     SetVelocities(_msg);
                     break;
-                case gz_interface_msgs::msg::GzDxlRequest_RequestItem_POS_VEL:
+                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_POS_VEL:
                     std::cout << "POS_VEL\n";
                     SetPositions(_msg);
                     SetVelocities(_msg);
                     break;
-                case gz_interface_msgs::msg::GzDxlRequest_RequestItem_TORQUE:
+                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_TORQUE:
                     std::cout << "TORQUE\n";
                     SetTorques(_msg);
                     break;
                 default: std::cout << "switch(_msg->requestitem()): default\n";;
             }
 
-        }else if(_msg->requesttype()==gz_interface_msgs::msg::GzDxlRequest_RequestType_READ){
+        }else if(_msg->requesttype()==gz_interface_msgs::msg::GzSimpleRequest_RequestType_READ){
             std::cout << "READ\n";
         }
 
@@ -83,14 +83,14 @@ namespace gazebo
         //this->SetVelocity(_msg->x());
     }
 
-    void GzDxlPlugin::SetPositions(GzDxlRequestPtr &_msg){
+    void GzSimplePlugin::SetPositions(GzSimpleRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->jointController->SetPositionTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->pos(i));
             std::cout << "SetPosition of Motor " << _msg->motorid(i) << ": "<< _msg->pos(i) << std::endl;
         }
     }
 
-    void GzDxlPlugin::SetVelocities(GzDxlRequestPtr &_msg){
+    void GzSimplePlugin::SetVelocities(GzSimpleRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->jointController->SetVelocityTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->vel(i));
             std::cout << "SetVelocity of Motor " << _msg->motorid(i) << ": "<< _msg->vel(i) << std::endl;
@@ -98,7 +98,7 @@ namespace gazebo
         }
     }
 
-    void GzDxlPlugin::SetTorques(GzDxlRequestPtr &_msg){
+    void GzSimplePlugin::SetTorques(GzSimpleRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->joints.at(_msg->motorid(i))->SetForce(0,_msg->torque(i));
             std::cout << "SetTorque of Motor " << _msg->motorid(i) << ": "<< _msg->torque(i) << std::endl;

@@ -21,12 +21,16 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 add_library(gz_interface_msgs SHARED ${PROTO_SRCS})
-add_library(gz_dxl_plugin SHARED GzDxlPlugin.cpp)
+add_library(gz_simple_plugin SHARED GzSimplePlugin.cpp)
+add_library(dxl_mem_map SHARED DxlMemMap.cpp)
+add_library(dxl_instruction_packet_parser SHARED DxlInstructionPacketParser.cpp)
+add_library(dxl_model_param_converter SHARED DxlModelParamConverter.cpp)
+add_library(funcmov_gz SHARED funcmovgz.cpp)
 
 add_executable(main main.cpp)
 
 
 target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
-target_link_libraries(gz_dxl_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})
+target_link_libraries(gz_simple_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})
 target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES})
 
