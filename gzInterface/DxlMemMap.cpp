@@ -1,15 +1,42 @@
 #include "DxlMemMap.h"
 #include <algorithm>
 #include <iostream>
+#include <jsoncpp/json/json.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 DxlMemMap::DxlMemMap(){
-    for(unsigned int i = 0; i < sizeof(DxlMemMap::controlTable); i++) {
+	this->fieldNames.reserve(MAX_CONTROL_TABLE_SIZE);
+	for(unsigned int i = 0; i < sizeof(DxlMemMap::controlTable); i++) {
         DxlMemMap::controlTable[i]=0;
     }
 
 }
 
-DxlMemMap::DxlMemMap(const char* jsonFileName){}
+DxlMemMap::DxlMemMap(const char* jsonFileName){
+
+	this->fieldNames.reserve(MAX_CONTROL_TABLE_SIZE);
+
+	Json::Value jsonObject;
+
+	std::ifstream jsonFile(jsonFileName);
+
+	jsonFile >> jsonObject;
+
+	Json::Value defaultTable = jsonObject["defaultTable"];
+
+	for (unsigned int i = 0; i < defaultTable.size(); ++i) {
+		int regNumber = defaultTable[i]["regNumber"].asInt();
+		char value = (char) defaultTable[i]["defaultValue"].asInt();
+		std::string regName = defaultTable[i]["regName"].asString();;
+
+		this->controlTable[regNumber] = value;
+		this->fieldNames[regNumber] = regName;
+
+	}
+
+}
 
 
 
@@ -53,7 +80,7 @@ std::string DxlMemMap::toString() {
 
     for(unsigned int i=0; i < sizeof(DxlMemMap::controlTable); i++){
 
-        str += std::to_string((int)controlTable[i]) + '\n';
+		str += "add" + std::to_string(i) + ": " + this->fieldNames[i] + " = " + std::to_string((int)controlTable[i]) + '\n';
     }
     return str;
 }
@@ -65,7 +92,7 @@ std::string DxlMemMap::toString(int startAddress, int length){
 
     for(int i=startAddress; i < startAddress+length; i++){
 
-        str += std::to_string((int)controlTable[i]) + '\n';
+		str += "add" + std::to_string(i) + ": " + this->fieldNames[i] + " = " + std::to_string((int)controlTable[i]) + '\n';
     }
     return str;
 }

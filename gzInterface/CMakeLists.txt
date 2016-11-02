@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 find_package(gazebo REQUIRED)
 find_package(Protobuf REQUIRED)
 
-list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS} -Wall")
+list(APPEND CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} ${GAZEBO_CXX_FLAGS} -Wall")
 
 set (msgs
   gz_interface_msgs.proto
@@ -32,5 +32,5 @@ add_executable(main main.cpp)
 
 target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
 target_link_libraries(gz_simple_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})
-target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES} dxl_mem_map)
+target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES} dxl_mem_map jsoncpp)
 
