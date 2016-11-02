@@ -1,0 +1,8 @@
+{
+//from http://support.robotis.com/en/product/dynamixel/mx_series/mx-106.htm
+"model":64,			//default value
+"posResolution":0.001535889742,	//0.088degree * PI/180
+"velResolution":0.011938,	//0.114rpm    * 2PI/60
+"angleRange":6.283185307,	//2*PI
+"torqueResolution":0.008211	//8.4/1023 (from stallTorque 12V)	
+}

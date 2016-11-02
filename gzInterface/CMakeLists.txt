@@ -32,5 +32,5 @@ add_executable(main main.cpp)
 
 target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
 target_link_libraries(gz_simple_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})
-target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES} dxl_mem_map jsoncpp)
+target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES} dxl_mem_map dxl_model_param_converter jsoncpp)
 
