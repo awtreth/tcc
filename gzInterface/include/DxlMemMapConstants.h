@@ -21,7 +21,8 @@
  */
 #define P_MODEL_NUMBER_L	0
 #define P_MODEL_NUMBER_H	1
-#define P_VERSION		2
+#define P_VERSION		2 //old version
+#define P_FIRMWARE_VERSION      2
 #define P_ID			3
 #define P_BAUD_RATE		4
 #define P_RETURN_DELAY_TIME	5
@@ -30,19 +31,31 @@
 #define P_CCW_ANGLE_LIMIT_L	8
 #define P_CCW_ANGLE_LIMIT_H	9
 #define P_SYSTEM_DATA2		10
+#define P_DRIVE_MODE		10
 #define P_LIMIT_TEMPERATURE	11
+#define P_HIGHEST_LIMIT_TEMPERATURE	11
 #define P_DOWN_LIMIT_VOLTAGE	12
+#define P_P_LOWEST_LIMIT_VOLTAGE	12
 #define P_UP_LIMIT_VOLTAGE	13
+#define P_HIGHEST_LIMIT_VOLTAGE	13
 #define P_MAX_TORQUE_L		14
 #define P_MAX_TORQUE_H		15
 #define P_RETURN_LEVEL		16
+#define P_STATUS_RETURN_LEVEL   16
 #define P_ALARM_LED		17
 #define P_ALARM_SHUTDOWN	18
+
 #define P_OPERATING_MODE	19
+
 #define P_DOWN_CALIBRATION_L	20
 #define P_DOWN_CALIBRATION_H	21
 #define P_UP_CALIBRATION_L	22
 #define P_UP_CALIBRATION_H	23
+
+#define P_MULTI_TURN_OFFSET_L   20
+#define P_MULTI_TURN_OFFSET_H   21
+#define P_RESOLUTION_DIVIDER    22
+
 #define P_TORQUE_ENABLE		24
 #define P_LED			25
 
@@ -71,17 +84,34 @@
 #define P_PRESENT_VOLTAGE	42
 #define P_PRESENT_TEMPERATURE	43
 #define P_REGISTERED_INSRUCTION	44
+#define P_REGISTERED            44
 #define P_PAUSE_TIME		45
 #define P_MOVING		46
+
 #define P_FINAL_GOAL_POSITION_H	47
 #define P_MOVING_TIME_L		48
 #define P_MOVING_TIME_H		49
+
+#define P_LOCK          	47
+#define P_PUNCH_L		48
+#define P_PUNCH_H		49
+
+
 #define P_FINAL_SPEED_L		50
 #define P_FINAL_SPEED_H		51
 #define P_POT_DATA_L		52
 #define P_POT_DATA_H		53
 #define P_PWM_OUT_L		54
 #define P_PWM_OUT_H		55
+
+
+#define P_CURRENT_L             68
+#define P_CURRENT_H             69
+#define P_TORQUE_ENABLE_MODE    70
+#define P_GOAL_TORQUE_L         71
+#define P_GOAL_TORQUE_H         72
+#define P_GOAL_ACCELERATION     73
+
 
 /*
  * Erros

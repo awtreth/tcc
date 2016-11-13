@@ -1,0 +1,10 @@
+package gz_msgs;
+
+message DxlStatusPacket {
+
+    optional bytes ids = 1;
+    optional int32 length = 2;
+    optional bytes parameters = 3;
+    optional int32 error = 4;
+
+}

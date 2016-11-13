@@ -1,6 +1,10 @@
 #ifndef DXLMODELPARAMCONVERTER_H
 #define DXLMODELPARAMCONVERTER_H
 
+/**
+ * @brief Auxilia na conversão de unidades de motor para unidades físicas utilizadas no sistema internacional de unidades, que é usado no Gazebo.
+ *
+ */
 class DxlModelParamConverter {
 	
 	

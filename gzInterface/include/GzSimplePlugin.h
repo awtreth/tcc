@@ -7,13 +7,14 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <boost/shared_ptr.hpp>
-#include <gz_interface_msgs.pb.h>
+//#include <gz_interface_msgs.pb.h>
+#include <GzWriteRequest.pb.h>
 
 namespace gazebo
 {
     typedef const boost::shared_ptr<
-    const gz_interface_msgs::msg::GzSimpleRequest>
-    GzSimpleRequestPtr;
+        const gz_msgs::WriteRequest>
+    GzWriteRequestPtr;
 
     class GzSimplePlugin :public ModelPlugin
     {
@@ -43,13 +44,13 @@ namespace gazebo
 
         public: void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf);
 
-        private: void HandleCommand(GzSimpleRequestPtr &_msg);
+        private: void HandleCommand(GzWriteRequestPtr &_msg);
 
-        private: void SetPositions(GzSimpleRequestPtr &_msg);
+        private: void SetPositions(GzWriteRequestPtr &_msg);
 
-        private: void SetVelocities(GzSimpleRequestPtr &_msg);
+        private: void SetVelocities(GzWriteRequestPtr &_msg);
 
-        private: void SetTorques(GzSimpleRequestPtr &_msg);
+        private: void SetTorques(GzWriteRequestPtr &_msg);
 
         //private: void GetPositions();
 

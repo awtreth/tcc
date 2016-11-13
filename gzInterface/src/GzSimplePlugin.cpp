@@ -50,47 +50,47 @@ namespace gazebo
 
     }
 
-    void GzSimplePlugin::HandleCommand(GzSimpleRequestPtr &_msg)
+	void GzSimplePlugin::HandleCommand(GzWriteRequestPtr &_msg)
     {
-        if(_msg->requesttype()==gz_interface_msgs::msg::GzSimpleRequest_RequestType_WRITE){
-            std::cout << "WRITE\n";
-            switch(_msg->requestitem()){
-                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_POS:
-                    std::cout << "POS\n";
-                    SetPositions(_msg);
-                    break;
-                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_VEL:
-                    std::cout << "VEL\n";
-                    SetVelocities(_msg);
-                    break;
-                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_POS_VEL:
-                    std::cout << "POS_VEL\n";
-                    SetPositions(_msg);
-                    SetVelocities(_msg);
-                    break;
-                case gz_interface_msgs::msg::GzSimpleRequest_RequestItem_TORQUE:
-                    std::cout << "TORQUE\n";
-                    SetTorques(_msg);
-                    break;
-                default: std::cout << "switch(_msg->requestitem()): default\n";;
-            }
+//		if(_msg->requesttype()==gz_msgs::WriteRequest_RequestType_WRITE){
+//            std::cout << "WRITE\n";
+//            switch(_msg->requestitem()){
+//				case gz_msgs::GzWriteRequestPtr_RequestItem_POS:
+//                    std::cout << "POS\n";
+//                    SetPositions(_msg);
+//                    break;
+//				case gz_msgs::GzWriteRequestPtr_RequestItem_VEL:
+//                    std::cout << "VEL\n";
+//                    SetVelocities(_msg);
+//                    break;
+//				case gz_msgs::GzWriteRequestPtr_RequestItem_POS_VEL:
+//                    std::cout << "POS_VEL\n";
+//                    SetPositions(_msg);
+//                    SetVelocities(_msg);
+//                    break;
+//				case gz_msgs::GzWriteRequestPtr_RequestItem_TORQUE:
+//                    std::cout << "TORQUE\n";
+//                    SetTorques(_msg);
+//                    break;
+//                default: std::cout << "switch(_msg->requestitem()): default\n";;
+//            }
 
-        }else if(_msg->requesttype()==gz_interface_msgs::msg::GzSimpleRequest_RequestType_READ){
-            std::cout << "READ\n";
-        }
+//		}else if(_msg->requesttype()==gz_msgs::GzWriteRequestPtr_RequestType_READ){
+//            std::cout << "READ\n";
+//        }
 
-        std::cout << std::to_string(_msg->nmotors()) << std::endl;
-        //this->SetVelocity(_msg->x());
+//        std::cout << std::to_string(_msg->nmotors()) << std::endl;
+//        //this->SetVelocity(_msg->x());
     }
 
-    void GzSimplePlugin::SetPositions(GzSimpleRequestPtr &_msg){
+	void GzSimplePlugin::SetPositions(GzWriteRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->jointController->SetPositionTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->pos(i));
             std::cout << "SetPosition of Motor " << _msg->motorid(i) << ": "<< _msg->pos(i) << std::endl;
         }
     }
 
-    void GzSimplePlugin::SetVelocities(GzSimpleRequestPtr &_msg){
+	void GzSimplePlugin::SetVelocities(GzWriteRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->jointController->SetVelocityTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->vel(i));
             std::cout << "SetVelocity of Motor " << _msg->motorid(i) << ": "<< _msg->vel(i) << std::endl;
@@ -98,7 +98,7 @@ namespace gazebo
         }
     }
 
-    void GzSimplePlugin::SetTorques(GzSimpleRequestPtr &_msg){
+	void GzSimplePlugin::SetTorques(GzWriteRequestPtr &_msg){
         for(int i = 0; i < _msg->motorid_size(); i++){
             this->joints.at(_msg->motorid(i))->SetForce(0,_msg->torque(i));
             std::cout << "SetTorque of Motor " << _msg->motorid(i) << ": "<< _msg->torque(i) << std::endl;
