@@ -29,7 +29,7 @@ int main(int _argc, char **_argv)
 	vecStr.push_back("Motor 1");
 	vecStr.push_back("Motor 2");
 
-	std::shared_ptr<IJointPosVelController> controller = std::make_shared<GzJointController>(vecStr,"~/input", "~/output");
+	std::shared_ptr<IPosVelJointController> controller = std::make_shared<GzJointController>(vecStr,"~/input", "~/output");
 
 	getchar();
 

@@ -7,7 +7,7 @@
 #include <GzReadAnswer.pb.h>
 #include <memory>
 
-class GzJointController : public AbsJointController, public IJointPosVelController, public IJointTorqueController {
+class GzJointController : public AbsJointController, public IPosVelJointController, public ITorqueJointController {
 
     private:
 
