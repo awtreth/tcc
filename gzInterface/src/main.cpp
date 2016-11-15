@@ -9,6 +9,10 @@
 #include <jsoncpp/json/json.h>
 #include "DxlModelParamConverter.h"
 #include <string>
+#include <Joint.h>
+#include <JointController.h>
+
+#include <memory>
 
 // for convenience
 //using json = nlohmann::json;
@@ -17,19 +21,10 @@
 int main(int _argc, char **_argv)
 {
 
+	JointPosVelCommand jcmd(2,3);
 
-	//DxlMemMap map("../json/MX-106.dxlmap");
+	//jcmd.hasPosVel();
 
-	//std::cout << map.toString();
-
-	DxlModelParamConverter parser("../json/MX-106.dxlparam");
-
-	std::cout << "Model: " + std::to_string(parser.getModel()) << std::endl;
-	std::cout << "PosRes: " + std::to_string(parser.getPosResolution()) << std::endl;
-	std::cout << "VelRes: " + std::to_string(parser.getVelResolution()) << std::endl;
-	std::cout << "TorRes: " + std::to_string(parser.getTorqueResolution()) << std::endl;
-	std::cout << "aRange: " + std::to_string(parser.getAngleRange()) << std::endl;
-
-
+	//JointPosVelCommand jcmd(2,3);
 
 }
