@@ -59,7 +59,7 @@ class IJointTorqueController {
      * @param jointID
      * @return bool
      */
-    virtual bool goTorque(double pos, double vel, int jointID = 0) = 0;
+    virtual bool goTorque(double torque, int jointID = 0) = 0;
 
     /**
      * @brief
@@ -69,7 +69,7 @@ class IJointTorqueController {
      * @param jointName
      * @return bool
      */
-    virtual bool goTorque(double pos, double vel, std::string jointName = "") = 0;
+    virtual bool goTorque(double torque, std::string jointName = "") = 0;
 
     /**
      * @brief
