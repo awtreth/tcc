@@ -39,11 +39,28 @@ int main(int _argc, char **_argv)
 
     std::cout << "write PID " + std::to_string(pid.kp) << std::endl;
 
-    controller.setPosVelPid(pid,pid,0);
+    std::vector<PidValues> pidVec(2,pid);
+
+
+    controller.setPosVelPid(pidVec,pidVec);
 
     std::cout << "PID enviado" << std::endl;
 
+    std::cout << "writePosVel" << std::endl;
+
+    std::vector<JointPosVelCommand> posVelCmdVec;
+
+    posVelCmdVec.push_back(JointPosVelCommand(45*3.141592/180,0));
+    posVelCmdVec.push_back(JointPosVelCommand(-15*3.141592/180,0));
+
+
+    controller.goPosVel(posVelCmdVec);
+
+    std::cout << "PosVel enviado" << std::endl;
+
     getchar();
+
+
 	//JointPosVelCommand jcmd(2,3);
 
 	//jcmd.hasPosVel();

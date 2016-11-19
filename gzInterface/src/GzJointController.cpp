@@ -39,7 +39,6 @@ bool GzJointController::goPosVel(double pos, double vel, int jointID) {
 
     gz_msgs::GzWriteRequest msg;
 
-
     msg.add_jointids(jointID);
 
     msg.add_pos(pos);

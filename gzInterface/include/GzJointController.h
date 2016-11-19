@@ -32,9 +32,9 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
 
     // IJointPosVelController interface
     public:
-    bool goPosVel(double pos, double vel, int jointID) override;
-    bool goPosVel(double pos, double vel, std::__cxx11::string jointName) override;
-    bool goPosVel(std::vector<JointPosVelCommand>) override;
+    bool goPosVel(double pos, double vel, int jointID) override;//testado
+    bool goPosVel(double pos, double vel, std::__cxx11::string jointName) override;//testado
+    bool goPosVel(std::vector<JointPosVelCommand>) override;//testado
 
     // AbsJointController interface
     public:
@@ -46,12 +46,14 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
     virtual bool setPosPid(PidValues pid, int jointID);
     virtual bool setPosPid(PidValues pid, std::__cxx11::string jointName);
     virtual bool setPosPid(std::vector<PidValues> pids);
+
     virtual bool setVelPid(PidValues pid, int jointID);
     virtual bool setVelPid(PidValues pid, std::__cxx11::string jointName);
     virtual bool setVelPid(std::vector<PidValues> pids);
-    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, int jointID);
-    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, std::__cxx11::string jointName);
-    virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids);
+
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, int jointID);//testado
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, std::__cxx11::string jointName);//testado
+    virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids);//testado
 };
 
 #endif

@@ -48,7 +48,8 @@ namespace gazebo
     void GzSimplePlugin::handleWriteRequest(GzWriteRequestPtr &msg)
     {
         std::cout << "WriteRequest" << std::endl;
-        std::cout << std::to_string(msg->jointids_size()) + " " + std::to_string(msg->pospid_size()) + " " + std::to_string(msg->velpid_size()) << std::endl;
+
+        std::cout << std::to_string(msg->jointids_size()) << std::endl;
 
 
         if(msg->jointids_size() > 0) {
@@ -59,9 +60,10 @@ namespace gazebo
             if(msg->jointids_size() == msg->velpid_size())
                 setVelPids(msg);
 
-            if(msg->jointids_size() == msg->pos_size() && msg->pos_size() == msg->vel_size())
+            if(msg->jointids_size() == msg->pos_size() && msg->pos_size() == msg->vel_size()) {
                 setPositions(msg);
-            else if (msg->jointids_size() == msg->torque_size())
+                setVelocities(msg);
+            }else if (msg->jointids_size() == msg->torque_size())
                 setTorques(msg);
         }
     }
