@@ -4,19 +4,19 @@
 #include <JointController.h>
 #include <string>
 #include <gazebo/transport/transport.hh>
-#include <GzReadAnswer.pb.h>
+#include <GzReadResponse.pb.h>
 #include <memory>
 
-class GzJointController : public AbsJointController, public IPosVelJointController, public ITorqueJointController {
+class GzJointController : public AbsPidJointController, public IPosVelJointController, public ITorqueJointController {
 
     private:
 
     gazebo::transport::PublisherPtr pub;
     gazebo::transport::SubscriberPtr sub;
 
-    typedef const boost::shared_ptr<const gz_msgs::ReadAnswer> ReadAnswerPtr;
+    typedef const boost::shared_ptr<const gz_msgs::GzReadResponse> GzReadResponsePtr;
 
-    void onReadMsg(ReadAnswerPtr &msg);
+    void onReadMsg(GzReadResponsePtr &msg);
 
     public:
 
@@ -39,6 +39,19 @@ class GzJointController : public AbsJointController, public IPosVelJointControll
     // AbsJointController interface
     public:
     bool readJointStates() override;
+
+
+    // AbsPidJointController interface
+    public:
+    virtual bool setPosPid(PidValues pid, int jointID);
+    virtual bool setPosPid(PidValues pid, std::__cxx11::string jointName);
+    virtual bool setPosPid(std::vector<PidValues> pids);
+    virtual bool setVelPid(PidValues pid, int jointID);
+    virtual bool setVelPid(PidValues pid, std::__cxx11::string jointName);
+    virtual bool setVelPid(std::vector<PidValues> pids);
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, int jointID);
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, std::__cxx11::string jointName);
+    virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids);
 };
 
 #endif

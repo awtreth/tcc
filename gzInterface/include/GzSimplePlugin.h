@@ -8,55 +8,60 @@
 #include <gazebo/msgs/msgs.hh>
 #include <boost/shared_ptr.hpp>
 //#include <gz_interface_msgs.pb.h>
+
 #include <GzWriteRequest.pb.h>
+#include <GzReadRequest.pb.h>
+#include <GzReadResponse.pb.h>
+
+#define DEFAULT_GZ_WRITE_REQUEST_TOPIC_NAME "/simple_plugin/cmd"
+#define DEFAULT_GZ_READ_ANSWER_TOPIC_NAME   "/simple_plugin/status"
 
 namespace gazebo
 {
-    typedef const boost::shared_ptr<
-        const gz_msgs::WriteRequest>
-    GzWriteRequestPtr;
+    typedef const boost::shared_ptr<const gz_msgs::GzWriteRequest> GzWriteRequestPtr;
+
+    typedef const boost::shared_ptr<const gz_msgs::GzReadRequest> GzReadRequestPtr;
+
+    typedef const boost::shared_ptr<const gz_msgs::GzReadResponse> GzReadResponsePtr;
 
     class GzSimplePlugin :public ModelPlugin
     {
         private:
 
-        /// \brief Plugin node
-        private: transport::NodePtr node;
+        transport::NodePtr node;
 
-        /// \brief A subscriber to input commands.
-        private: transport::SubscriberPtr cmdSub;
+        transport::SubscriberPtr readRequestSub;
 
-        /// \brief A publisher to broadcast model status.
-        private: transport::PublisherPtr statusPub;
+        transport::SubscriberPtr writeRequestSub;
 
-        /// \brief Pointer to the model.
-        private: physics::ModelPtr model;
+        transport::PublisherPtr responsePub;
 
-        /// \brief Pointer to the joints (std::vector<JointPtr>)
-        private: physics::Joint_V joints;
+        physics::ModelPtr model;
 
-        /// \brief Pointer to the JointController
-        private: physics::JointControllerPtr jointController;
+        physics::Joint_V joints;
+
+        physics::JointControllerPtr jointController;
+
 
         public:
 
-        public: GzSimplePlugin();
+        GzSimplePlugin();
 
-        public: void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf);
+        void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf) override;
 
-        private: void HandleCommand(GzWriteRequestPtr &_msg);
+        void handleWriteRequest(GzWriteRequestPtr &msg);
 
-        private: void SetPositions(GzWriteRequestPtr &_msg);
+        void handleReadRequest(GzReadRequestPtr &msg);
 
-        private: void SetVelocities(GzWriteRequestPtr &_msg);
+        void setPositions(GzWriteRequestPtr &_msg);
 
-        private: void SetTorques(GzWriteRequestPtr &_msg);
+        void setVelocities(GzWriteRequestPtr &_msg);
 
-        //private: void GetPositions();
+        void setTorques(GzWriteRequestPtr &_msg);
 
-        //private: void GetVelocities();
+        void setPosPids(GzWriteRequestPtr &msg);
 
-        //private: void GetTorques();
+        void setVelPids(GzWriteRequestPtr &msg);
 
     };
     GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);

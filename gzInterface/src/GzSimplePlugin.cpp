@@ -18,91 +18,101 @@ namespace gazebo
 
         std::cout << "Plugin Loaded\n";
 
-        // Store the model pointer for convenience.
+
+        //Pega parãmetros por conveniência
         this->model = _model;
 
-        // Get the first joint. We are making an assumption about the model
-        // having one joint that is the rotational joint.
         this->jointController = this->model->GetJointController();
 
         this->joints = this->model->GetJoints();
 
-        const common::PID defaultPID = common::PID(0.1);
-
-        for(unsigned int i = 0; i < this->model->GetJointCount(); i++){
-            std::string jointName = this->joints.at(i)->GetScopedName();
-            this->jointController->SetVelocityPID(jointName,common::PID(0));
-            this->jointController->SetPositionPID(jointName,defaultPID);
-            this->jointController->SetPositionTarget(jointName,0);
-            this->jointController->SetVelocityTarget(jointName,0);
-        }
-
-        // Create the node
+        // cria o nó
         this->node = transport::NodePtr(new transport::Node());
+
         this->node->Init(this->model->GetWorld()->GetName());
 
-        // Create a topic name
-        std::string topicName = "~/" + this->model->GetName() + "/dxl_cmd";
+        const std::string writeRequestTopicName = "~/" + this->model->GetName() + "/writeRequest";
+
+        const std::string readRequestTopicName = "~/" + this->model->GetName() + "/readRequest";
+
+        const std::string readResponseTopicName = "~/" + this->model->GetName() + "/readResponse";
 
         // Subscribe to the topic, and register a callback
-        this->cmdSub = this->node->Subscribe(topicName,
-                                             &GzSimplePlugin::HandleCommand, this);
+        this->writeRequestSub = this->node->Subscribe(writeRequestTopicName, &GzSimplePlugin::handleWriteRequest, this);
 
+        this->readRequestSub = this->node->Subscribe(writeRequestTopicName, &GzSimplePlugin::handleReadRequest, this);
+
+        //TODO: publish response
     }
 
-	void GzSimplePlugin::HandleCommand(GzWriteRequestPtr &_msg)
+    void GzSimplePlugin::handleWriteRequest(GzWriteRequestPtr &msg)
     {
-//		if(_msg->requesttype()==gz_msgs::WriteRequest_RequestType_WRITE){
-//            std::cout << "WRITE\n";
-//            switch(_msg->requestitem()){
-//				case gz_msgs::GzWriteRequestPtr_RequestItem_POS:
-//                    std::cout << "POS\n";
-//                    SetPositions(_msg);
-//                    break;
-//				case gz_msgs::GzWriteRequestPtr_RequestItem_VEL:
-//                    std::cout << "VEL\n";
-//                    SetVelocities(_msg);
-//                    break;
-//				case gz_msgs::GzWriteRequestPtr_RequestItem_POS_VEL:
-//                    std::cout << "POS_VEL\n";
-//                    SetPositions(_msg);
-//                    SetVelocities(_msg);
-//                    break;
-//				case gz_msgs::GzWriteRequestPtr_RequestItem_TORQUE:
-//                    std::cout << "TORQUE\n";
-//                    SetTorques(_msg);
-//                    break;
-//                default: std::cout << "switch(_msg->requestitem()): default\n";;
-//            }
+        std::cout << "WriteRequest" << std::endl;
+        std::cout << std::to_string(msg->jointids_size()) + " " + std::to_string(msg->pospid_size()) + " " + std::to_string(msg->velpid_size()) << std::endl;
 
-//		}else if(_msg->requesttype()==gz_msgs::GzWriteRequestPtr_RequestType_READ){
-//            std::cout << "READ\n";
-//        }
 
-//        std::cout << std::to_string(_msg->nmotors()) << std::endl;
-//        //this->SetVelocity(_msg->x());
-    }
+        if(msg->jointids_size() > 0) {
 
-	void GzSimplePlugin::SetPositions(GzWriteRequestPtr &_msg){
-        for(int i = 0; i < _msg->motorid_size(); i++){
-            this->jointController->SetPositionTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->pos(i));
-            std::cout << "SetPosition of Motor " << _msg->motorid(i) << ": "<< _msg->pos(i) << std::endl;
+            if(msg->jointids_size() == msg->pospid_size())
+                setPosPids(msg);
+
+            if(msg->jointids_size() == msg->velpid_size())
+                setVelPids(msg);
+
+            if(msg->jointids_size() == msg->pos_size() && msg->pos_size() == msg->vel_size())
+                setPositions(msg);
+            else if (msg->jointids_size() == msg->torque_size())
+                setTorques(msg);
         }
     }
 
-	void GzSimplePlugin::SetVelocities(GzWriteRequestPtr &_msg){
-        for(int i = 0; i < _msg->motorid_size(); i++){
-            this->jointController->SetVelocityTarget(this->joints.at(_msg->motorid(i))->GetScopedName(),_msg->vel(i));
-            std::cout << "SetVelocity of Motor " << _msg->motorid(i) << ": "<< _msg->vel(i) << std::endl;
+    void GzSimplePlugin::handleReadRequest(GzReadRequestPtr &msg) {
+
+    }
+
+
+    void GzSimplePlugin::setPositions(GzWriteRequestPtr &msg){
+        for(int i = 0; i < msg->jointids_size(); i++){
+            this->jointController->SetPositionTarget(this->joints.at(msg->jointids(i))->GetScopedName(),msg->pos(i));
+            std::cout << "SetPosition of Joint " << msg->jointids(i) << ": "<< msg->pos(i) << std::endl;
+        }
+    }
+
+    void GzSimplePlugin::setVelocities(GzWriteRequestPtr &msg){
+        for(int i = 0; i < msg->jointids_size(); i++){
+            this->jointController->SetVelocityTarget(this->joints.at(msg->jointids(i))->GetScopedName(),msg->vel(i));
+            std::cout << "SetVelocity of Joint " << msg->jointids(i) << ": "<< msg->vel(i) << std::endl;
 
         }
     }
 
-	void GzSimplePlugin::SetTorques(GzWriteRequestPtr &_msg){
-        for(int i = 0; i < _msg->motorid_size(); i++){
-            this->joints.at(_msg->motorid(i))->SetForce(0,_msg->torque(i));
-            std::cout << "SetTorque of Motor " << _msg->motorid(i) << ": "<< _msg->torque(i) << std::endl;
+    void GzSimplePlugin::setTorques(GzWriteRequestPtr &msg){
+        for(int i = 0; i < msg->jointids_size(); i++){
+            this->joints.at(msg->jointids(i))->SetForce(0,msg->torque(i));
+            std::cout << "SetTorque of Joint " << msg->jointids(i) << ": "<< msg->torque(i) << std::endl;
 
+        }
+    }
+
+    std::string gzPidToString(gazebo::common::PID pid) {
+        return "P = " + std::to_string(pid.GetPGain()) + "; I = " + std::to_string(pid.GetIGain()) + "; D = " + std::to_string(pid.GetDGain()) + ";";
+    }
+
+    void GzSimplePlugin::setPosPids(GzWriteRequestPtr& msg)
+    {
+        for (int i = 0; i < msg->jointids_size(); i++) {
+            gazebo::common::PID gzPid(msg->pospid(i).kp(), msg->pospid(i).ki(), msg->pospid(i).kd());
+            jointController->SetPositionPID(this->joints.at(msg->jointids(i))->GetScopedName(),gzPid);
+            std::cout << "SetPositionPID of Joint " << msg->jointids(i) << ": "<< gzPidToString(gzPid) << std::endl;
+        }
+    }
+
+    void GzSimplePlugin::setVelPids(GzWriteRequestPtr& msg)
+    {
+        for (int i = 0; i < msg->jointids_size(); i++) {
+            gazebo::common::PID gzPid(msg->velpid(i).kp(), msg->velpid(i).ki(), msg->velpid(i).kd());
+            jointController->SetVelocityPID(this->joints.at(msg->jointids(i))->GetScopedName(),gzPid);
+            std::cout << "SetVelocityPID of Joint " << msg->jointids(i) << ": "<< gzPidToString(gzPid) << std::endl;
         }
     }
 

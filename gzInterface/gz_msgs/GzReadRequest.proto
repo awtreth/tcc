@@ -1,18 +1,22 @@
 package gz_msgs;
 
-message ReadRequest {
 
-	enum RequestItem{
-		POS = 0;
-		VEL = 1;
-		POS_VEL = 2;
-		TORQUE  = 3;
-		POS_VEL_TORQUE = 4;
-	}
+message GzReadRequest {
 
-	required string returnTopic = 1;
+    enum RequestItem{
+        POS = 0;
+        VEL = 1;
+        POS_VEL = 2;
+        TORQUE  = 3;
+        POS_VEL_TORQUE = 4;
+        POS_PID = 5;
+        POS_VEL_PID = 6;
+    }
 
-        required RequestItem requestItem = 2 [default = POS_VEL_TORQUE];
+    optional string returnTopic = 1 [default = "~/simple_arm/readResponse"];
 
-        repeated int32 motorId = 3 [packed = true]; //Lista de IDs
+    optional RequestItem requestItem = 2 [default = POS_VEL_TORQUE];
+
+    repeated int32 jointIds = 3 [packed = true]; //Lista de IDs
+
 }

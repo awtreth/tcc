@@ -29,10 +29,21 @@ int main(int _argc, char **_argv)
 	vecStr.push_back("Motor 1");
 	vecStr.push_back("Motor 2");
 
-	std::shared_ptr<IPosVelJointController> controller = std::make_shared<GzJointController>(vecStr,"~/input", "~/output");
+    std::cout << "criando controller" << std::endl;
 
-	getchar();
+    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/output");
 
+    std::cout << "conexão estabelecida" << std::endl;
+
+    PidValues pid(0.1,0,0);
+
+    std::cout << "write PID " + std::to_string(pid.kp) << std::endl;
+
+    controller.setPosVelPid(pid,pid,0);
+
+    std::cout << "PID enviado" << std::endl;
+
+    getchar();
 	//JointPosVelCommand jcmd(2,3);
 
 	//jcmd.hasPosVel();

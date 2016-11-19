@@ -80,7 +80,7 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <model name='simple_arm'>
-        <plugin name="gz_simple_plugin" filename="build/libgz_simple_plugin.so"/>
+        <plugin name="gz_simple_plugin" filename="../lib/libgz_simple_plugin.so"/>
       <link name='arm_base'>
         <inertial>
           <pose frame=''>0 0 0.00099 0 -0 0</pose>

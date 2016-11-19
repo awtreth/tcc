@@ -9,7 +9,7 @@ add_definitions(${GAZEBO_CXX_FLAGS})
 set (msgs
   ${CMAKE_SOURCE_DIR}/gz_msgs/GzWriteRequest.proto
   ${CMAKE_SOURCE_DIR}/gz_msgs/GzReadRequest.proto
-  ${CMAKE_SOURCE_DIR}/gz_msgs/GzReadAnswer.proto
+  ${CMAKE_SOURCE_DIR}/gz_msgs/GzReadResponse.proto
   ${CMAKE_SOURCE_DIR}/gz_msgs/DxlInstructionPacket.proto
   ${CMAKE_SOURCE_DIR}/gz_msgs/DxlStatusPacket.proto
 )

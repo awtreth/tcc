@@ -90,9 +90,9 @@ class AbsJointController {
 
     protected:
 
-    JointVec jointVec;
+    JointVec jointVec; /**< TODO: describe */
 
-    std::map<std::string,int> jointNamesMap;
+    std::map<std::string,int> jointNamesMap; /**< TODO: describe */
 
     public:
 
@@ -111,6 +111,8 @@ class AbsJointController {
             jointVec.push_back(Joint(jointName));
 
         }
+
+        jointNamesMap[""] = 0;
     }
 
     /**
@@ -162,14 +164,41 @@ class AbsJointController {
 
 };
 
-class PidAbsJointController : public AbsJointController {
+/**
+ * @brief
+ *
+ */
+class AbsPidJointController : public AbsJointController {
 
     public:
 
+    AbsPidJointController(std::vector<std::string> jointNames) : AbsJointController (jointNames) {}
+
+
+    /**
+     * @brief
+     *
+     * @param pid
+     * @param jointID
+     * @return bool
+     */
     virtual bool setPosPid(PidValues pid, int jointID = 0) { jointVec[jointID].setPosPid(pid); return true;}
 
+    /**
+     * @brief
+     *
+     * @param pid
+     * @param jointName
+     * @return bool
+     */
     virtual bool setPosPid(PidValues pid, std::string jointName = "") { jointVec[jointNamesMap[jointName]].setPosPid(pid); return true; }
 
+    /**
+     * @brief
+     *
+     * @param pids
+     * @return bool
+     */
     virtual bool setPosPid(std::vector<PidValues> pids) {
         for(unsigned int i = 0; i < pids.size(); i++) {
             jointVec[i].setPosPid(pids[i]);
@@ -177,10 +206,30 @@ class PidAbsJointController : public AbsJointController {
         return true;
     }
 
+    /**
+     * @brief
+     *
+     * @param pid
+     * @param jointID
+     * @return bool
+     */
     virtual bool setVelPid(PidValues pid, int jointID = 0) {jointVec[jointID].setVelPid(pid); return true;}
 
+    /**
+     * @brief
+     *
+     * @param pid
+     * @param jointName
+     * @return bool
+     */
     virtual bool setVelPid(PidValues pid, std::string jointName = "") { jointVec[jointNamesMap[jointName]].setVelPid(pid); return true; }
 
+    /**
+     * @brief
+     *
+     * @param pids
+     * @return bool
+     */
     virtual bool setVelPid(std::vector<PidValues> pids) {
         for(unsigned int i = 0; i < pids.size(); i++) {
             jointVec[i].setVelPid(pids[i]);
@@ -188,11 +237,42 @@ class PidAbsJointController : public AbsJointController {
         return true;
     }
 
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, int jointID = 0) {
+        return AbsPidJointController::setPosPid(posPid, jointID) && AbsPidJointController::setVelPid(velPid, jointID);
+    }
 
+    virtual bool setPosVelPid(PidValues posPid, PidValues velPid, std::string jointName = 0) {
+        return AbsPidJointController::setPosPid(posPid, jointName) && AbsPidJointController::setVelPid(velPid, jointName);
+    }
+
+    virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids) {
+        return AbsPidJointController::setPosPid(posPids) && AbsPidJointController::setPosPid(velPids);
+    }
+
+
+
+
+    /**
+     * @brief
+     *
+     * @param jointID
+     * @return PidValues
+     */
     virtual PidValues getPosPid(int jointID = 0) { return jointVec[jointID].getPosPid(); }
 
+    /**
+     * @brief
+     *
+     * @param jointName
+     * @return PidValues
+     */
     virtual PidValues getPosPid(std::string jointName = "") { return jointVec[jointNamesMap[jointName]].getPosPid(); }
 
+    /**
+     * @brief
+     *
+     * @return std::vector<PidValues>
+     */
     virtual std::vector<PidValues> getPosPids() {
         std::vector<PidValues> output;
 
@@ -203,10 +283,27 @@ class PidAbsJointController : public AbsJointController {
         return output;
     }
 
+    /**
+     * @brief
+     *
+     * @param jointID
+     * @return PidValues
+     */
     virtual PidValues getVelPid(int jointID = 0) {return jointVec[jointID].getVelPid();}
 
+    /**
+     * @brief
+     *
+     * @param jointName
+     * @return PidValues
+     */
     virtual PidValues getVelPid(std::string jointName = "") { return jointVec[jointNamesMap[jointName]].getPosPid(); }
 
+    /**
+     * @brief
+     *
+     * @return std::vector<PidValues>
+     */
     virtual std::vector<PidValues> getVelPids() {
         std::vector<PidValues> output;
 
@@ -218,26 +315,12 @@ class PidAbsJointController : public AbsJointController {
     }
 
 
-
-    /**
-     * @brief
-     *
-     * @param pos
-     * @param vel
-     * @param jointName
-     * @return bool
-     */
-    virtual bool goPosVel(double pos, double vel, std::string jointName = "") = 0;
-
-    /**
-     * @brief
-     *
-     * @param std::vector<JointPosVelCommand>
-     * @return bool
-     */
-    virtual bool goPosVel(std::vector<JointPosVelCommand>) = 0;
-
     // AbsJointController interface
+    /**
+     * @brief
+     *
+     * @return bool
+     */
     virtual bool readJointStates() = 0;
 };
 
