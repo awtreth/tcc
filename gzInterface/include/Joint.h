@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 /**
  * @brief
@@ -35,13 +36,17 @@ class AbsJointCommand {
 
 };
 
+typedef std::shared_ptr<AbsJointCommand> JointCommandPtr;
+
+
 /**
  * @brief
  *
  */
 class JointPosVelCommand: public AbsJointCommand {
 
-    private:
+    public:
+
     /**
      * @brief
      *
@@ -56,7 +61,6 @@ class JointPosVelCommand: public AbsJointCommand {
      */
     bool hasTorque(){return false;}
 
-    public:
 
     /**
      * @brief
@@ -90,7 +94,7 @@ class JointPosVelCommand: public AbsJointCommand {
  */
 class JointTorqueCommand: public AbsJointCommand {
 
-    private:
+    public:
 
     /**
      * @brief
@@ -106,7 +110,6 @@ class JointTorqueCommand: public AbsJointCommand {
      */
     bool hasTorque(){return true;}
 
-    public:
 
     /**
      * @brief
@@ -150,6 +153,16 @@ class JointState{
      * @param torq
      */
     JointState(double pos, double vel, double torq) : position(pos), velocity(vel), torque(torq) {}
+
+    std::string toString() {
+        std::string str;
+
+        str += "pos = " + std::to_string(position) + "; ";
+        str += "vel = " + std::to_string(velocity) + "; ";
+        str += "torque = " + std::to_string(torque) + ";";
+
+        return str;
+    }
 
 };
 

@@ -2,11 +2,12 @@
 #include <GzJointController.h>
 #include <gazebo/transport/transport.hh>
 #include <GzWriteRequest.pb.h>
+#include <GzReadRequest.pb.h>
 #include <gazebo/gazebo_client.hh>
 #include <memory>
 
 
-GzJointController::GzJointController(std::vector<std::__cxx11::string> jointNames, std::string pubTopic, std::string subTopic) : AbsPidJointController(jointNames) {
+GzJointController::GzJointController(std::vector<std::__cxx11::string> jointNames, std::string pubWriteTopic, std::string pubReadTopic, std::string subTopic) : AbsPidJointController(jointNames) {
 
     gazebo::client::setup();//TODO: verificar se é melhor aqui ou fora
 
@@ -16,10 +17,13 @@ GzJointController::GzJointController(std::vector<std::__cxx11::string> jointName
     node->Init();
 
     // Publish to the  velodyne topic
-    pub = node->Advertise<gz_msgs::GzWriteRequest>(pubTopic);
+    writePub = node->Advertise<gz_msgs::GzWriteRequest>(pubWriteTopic);
+    readPub = node->Advertise<gz_msgs::GzReadRequest>(pubReadTopic);
+
 
     // Wait for a subscriber to connect to this publisher
-    pub->WaitForConnection();
+    writePub->WaitForConnection();
+    readPub->WaitForConnection();
 
     // Subscribe to the topic, and register a callback
     sub = node->Subscribe(subTopic, &GzJointController::onReadMsg, this);
@@ -45,7 +49,7 @@ bool GzJointController::goPosVel(double pos, double vel, int jointID) {
 
     msg.add_vel(vel);
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     return true;
 }
@@ -66,7 +70,7 @@ bool GzJointController::goPosVel(std::vector<JointPosVelCommand> cmd) {
         msg.add_vel(cmd[i].getVel());
     }
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     return true;
 
@@ -80,7 +84,7 @@ bool GzJointController::goTorque(double torque, int jointID) {
 
     msg.add_torque(torque);
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     return true;
 
@@ -101,19 +105,39 @@ bool GzJointController::goTorque(std::vector<JointTorqueCommand> cmd) {
         msg.add_torque(cmd[i].getTorque());
     }
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     return true;
 
 }
 
 bool GzJointController::readJointStates() {
+
+    gz_msgs::GzReadRequest msg;
+
+    msg.set_returntopic(sub->GetTopic());
+
+    msg.set_requestitem(msg.POS_VEL_TORQUE);
+
+    for(unsigned int i = 0; i < this->jointVec.size(); i++)
+        msg.add_jointids(i);
+
+    readPub->Publish(msg, false);
+
     return true;
 
 }
 
 void GzJointController::onReadMsg(GzReadResponsePtr& msg)
 {
+    for(int i = 0; i < msg->jointids_size(); i++) {
+
+        JointState jstate(msg->pos(i),msg->vel(i),msg->torque(i));
+
+        this->jointVec[i].setJointState(jstate);
+
+        std::cout << "Joint " + std::to_string(i) + ": " + jstate.toString() << std::endl;
+    }
 
 }
 
@@ -135,7 +159,7 @@ bool GzJointController::setPosPid(PidValues pid, int jointID)
 
     msg.add_jointids(jointID);
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     AbsPidJointController::setPosPid(pid, jointID);
 
@@ -159,7 +183,7 @@ bool GzJointController::setPosPid(std::vector<PidValues> pids)
         msg.add_jointids(i);
     }
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     AbsPidJointController::setPosPid(pids);
 
@@ -177,7 +201,7 @@ bool GzJointController::setVelPid(PidValues pid, int jointID)
 
     msg.add_jointids(jointID);
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     AbsPidJointController::setVelPid(pid, jointID);
 
@@ -202,7 +226,7 @@ bool GzJointController::setVelPid(std::vector<PidValues> pids)
         msg.add_jointids(i);
     }
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     AbsPidJointController::setVelPid(pids);
 
@@ -226,7 +250,7 @@ bool GzJointController::setPosVelPid(PidValues posPid, PidValues velPid, int joi
 
     msg.add_jointids(jointID);
 
-    pub->Publish(msg, false);
+    writePub->Publish(msg, false);
 
     AbsPidJointController::setPosVelPid(posPid, velPid, jointID);
 
@@ -255,7 +279,7 @@ bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector
             msg.add_jointids(i);
         }
 
-        pub->Publish(msg, false);
+        writePub->Publish(msg, false);
 
         AbsPidJointController::setPosVelPid(posPids, velPids);
 
@@ -263,4 +287,38 @@ bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector
     }
 
     return false;
+}
+
+bool GzJointController::sendCommand(std::vector<JointCommandPtr> cmd)
+{
+
+
+    if(cmd[0]->hasPosVel()) {
+
+        std::vector<JointPosVelCommand> posVelCmd;
+
+        for(JointCommandPtr cmdPtr : cmd) {
+
+            posVelCmd.push_back(static_cast<JointPosVelCommand&>(*cmdPtr));
+        }
+
+        this->goPosVel(posVelCmd);
+
+        return true;
+
+    }else if (cmd[0]->hasTorque()) {
+
+        std::vector<JointTorqueCommand> torqueCmd;
+
+        for(JointCommandPtr cmdPtr : cmd)
+            torqueCmd.push_back(static_cast<JointTorqueCommand&>(*cmdPtr));
+
+
+        this->goTorque(torqueCmd);
+
+        return true;
+    }
+
+    return false;
+
 }

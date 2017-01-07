@@ -5,7 +5,6 @@ find_package(Protobuf REQUIRED)
 add_definitions(${GAZEBO_CXX_FLAGS})
 
 
-
 set (msgs
   ${CMAKE_SOURCE_DIR}/gz_msgs/GzWriteRequest.proto
   ${CMAKE_SOURCE_DIR}/gz_msgs/GzReadRequest.proto
@@ -37,3 +36,4 @@ target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
 target_link_libraries(gz_simple_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})
 target_link_libraries(main gz_interface_msgs ${GAZEBO_LIBRARIES} dxl_mem_map dxl_model_param_converter jsoncpp gz_joint_controller)
 target_link_libraries(gz_joint_controller ${GAZEBO_LIBRARIES} ${PROTOBUF_LIBRARY} gz_interface_msgs)
+

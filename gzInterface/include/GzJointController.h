@@ -11,7 +11,8 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
 
     private:
 
-    gazebo::transport::PublisherPtr pub;
+    gazebo::transport::PublisherPtr writePub;
+    gazebo::transport::PublisherPtr readPub;
     gazebo::transport::SubscriberPtr sub;
 
     typedef const boost::shared_ptr<const gz_msgs::GzReadResponse> GzReadResponsePtr;
@@ -20,7 +21,7 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
 
     public:
 
-    GzJointController(std::vector<std::string> jointNames, std::string pubTopic, std::string subTopic);
+    GzJointController(std::vector<std::string> jointNames, std::string pubWriteTopic, std::string pubReadTopic, std::string subTopic);
 
     ~GzJointController();
 
@@ -54,6 +55,10 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
     virtual bool setPosVelPid(PidValues posPid, PidValues velPid, int jointID);//testado
     virtual bool setPosVelPid(PidValues posPid, PidValues velPid, std::__cxx11::string jointName);//testado
     virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids);//testado
+
+    // AbsJointController interface
+    virtual bool sendCommand(std::vector<JointCommandPtr> cmd);
+
 };
 
 #endif

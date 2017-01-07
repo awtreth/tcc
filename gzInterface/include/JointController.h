@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <Joint.h>
-
+#include <memory>
 
 /**
  * @brief
@@ -44,6 +44,8 @@ class IPosVelJointController {
 
 };
 
+typedef std::shared_ptr<IPosVelJointController> IPosVelJointControllerPtr;
+
 
 /**
  * @brief
@@ -81,6 +83,9 @@ class ITorqueJointController {
      */
     virtual bool goTorque(std::vector<JointTorqueCommand>) = 0;
 };
+
+typedef std::shared_ptr<ITorqueJointController> ITorqueJointControllerPtr;
+
 
 /**
  * @brief
@@ -161,6 +166,8 @@ class AbsJointController {
      * @return bool
      */
     virtual bool readJointStates() = 0;
+
+    virtual bool sendCommand(std::vector<JointCommandPtr> cmd) = 0;
 
 };
 
@@ -322,6 +329,9 @@ class AbsPidJointController : public AbsJointController {
      * @return bool
      */
     virtual bool readJointStates() = 0;
+
+    // AbsJointController interface
+    virtual bool sendCommand(std::vector<JointCommandPtr> cmd) = 0;
 };
 
 

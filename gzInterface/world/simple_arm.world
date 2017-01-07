@@ -63,6 +63,7 @@
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
     <physics name='default_physics' default='0' type='ode'>
+
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
@@ -508,8 +509,8 @@
             <lower>-1e+16</lower>
             <upper>1e+16</upper>
           </limit>
-        </axis>
-      </joint>
+        </axis>      
+	</joint>
       <joint name='arm_elbow_pan_joint' type='revolute'>
         <parent>arm_shoulder_pan</parent>
         <child>arm_elbow_pan</child>
@@ -528,8 +529,8 @@
           </limit>
         </axis>
       </joint>
-      <joint name='arm_wrist_lift_joint' type='prismatic'>
-        <parent>arm_elbow_pan</parent>
+      <joint name='arm_wrist_lift_joint' type='prismatic'>        
+	<parent>arm_elbow_pan</parent>
         <child>arm_wrist_lift</child>
         <axis>
           <dynamics>
@@ -547,7 +548,7 @@
         </axis>
       </joint>
       <joint name='arm_wrist_roll_joint' type='revolute'>
-        <parent>arm_wrist_lift</parent>
+	<parent>arm_wrist_lift</parent>
         <child>arm_wrist_roll</child>
         <axis>
           <dynamics>

@@ -12,6 +12,8 @@
 #include <GzWriteRequest.pb.h>
 #include <GzReadRequest.pb.h>
 #include <GzReadResponse.pb.h>
+#include <map>
+#include <string>
 
 #define DEFAULT_GZ_WRITE_REQUEST_TOPIC_NAME "/simple_plugin/cmd"
 #define DEFAULT_GZ_READ_ANSWER_TOPIC_NAME   "/simple_plugin/status"
@@ -42,6 +44,7 @@ namespace gazebo
 
         physics::JointControllerPtr jointController;
 
+        std::map<std::string,transport::PublisherPtr> pubMap;
 
         public:
 
@@ -62,6 +65,8 @@ namespace gazebo
         void setPosPids(GzWriteRequestPtr &msg);
 
         void setVelPids(GzWriteRequestPtr &msg);
+
+        void getJointStates(gz_msgs::GzReadResponse* msg);
 
     };
     GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);
