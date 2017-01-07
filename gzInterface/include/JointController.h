@@ -171,6 +171,10 @@ class AbsJointController {
 
 };
 
+typedef std::shared_ptr<AbsJointController> JointControllerPtr;
+
+
+
 /**
  * @brief
  *

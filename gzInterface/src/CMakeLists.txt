@@ -29,6 +29,7 @@ add_library(dxl_mem_map SHARED DxlMemMap.cpp)
 add_library(dxl_model_param_converter SHARED DxlModelParamConverter.cpp)
 add_library(funcmov_gz SHARED funcmovgz.cpp)
 add_library(gz_joint_controller SHARED GzJointController.cpp)
+add_library(abs_motion_controller SHARED AbsMotionController.cpp)
 
 add_executable(main main.cpp)
 
