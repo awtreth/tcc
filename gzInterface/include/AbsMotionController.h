@@ -5,6 +5,8 @@
 #include <Joint.h>
 #include <chrono>
 #include <thread>
+#include <mutex>              // std::mutex, std::unique_lock
+#include <condition_variable> // std::condition_variable
 
 using namespace std::chrono;
 
@@ -32,6 +34,20 @@ class AbsMotionController {
 
     void loop();
 
+    bool isPaused = true;
+
+    int requestCount = 0;
+
+    std::mutex pauseMtx;
+
+    std::mutex nextTimeMtx;
+
+    std::condition_variable pauseCv;
+
+    void updateShiftPeriod();
+
+    bool isClosed = false;
+
     protected:
 
 
@@ -50,6 +66,8 @@ class AbsMotionController {
 
     AbsMotionController(JointControllerPtr _jointController);
 
+    //AbsMotionController(JointControllerPtr _jointController);
+
     unsigned int getWritePeriod() const;
     void setWritePeriod(unsigned int value);
     unsigned int getReadPeriod() const;
@@ -62,6 +80,8 @@ class AbsMotionController {
     void resume(unsigned int readWaitTime);
 
     void pause();
+
+    void close();
 };
 
 
