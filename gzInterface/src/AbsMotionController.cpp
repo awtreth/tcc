@@ -81,6 +81,16 @@ void AbsMotionController::updateShiftPeriod()
     this->shiftDuration = std::chrono::microseconds( (unsigned) (std::min(this->readPeriod.count(),this->writePeriod.count())*this->readWriteShift));
 }
 
+void AbsMotionController::startIntervention()
+{
+    pauseMtx.lock();
+}
+
+void AbsMotionController::stopIntervention()
+{
+    pauseMtx.unlock();
+}
+
 void AbsMotionController::setReadWriteShift(double value)
 {
     if(value > 0 && value < 1){
@@ -168,25 +178,26 @@ void AbsMotionController::loop()
 
 
         if(this->nextReadTime < this->nextWriteTime) {
+
+            onRead();
+
             std::this_thread::sleep_until(this->nextReadTime);
 
-            //onRead
+            read();
 
-            //this->jointController->readJointStates();
-            std::cout << "read" << std::endl;
-
-
-            this->afterRead();
+            afterRead();
 
             this->nextReadTime += this->readPeriod;
 
         }else {
-            std::vector<JointCommandPtr> cmds = this->onWrite();
+
+            onWrite();
 
             std::this_thread::sleep_until(this->nextWriteTime);
 
-            //this->jointController->sendCommand(cmds);
-            std::cout << "write" << std::endl;
+            write();
+
+            afterWrite();
 
             this->nextWriteTime += this->writePeriod;
         }
@@ -198,9 +209,9 @@ void AbsMotionController::loop()
 }
 
 
-AbsMotionController::AbsMotionController(JointControllerPtr _jointController)
+AbsMotionController::AbsMotionController()
 {
-    this->jointController = _jointController;
+    //this->jointController = _jointController;
 
     //fazer a thread
 

@@ -44,7 +44,7 @@ class IPosVelJointController {
 
 };
 
-typedef std::shared_ptr<IPosVelJointController> IPosVelJointControllerPtr;
+typedef std::shared_ptr<IPosVelJointController> PosVelJointControllerPtr;
 
 
 /**

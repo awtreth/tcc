@@ -14,7 +14,7 @@ class AbsMotionController {
 
     private:
 
-    JointControllerPtr jointController ;
+    //JointControllerPtr jointController ;
 
     std::thread mainThread;
 
@@ -50,23 +50,30 @@ class AbsMotionController {
 
     protected:
 
+    virtual void onRead(){}
 
-    virtual std::vector<JointCommandPtr> onWrite() = 0;
+    virtual void read(){}
 
-    virtual void afterRead() = 0;
+    virtual void afterRead(){}
 
-    //virtual ReadJointCommand onRead() = 0;
+    virtual void onWrite(){}
 
-    virtual void onReadMiss() = 0;
+    virtual void write(){}
 
-    virtual void onWriteMiss() = 0;
+    virtual void afterWrite(){}
+
+    virtual void onReadMiss(){}
+
+    virtual void onWriteMiss(){}
+
+    void startIntervention(){}
+
+    void stopIntervention(){}
 
 
     public:
 
-    AbsMotionController(JointControllerPtr _jointController);
-
-    //AbsMotionController(JointControllerPtr _jointController);
+    AbsMotionController();
 
     unsigned int getWritePeriod() const;
     void setWritePeriod(unsigned int value);

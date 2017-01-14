@@ -19,7 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <GzMotionController.h>
+//#include <GzMotionController.h>
+
+#include <DummyMotionController.h>
+
 
 // for convenience
 //using json = nlohmann::json;
@@ -41,33 +44,44 @@ void func (const gazebo::transport::ConnectionPtr& c) {
 int main(int _argc, char **_argv)
 {
 
-    std::vector<std::string> vecStr;
 
-    vecStr.push_back("Motor 1");
-    vecStr.push_back("Motor 2");
+    DummyMotionController motionController;
 
-    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
+        motionController.setReadPeriod(2e6);
+        motionController.setWritePeriod(2e6);
 
-    GzMotionController motionController(controller);
+        motionController.resume(3e6);
 
-    motionController.setReadPeriod(2e6);
-    motionController.setWritePeriod(2e6);
+        sleep(5);
 
-    motionController.resume(3e6);
+        motionController.close();
+//    std::vector<std::string> vecStr;
 
-    //getchar();
+//    vecStr.push_back("Motor 1");
+//    vecStr.push_back("Motor 2");
 
-    sleep(5);
+//    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
 
-    motionController.pause();
+//    GzMotionController motionController(controller);
 
-    std::cout << "paused" << std::endl;
+//    motionController.setReadPeriod(2e6);
+//    motionController.setWritePeriod(2e6);
 
-    getchar();
+//    motionController.resume(3e6);
 
-    motionController.close();
+//    //getchar();
 
-    return 0;
+//    sleep(5);
+
+//    motionController.pause();
+
+//    std::cout << "paused" << std::endl;
+
+//    getchar();
+
+//    motionController.close();
+
+//    return 0;
 
 
 //    std::cout << "criando controller" << std::endl;
