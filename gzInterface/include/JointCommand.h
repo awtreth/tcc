@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <MapVec.h>
 
 /**
  * @brief
@@ -12,21 +13,59 @@
  */
 class JointCommand {
 
-    public:
-
-    enum Type{READ,WRITE,UNDEFINED};
+    public: enum Type{READ, WRITE, UNDEFINED};
 
     protected:
 
     Type type;
 
-    virtual bool hasParam(const char* param){ return false; }
+    const char* cmdID;
 
-    Type getType() const { return type;}
+    public:
+
+    JointCommand() {
+        type = UNDEFINED;
+    }
+
+    JointCommand(const Type _type, const char* _cmdID) {
+        type = _type;
+        cmdID = _cmdID;
+    }
+
+    virtual Type getType() const{return type;}
+    virtual const char* getCmdID() const{ return cmdID; }
+};
+
+
+
+class ReadJointCommand : public JointCommand {
+
+    public:
+
+    ReadJointCommand(const char* _cmdID){
+        type = JointCommand::Type::READ;
+        cmdID = _cmdID;
+    }
+
 
 };
 
-class PosVelJointCommand {
+#define READ_JOINT_STATE_CMD_ID "READ_JOINT_STATE_COMMAND"
+
+const ReadJointCommand readJointStateCommand(READ_JOINT_STATE_CMD_ID);
+
+
+class WriteJointCommand : public JointCommand {
+
+    public:
+
+    WriteJointCommand(){
+        type = JointCommand::Type::WRITE;
+    }
+};
+
+class PosVelWriteJointCommand : public WriteJointCommand {
+
     private:
 
     double pos;
@@ -34,19 +73,51 @@ class PosVelJointCommand {
 
     public:
 
-    PosVelJointCommand(double _pos, double _vel) : pos(_pos), vel(_vel){
+    static const char * CMD_ID;
 
+    PosVelWriteJointCommand(){
+        cmdID = CMD_ID;
     }
 
+    PosVelWriteJointCommand(double _pos, double _vel){
+        cmdID = CMD_ID;
+        pos = _pos;
+        vel = _vel;
+    }
+
+    double getPos() const{return pos;}
+    void setPos(double value){pos = value;}
+
+    double getVel() const{return vel;}
+    void setVel(double value){vel = value;}
+
 };
 
-class PosVelJointCommand {
+const char* PosVelWriteJointCommand::CMD_ID = "POSVEL_WRITE_JOINT_COMMAND";
+
+
+class TorqueWriteJointCommand : public WriteJointCommand {
+
+    private:
+
+    double torque;
+
+    public:
+
+    static const char * CMD_ID;
+
+    TorqueWriteJointCommand(double _torque){
+        cmdID = CMD_ID;
+        torque = _torque;
+    }
+
+    double getTorque() const{return torque;}
+
+    void setTorque(double value){torque = value;}
 
 };
 
-
-typedef std::shared_ptr<AbsJointCommand> JointCommandPtr;
-
-
+const char* TorqueWriteJointCommand::CMD_ID = "TORQUE_WRITE_JOINT_COMMAND";
 
 #endif
+

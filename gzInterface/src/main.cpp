@@ -1,60 +1,58 @@
-#include <gazebo/gazebo_config.h>
-#include <gazebo/transport/transport.hh>
-#include <gazebo/msgs/msgs.hh>
-//#include <gz_interface_msgs.pb.h>
-#include <gazebo/gazebo_client.hh>
+//#include <gazebo/gazebo_config.h>
+//#include <gazebo/transport/transport.hh>
+//#include <gazebo/msgs/msgs.hh>
+////#include <gz_interface_msgs.pb.h>
+//#include <gazebo/gazebo_client.hh>
 
-#include "DxlMemMap.h"
+//#include "DxlMemMap.h"
+//#include <iostream>
+//#include <jsoncpp/json/json.h>
+//#include "DxlModelParamConverter.h"
+//#include <Joint.h>
+//#include <JointController.h>
+//#include <GzJointController.h>
+//#include <stdlib.h>
+
+//#include <memory>
+//#include <vector>
+//#include <string>
+//#include <stdio.h>
+//#include <stdlib.h>
+
+////#include <GzMotionController.h>
+
+//#include <DummyMotionController.h>
+
 #include <iostream>
-#include <jsoncpp/json/json.h>
-#include "DxlModelParamConverter.h"
-#include <Joint.h>
-#include <JointController.h>
-#include <GzJointController.h>
-#include <stdlib.h>
-
-#include <memory>
-#include <vector>
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
-
-//#include <GzMotionController.h>
-
-#include <DummyMotionController.h>
-
-
-// for convenience
-//using json = nlohmann::json;
-
-void func (const gazebo::transport::ConnectionPtr& c) {
-    std::cout << "recebeu" << std::endl;
-    std::cout << c->GetId() << std::endl;
-    std::cout << c->GetIPWhiteList() << std::endl;
-    std::cout << c->GetLocalAddress() << std::endl;
-    std::cout << c->GetLocalPort() << std::endl;
-    std::cout << c->GetLocalURI() << std::endl;
-    std::cout << c->GetRemoteAddress() << std::endl;
-    std::cout << c->GetRemoteHostname() << std::endl;
-    std::cout << c->GetRemotePort() << std::endl;
-    std::cout << c->GetRemoteURI() << std::endl;
-}
+#include <MapVec.h>
+#include <map>
+#include <JointCommand.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
 
+    TorqueWriteJointCommand cmd(2);
 
-    DummyMotionController motionController;
+    //cmd.setTorque(34);
 
-        motionController.setReadPeriod(2e6);
-        motionController.setWritePeriod(2e6);
+    std::cout << readJointStateCommand.getCmdID() << std::endl;
+    //std::cout << ReadJointStateCommand.getTorque() << std::endl;
 
-        motionController.resume(3e6);
+    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
 
-        sleep(5);
 
-        motionController.close();
+//    DummyMotionController motionController;
+
+//        motionController.setReadPeriod(2e6);
+//        motionController.setWritePeriod(2e6);
+
+//        motionController.resume(3e6);
+
+//        sleep(5);
+
+//        motionController.close();
 //    std::vector<std::string> vecStr;
 
 //    vecStr.push_back("Motor 1");

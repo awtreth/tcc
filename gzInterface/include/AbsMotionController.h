@@ -66,10 +66,9 @@ class AbsMotionController {
 
     virtual void onWriteMiss(){}
 
-    void startIntervention(){}
+    void startIntervention();
 
-    void stopIntervention(){}
-
+    void stopIntervention();
 
     public:
 
