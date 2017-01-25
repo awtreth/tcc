@@ -52,21 +52,29 @@ int main(int _argc, char **_argv)
 
     Page page(poses);
 
+    //page.setTimesByPeriod(15);
+
     //page.setTimesByTimeToNext();
     page.setTimesByTimestamp(86);
 
+    page.computePageDuration();
 
-    for(auto pose: page.getPoses()){
-        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+    for(auto i = 0; i < 15; i++){
+        std::cout << page.advanceTime(20) << std::endl;
+        std::cout << page.getCurrentPoseId() << " " << page.getLoopCount()<< " " << page.getPageTimeCount()<< " " << std::endl;
     }
 
-    page.roundPoseTimes(10);
+//    for(auto pose: page.getPoses()){
+//        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+//    }
 
-    for(auto pose: page.getPoses()){
-        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
-    }
+//    page.roundPoseTimes(10);
 
-    std::cout << page.computePageDuration() << std::endl;
+//    for(auto pose: page.getPoses()){
+//        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+//    }
+
+//    std::cout << page.computePageDuration() << std::endl;
 
 
 //    TorqueWriteJointCommand cmd(2);

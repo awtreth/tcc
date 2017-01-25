@@ -16,7 +16,6 @@ class Page : public IJsonObject{
 
 
     int currentPoseId = 0;
-    int nextPoseId = 1;
 
     int globalTimeCount = 0;
     int pageTimeCount = 0;

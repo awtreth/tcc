@@ -36,8 +36,30 @@ void Page::toJsonFile(const char* filePath)
 
 bool Page::advanceTime(long tick)
 {
-    //TODO
+    globalTimeCount += tick;
+    pageTimeCount = globalTimeCount%pageDuration;
+    poseTimeCount += tick;
+
+    auto currentTimeToNext = currentPose().getTimeToNext();
+
+    if(poseTimeCount >= currentTimeToNext){
+        loopCount = globalTimeCount/pageDuration;
+        poseTimeCount -= currentTimeToNext;
+        currentPoseId = (currentPoseId+1)%poses.size();
+        return true;
+    }
+
     return false;
+}
+
+Pose Page::currentPose() const
+{
+    return poses.at(currentPoseId);
+}
+
+Pose Page::nextPose() const
+{
+    return poses.at((currentPoseId+1)%poses.size());
 }
 
 int Page::getLoopCount() const
