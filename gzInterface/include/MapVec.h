@@ -18,7 +18,7 @@ template <class T> class MapVec {
         elements = std::vector<T>();
     }
 
-    MapVec(std::vector<std::string> names, std::vector<T> _elements) : MapVec(){
+    MapVec(std::vector<std::string> const names, const std::vector<T>& _elements) : MapVec(){
         elements = _elements;
         for(unsigned int i; i < elements.size(); i++)
             nameMap[names[i]] = i;
@@ -29,12 +29,12 @@ template <class T> class MapVec {
         elements.push_back(element);
     }
 
-    T get(int const idx){
+    T get(int const idx) const{
         return elements[idx];
     }
 
-    T get(const char* name){
-        return elements[nameMap[name]];
+    T get(const char* name) const{
+        return elements[nameMap.at(name)];
     }
 
     void set(std::string const name, T const& element) {
@@ -45,7 +45,7 @@ template <class T> class MapVec {
         elements[idx] = element;
     }
 
-    unsigned int size(){
+    unsigned int size() const {
         return elements.size();
     }
 

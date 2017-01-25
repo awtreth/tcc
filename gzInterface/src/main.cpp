@@ -28,19 +28,55 @@
 #include <MapVec.h>
 #include <map>
 #include <JointCommand.h>
+#include <Pose.h>
+#include <Page.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
 
-    TorqueWriteJointCommand cmd(2);
+    std::vector<Pose> poses = std::vector<Pose>(5);
 
-    //cmd.setTorque(34);
+    poses[0].setTimestamp(0);
+    poses[1].setTimestamp(12);
+    poses[2].setTimestamp(36);
+    poses[3].setTimestamp(78);
+    poses[4].setTimestamp(132);
 
-    std::cout << readJointStateCommand.getCmdID() << std::endl;
-    //std::cout << ReadJointStateCommand.getTorque() << std::endl;
+//    poses[0].setTimeToNext(12);
+//    poses[1].setTimeToNext(24);
+//    poses[2].setTimeToNext(42);
+//    poses[3].setTimeToNext(54);
+//    poses[4].setTimeToNext(86);
 
-    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
+
+    Page page(poses);
+
+    //page.setTimesByTimeToNext();
+    page.setTimesByTimestamp(86);
+
+
+    for(auto pose: page.getPoses()){
+        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+    }
+
+    page.roundPoseTimes(10);
+
+    for(auto pose: page.getPoses()){
+        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+    }
+
+    std::cout << page.computePageDuration() << std::endl;
+
+
+//    TorqueWriteJointCommand cmd(2);
+
+//    //cmd.setTorque(34);
+
+//    std::cout << readJointStateCommand.getCmdID() << std::endl;
+//    //std::cout << ReadJointStateCommand.getTorque() << std::endl;
+
+//    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
 
 
 //    DummyMotionController motionController;
