@@ -53,6 +53,13 @@ template <class T> class MapVec {
         return elements;
     }
 
+    bool contains(std::string key) {
+        return nameMap.find(key) != nameMap.end();
+    }
+
+    std::map<std::string, int> getNameMap() const{
+        return nameMap;
+    }
 };
 
 

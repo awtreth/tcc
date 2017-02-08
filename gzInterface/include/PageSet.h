@@ -1,29 +1,31 @@
-#ifndef PAGE_H
-#define PAGE_H
+#ifndef PAGESET_H
+#define PAGESET_H
 
 #include <Pose.h>
+#include <Page.h>
+#include <MapVec.h>
 
-
-class Page {
+class PageSet {
 
     private:
 
-    std::vector<Pose> poses;
+    MapVec<Page> pages;
 
-    int nRepetitions;
+    bool checkMerge(Page page);
 
     public:
 
-    Page(std::vector<Pose> poses);
+    Page& getPage(const char* name);
 
-    void setAllPoses(std::vector<Pose> poses);
+    bool setPage(Page& otherPage);
 
-    void loadPageFromJsonFile(const char* fileName);
+    bool setPageSet(PageSet& otherPageSet);
 
-    void setPose(int index, Pose pose);
+    bool advanceTime(long tick);
 
-    Pose getPose(int index);
+    bool getCurrentPose();
 
+    MapVec<Page> getPages() const;
 };
 
 

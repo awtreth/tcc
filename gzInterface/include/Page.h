@@ -30,6 +30,7 @@ class Page : public IJsonObject{
 
     //Constructors
     Page(const std::vector<Pose>& value);
+    Page();
 
     //Getters & Setters
     void setPose(int index, const Pose& pose);
@@ -61,6 +62,7 @@ class Page : public IJsonObject{
 
     //Misc
     int addPose(const Pose& newPose);
+    unsigned int size();
 
     //Time First Settings Methods
     void setTimesByPeriod(long period);
@@ -81,6 +83,9 @@ class Page : public IJsonObject{
 
     Pose nextPose() const;
 
+    bool matchPoses(Page otherPage);
+
+    bool intersectPoses(Page otherPage);
 
 };
 

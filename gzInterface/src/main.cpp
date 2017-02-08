@@ -35,34 +35,63 @@
 int main(int _argc, char **_argv)
 {
 
-    std::vector<Pose> poses = std::vector<Pose>(5);
+    Pose pose1, pose2, pose3;
 
-    poses[0].setTimestamp(0);
-    poses[1].setTimestamp(12);
-    poses[2].setTimestamp(36);
-    poses[3].setTimestamp(78);
-    poses[4].setTimestamp(132);
+    pose1.addPosVel("motor 0", PosVel(0,0));
+    pose1.addPosVel("motor 1", PosVel(0,0));
+    pose1.addPosVel("motor 2", PosVel(0,0));
 
-//    poses[0].setTimeToNext(12);
-//    poses[1].setTimeToNext(24);
-//    poses[2].setTimeToNext(42);
-//    poses[3].setTimeToNext(54);
-//    poses[4].setTimeToNext(86);
+    pose2.addPosVel("motor 3", PosVel(0,0));
+    pose2.addPosVel("motor 4", PosVel(0,0));
+    pose2.addPosVel("motor 2", PosVel(0,0));
+    pose2.addPosVel("motor 0", PosVel(0,0));
+
+    pose3.addPosVel("motor 3", PosVel(0,0));
+    pose3.addPosVel("motor 4", PosVel(0,0));
+    pose3.addPosVel("motor 5", PosVel(0,0));
+
+    Page page1, page2, page3;
+
+    page1.addPose(pose1);
+    page2.addPose(pose2);
+    page3.addPose(pose3);
 
 
-    Page page(poses);
+    std::cout << page2.matchPoses(page2) << std::endl;
+    std::cout << page1.matchPoses(page3) << std::endl;
 
-    //page.setTimesByPeriod(15);
+    //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //page.setTimesByTimeToNext();
-    page.setTimesByTimestamp(86);
+//    std::vector<Pose> poses = std::vector<Pose>(5);
 
-    page.computePageDuration();
+//    poses[0].setTimestamp(0);
+//    poses[1].setTimestamp(12);
+//    poses[2].setTimestamp(36);
+//    poses[3].setTimestamp(78);
+//    poses[4].setTimestamp(132);
 
-    for(auto i = 0; i < 15; i++){
-        std::cout << page.advanceTime(20) << std::endl;
-        std::cout << page.getCurrentPoseId() << " " << page.getLoopCount()<< " " << page.getPageTimeCount()<< " " << std::endl;
-    }
+////    poses[0].setTimeToNext(12);
+////    poses[1].setTimeToNext(24);
+////    poses[2].setTimeToNext(42);
+////    poses[3].setTimeToNext(54);
+////    poses[4].setTimeToNext(86);
+
+
+//    Page page(poses);
+
+//    //page.setTimesByPeriod(15);
+
+//    //page.setTimesByTimeToNext();
+//    page.setTimesByTimestamp(86);
+
+//    page.computePageDuration();
+
+//    for(auto i = 0; i < 15; i++){
+//        std::cout << page.advanceTime(20) << std::endl;
+//        std::cout << page.getCurrentPoseId() << " " << page.getLoopCount()<< " " << page.getPageTimeCount()<< " " << std::endl;
+//    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //    for(auto pose: page.getPoses()){
 //        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;

@@ -4,13 +4,15 @@
 #include "IJsonObject.h"
 
 #include <MapVec.h>
-
+#include <string>
 
 struct PosVel {
+
+    //std::string jointName;
     double pos;
     double vel;
 
-    PosVel(double _pos, double _vel) : pos(_pos), vel(_vel) {}
+    PosVel(double _pos, double _vel) : pos(_pos), vel(_vel){}//, std::string(_jointName) {}
 };
 
 
@@ -67,6 +69,12 @@ class Pose : public IJsonObject{
     long getTimeToNext() const;
 
     bool hasValidTimes();
+
+    unsigned int size();
+
+    bool match(Pose otherPose);
+
+    bool intersect(Pose otherPose);
 
 };
 

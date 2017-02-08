@@ -31,6 +31,50 @@ bool Pose::hasValidTimes()
     return timeToNext > 0 && timestamp >= 0;
 }
 
+unsigned int Pose::size()
+{
+    return this->values.size();
+}
+
+bool Pose::match(Pose otherPose)
+{
+    if(this->size() == otherPose.size()) {
+
+        if(this->size() > 0){
+            auto thisPoseMap = this->getValues().getNameMap();
+            auto otherPoseMap = otherPose.getValues().getNameMap();
+
+            for(auto this_it = thisPoseMap.begin(), other_it = otherPoseMap.begin(); this_it != thisPoseMap.end(); this_it++, other_it++) {
+                if(this_it->first != other_it->first)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool Pose::intersect(Pose otherPose)
+{
+    if(this->size() > 0 && otherPose.size() > 0) {
+
+        auto thisPoseMap = this->getValues().getNameMap();
+        auto otherPoseMap = otherPose.getValues().getNameMap();
+
+        for(auto thisPair : thisPoseMap) {
+            for(auto otherPair : otherPoseMap) {
+                if(thisPair.first == otherPair.first)
+                    return true;
+            }
+        }
+
+    }
+
+    return false;
+}
+
 void Pose::setTimeToNext(long value)
 {
     //TODO: throw exception when value <= 0

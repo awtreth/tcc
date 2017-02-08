@@ -62,6 +62,22 @@ Pose Page::nextPose() const
     return poses.at((currentPoseId+1)%poses.size());
 }
 
+bool Page::matchPoses(Page otherPage)
+{
+    if(this->size() > 0 && otherPage.size() > 0)
+        return this->getPose(0).match(otherPage.getPose(0));
+
+    return false;
+}
+
+bool Page::intersectPoses(Page otherPage)
+{
+    if(this->size() > 0 && otherPage.size() > 0)
+        return this->getPose(0).intersect(otherPage.getPose(0));
+
+    return false;
+}
+
 int Page::getLoopCount() const
 {
     return loopCount;
@@ -74,7 +90,7 @@ long Page::getPageDuration() const
 
 long Page::computePageDuration()
 {
-   pageDuration = 0;
+    pageDuration = 0;
 
     for(auto pose : poses)
         pageDuration += pose.getTimeToNext();
@@ -117,6 +133,13 @@ Page::Page(const std::vector<Pose>& value)
     setPoses(value);
 }
 
+Page::Page()
+{
+    poses = std::vector<Pose>();
+    motionName = "";
+    modelName = "";
+}
+
 void Page::setPose(int index, const Pose& pose)
 {
     //TODO: verificar se o timestamp é válido com a pose anterior e posterior. Lançar exceção quando não for
@@ -147,8 +170,7 @@ long Page::roundPoseTimes(long resolution)
         offset = adjustedTime - pose.getTimeToNext();
     }
 
-    //setTimesByTimestamp();
-
+    computePageDuration();
 
     return offset;
 }
@@ -158,6 +180,11 @@ int Page::addPose(const Pose& newPose)
     poses.push_back(newPose);
     //pageDuration += newPose.getTimeToNext();
 
+    return poses.size();
+}
+
+unsigned int Page::size()
+{
     return poses.size();
 }
 
@@ -185,6 +212,7 @@ void Page::setTimesByTimestamp(long lastTimeToNext) {
 
     poses.back().setTimeToNext(lastTimeToNext);
 
+    computePageDuration();
 }
 
 void Page::setTimesByTimeToNext() {
@@ -195,6 +223,8 @@ void Page::setTimesByTimeToNext() {
         pose.setTimestamp(nextTimestamp);
         nextTimestamp += pose.getTimeToNext();
     }
+
+    computePageDuration();
 }
 
 bool Page::checkTimes() {
