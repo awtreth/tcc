@@ -77,6 +77,8 @@ class Page : public IJsonObject{
     //Time Flow Methods
     bool advanceTime(long tick);
 
+    bool resetTime();
+
     int advancePose();
 
     Pose currentPose() const;

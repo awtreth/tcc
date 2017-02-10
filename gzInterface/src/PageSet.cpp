@@ -16,6 +16,23 @@ std::__cxx11::string PageSet::toString()
     return str;
 }
 
+bool PageSet::resetTime()
+{
+    currentPose = Pose();
+
+    bool status = false;
+
+    for(Page& page : pages.getElements()){
+        if(page.resetTime()){
+            currentPose.append(page.currentPose());
+            status = true;
+        }
+
+    }
+
+    return status;
+}
+
 Page& PageSet::getPage(const char* name)
 {
     return pages.get(name);

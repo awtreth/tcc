@@ -77,10 +77,21 @@ bool Pose::intersect(Pose otherPose)
 
 bool Pose::append(Pose otherPose)
 {
-    for(auto posVel : otherPose.getValues().getElements()){
-        this->addPosVel(posVel.jointName,posVel);
+
+    for(unsigned int i = 0; i < otherPose.size(); i++){
+        this->addPosVel(otherPose.getPosVel(i));
     }
     return true;
+}
+
+std::__cxx11::string Pose::toString()
+{
+    std::string str;
+
+    for(PosVel joint : values.getElements())
+        str += std::string(joint.jointName) + "(" + std::to_string(joint.pos) + "," + std::to_string(joint.vel) + ") ";
+
+    return str;
 }
 
 void Pose::setTimeToNext(long value)
@@ -126,14 +137,19 @@ void Pose::addPosVel(const char* jointName, const PosVel& value)
     values.add(jointName, value);
 }
 
+void Pose::addPosVel(const PosVel& value)
+{
+    values.add(value.jointName,value);
+}
+
 void Pose::fromJsonFile(const char* filePath)
 {
-//TODO
+    //TODO
 }
 
 void Pose::toJsonFile(const char* filePath)
 {
-//TODO
+    //TODO
 }
 
 void Pose::setPosVel(int index, PosVel posVel)

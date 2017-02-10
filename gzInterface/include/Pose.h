@@ -6,16 +6,35 @@
 #include <MapVec.h>
 #include <string>
 
-struct PosVel {
+class PosVel {
+
+    public:
 
     double pos;
     double vel;
-    const char* jointName;
+    std::string jointName;
     //int jointIndex = 0;
+
+
 
     //PosVel(double _pos, double _vel) : pos(_pos), vel(_vel), jointName(""){}
 
-    PosVel(double _pos, double _vel, const char* _jointName) : pos(_pos), vel(_vel), jointName(_jointName) {}
+    PosVel(double _pos, double _vel, const std::string _jointName) {
+        pos = _pos;
+        vel = _vel;
+        jointName = _jointName;
+    }
+
+    // assume the object holds reusable storage, such as a heap-allocated buffer mArray
+    PosVel& operator=(const PosVel& other) // copy assignment
+    {
+        if (this != &other) { // self-assignment check expected
+            pos = other.pos;
+            vel = other.vel;
+            jointName = other.jointName;
+        }
+        return *this;
+    }
 
     //PosVel(double _pos, double _vel, int idx) : pos(_pos), vel(_vel), jointIndex(idx){}
 
@@ -54,6 +73,8 @@ class Pose : public IJsonObject{
 
     void addPosVel(const char* jointName, const PosVel& value);
 
+    void addPosVel(const PosVel& value);
+
     void setPosVel(int index, PosVel posVel);
 
     void setPosVel(const char* jointName, const PosVel& posVel);
@@ -86,14 +107,7 @@ class Pose : public IJsonObject{
 
     bool append(Pose otherPose);
 
-    std::string toString(){
-        std::string str;
-
-        for(auto joint : values.getElements())
-            str += std::string(joint.jointName) + "(" + std::to_string(joint.pos) + "," + std::to_string(joint.vel) + ") ";
-
-        return str;
-    }
+    std::string toString();
 };
 
 

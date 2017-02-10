@@ -57,7 +57,7 @@ template <class T> class MapVec {
         return elements.size();
     }
 
-    std::vector<T> getElements() const{
+    std::vector<T>& getElements(){
         return elements;
     }
 

@@ -52,6 +52,21 @@ bool Page::advanceTime(long tick)
     return false;
 }
 
+bool Page::resetTime()
+{
+    currentPoseId = 0;
+    globalTimeCount = 0;
+    pageTimeCount = 0;
+    poseTimeCount = 0;
+    loopCount = 0;
+
+    if(poses.size()>0 && poses.at(0).getTimestamp()==0)
+        return true;
+
+    return false;
+
+}
+
 Pose Page::currentPose() const
 {
     return poses.at(currentPoseId);
@@ -85,7 +100,7 @@ std::__cxx11::string Page::toString()
     str += "Model(" + this->modelName + ") Motion(" + this->motionName + ")\n";
 
     for(auto pose : poses)
-        str += std::to_string(pose.getTimestamp()) + " " + std::to_string(pose.getTimeToNext()) + " " +  pose.toString() + "\n";
+        str += "ts("+std::to_string(pose.getTimestamp()) + ") tn(" + std::to_string(pose.getTimeToNext()) + ") " +  pose.toString() + "\n";
 
     return str;
 }

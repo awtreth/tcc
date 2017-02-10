@@ -28,6 +28,9 @@ class PageSet {
     Pose getCurrentPose() const;
 
     std::string toString();
+
+    bool resetTime();
+
 };
 
 

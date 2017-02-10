@@ -36,54 +36,129 @@
 int main(int _argc, char **_argv)
 {
 
-    Pose pose1, pose2, pose3;
+    Pose p11, p12, p13, p21, p22;
+    Page page1, page2;
 
-    pose1.addPosVel("motor 0", PosVel(0,1,"motor 0"));
-    pose1.addPosVel("motor 1", PosVel(2,3,"motor 1"));
-    pose1.addPosVel("motor 2", PosVel(4,5,"motor 2"));
+    p11.addPosVel(PosVel(110,111,"motor0"));
+    p11.addPosVel(PosVel(112,113,"motor1"));
+    p11.setTimeToNext(2);
 
-    pose2.addPosVel("motor 3", PosVel(6,7,"motor 3"));
-    pose2.addPosVel("motor 4", PosVel(8,9,"motor 4"));
-    pose2.addPosVel("motor 2", PosVel(10,11,"motor 2"));
-    pose2.addPosVel("motor 0", PosVel(12,13,"motor 0"));
-
-    pose3.addPosVel("motor 3", PosVel(14,15,"motor 3"));
-    pose3.addPosVel("motor 4", PosVel(16,17,"motor 4"));
-    pose3.addPosVel("motor 5", PosVel(18,19,"motor 5"));
-
-    Page page1, page2, page3;
-
-    page1.addPose(pose1);
-    page1.addPose(pose1);
+    p12.addPosVel(PosVel(120,121,"motor0"));
+    p12.addPosVel(PosVel(122,123,"motor1"));
+    p12.setTimeToNext(2);
 
 
-    page1.getPose(0).setTimestamp(0);
-    page1.getPose(1).setTimestamp(2);
-
-    page1.setTimesByTimestamp(4);
-    page1.computePageDuration();
-
-    page2.addPose(pose2);
-    page3.addPose(pose3);
-
-    page1.setModelName("model1");
-    page2.setModelName("model2");
-    page3.setModelName("model3");
+    p13.addPosVel(PosVel(132,133,"motor0"));
+    p13.addPosVel(PosVel(132,133,"motor1"));
+    p13.setTimeToNext(2);
 
 
-    //std::cout << page2.matchPoses(page2) << std::endl;
-    //std::cout << page1.matchPoses(page3) << std::endl;
+    p21.addPosVel(PosVel(210,211,"motor2"));
+    p21.addPosVel(PosVel(212,213,"motor3"));
+    p21.setTimeToNext(3);
+
+    p22.addPosVel(PosVel(222,223,"motor2"));
+    p22.addPosVel(PosVel(222,223,"motor3"));
+    p22.setTimeToNext(5);
+
+    page1.addPose(p11);
+    page1.addPose(p12);
+    page1.addPose(p13);
+
+    page1.setModelName("Model1");
+    page1.setMotionName("Motion1");
+    page1.setTimesByTimeToNext();
+
+    page2.addPose(p21);
+    page2.addPose(p22);
+
+    page2.setModelName("Model2");
+    page2.setMotionName("Motion2");
+    page2.setTimesByTimeToNext();
 
     PageSet pset;
 
-    std::cout << pset.setPage(page1) << std::endl;
-
-    std::cout << pset.setPage(page3) << std::endl;
-
-    std::cout << pset.setPage(page1) << std::endl;
-
+    pset.setPage(page1);
+    pset.setPage(page2);
 
     std::cout << pset.toString() << std::endl;
+
+
+    int i = 0;
+
+    std::cout << "currentTime = " << i << " hasPose ";
+
+    if(pset.resetTime()){
+        std::cout << true << std::endl;
+        std::cout << pset.getCurrentPose().toString() << std::endl;
+    }else
+        std::cout << false << std::endl;
+
+    for(i = 1; i < 18; i++){
+        std::cout << "currentTime = " << i << " hasPose ";
+
+        if(pset.advanceTime(1)){
+            std::cout << true << std::endl;
+            std::cout << pset.getCurrentPose().toString() << std::endl;
+        }else
+            std::cout << false << std::endl;
+
+    }
+
+
+    ///////////////////////////////////////////////////////////////
+
+//    Pose pose1, pose2, pose3;
+
+//    pose1.addPosVel("motor 0", PosVel(0,1,"motor 0"));
+//    pose1.addPosVel("motor 1", PosVel(2,3,"motor 1"));
+//    pose1.addPosVel("motor 2", PosVel(4,5,"motor 2"));
+
+//    pose2.addPosVel("motor 3", PosVel(6,7,"motor 3"));
+//    pose2.addPosVel("motor 4", PosVel(8,9,"motor 4"));
+//    pose2.addPosVel("motor 2", PosVel(10,11,"motor 2"));
+//    pose2.addPosVel("motor 0", PosVel(12,13,"motor 0"));
+
+//    pose3.addPosVel("motor 3", PosVel(14,15,"motor 3"));
+//    pose3.addPosVel("motor 4", PosVel(16,17,"motor 4"));
+//    pose3.addPosVel("motor 5", PosVel(18,19,"motor 5"));
+
+//    Page page1, page2, page3;
+
+//    page1.addPose(pose1);
+//    page1.addPose(pose1);
+
+
+//    page1.getPose(0).setTimestamp(0);
+//    page1.getPose(1).setTimestamp(2);
+
+//    page1.setTimesByTimestamp(4);
+//    page1.computePageDuration();
+
+//    page2.addPose(pose2);
+//    page3.addPose(pose3);
+
+//    page1.setModelName("model1");
+//    page2.setModelName("model2");
+//    page3.setModelName("model3");
+
+
+//    //std::cout << page2.matchPoses(page2) << std::endl;
+//    //std::cout << page1.matchPoses(page3) << std::endl;
+
+//    PageSet pset;
+
+//    pset.setPage(page1);
+//    pset.setPage(page3);
+
+
+//    std::cout << pset.setPage(page1) << std::endl;
+
+
+//    std::cout << pset.setPage(page1) << std::endl;
+
+
+//    std::cout << pset.toString() << std::endl;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
