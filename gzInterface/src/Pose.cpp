@@ -75,6 +75,14 @@ bool Pose::intersect(Pose otherPose)
     return false;
 }
 
+bool Pose::append(Pose otherPose)
+{
+    for(auto posVel : otherPose.getValues().getElements()){
+        this->addPosVel(posVel.jointName,posVel);
+    }
+    return true;
+}
+
 void Pose::setTimeToNext(long value)
 {
     //TODO: throw exception when value <= 0
@@ -112,8 +120,9 @@ Pose::Pose(const MapVec<PosVel>& _values)
     setValues(_values);
 }
 
-void Pose::addPosVel(const char* jointName, PosVel value)
+void Pose::addPosVel(const char* jointName, const PosVel& value)
 {
+    //value.jointName = jointName;
     values.add(jointName, value);
 }
 
@@ -132,7 +141,7 @@ void Pose::setPosVel(int index, PosVel posVel)
     values.set(index,posVel);
 }
 
-void Pose::setPosVel(const char* jointName, PosVel posVel)
+void Pose::setPosVel(const char* jointName, const PosVel& posVel)
 {
     values.set(jointName,posVel);
 }

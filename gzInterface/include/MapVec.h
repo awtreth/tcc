@@ -37,6 +37,14 @@ template <class T> class MapVec {
         return elements[nameMap.at(name)];
     }
 
+    T& get(int const idx){
+        return elements[idx];
+    }
+
+    T& get(const char* name){
+        return elements[nameMap.at(name)];
+    }
+
     void set(std::string const name, T const& element) {
         elements[nameMap[name]] = element;
     }
@@ -60,6 +68,7 @@ template <class T> class MapVec {
     std::map<std::string, int> getNameMap() const{
         return nameMap;
     }
+
 };
 
 

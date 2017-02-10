@@ -62,7 +62,7 @@ void AbsMotionController::setReadWritePeriodRatio(int value)
     std::unique_lock<std::mutex> lck(pauseMtx);
 
     readWritePeriodRatio = pow(2,value);
-    writePeriod = std::chrono::microseconds(value/readWritePeriodRatio);
+    writePeriod = std::chrono::microseconds(readPeriod/readWritePeriodRatio);
     updateShiftPeriod();
 
     requestCount--;

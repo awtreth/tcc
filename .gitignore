@@ -1,8 +1,12 @@
 # Código da EDROM versão GitLab 11-set-2016
+
+#Pessoais
 codigoEDROM/
 codigoMurilo/
 referencias/
 PropostaTCC*
+progressoTCC*
+esquemaPageSet.xlsx
 
 # Compiled Object files
 *.slo

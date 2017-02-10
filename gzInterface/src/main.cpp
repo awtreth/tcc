@@ -30,6 +30,7 @@
 #include <JointCommand.h>
 #include <Pose.h>
 #include <Page.h>
+#include <PageSet.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
@@ -37,28 +38,52 @@ int main(int _argc, char **_argv)
 
     Pose pose1, pose2, pose3;
 
-    pose1.addPosVel("motor 0", PosVel(0,0));
-    pose1.addPosVel("motor 1", PosVel(0,0));
-    pose1.addPosVel("motor 2", PosVel(0,0));
+    pose1.addPosVel("motor 0", PosVel(0,1,"motor 0"));
+    pose1.addPosVel("motor 1", PosVel(2,3,"motor 1"));
+    pose1.addPosVel("motor 2", PosVel(4,5,"motor 2"));
 
-    pose2.addPosVel("motor 3", PosVel(0,0));
-    pose2.addPosVel("motor 4", PosVel(0,0));
-    pose2.addPosVel("motor 2", PosVel(0,0));
-    pose2.addPosVel("motor 0", PosVel(0,0));
+    pose2.addPosVel("motor 3", PosVel(6,7,"motor 3"));
+    pose2.addPosVel("motor 4", PosVel(8,9,"motor 4"));
+    pose2.addPosVel("motor 2", PosVel(10,11,"motor 2"));
+    pose2.addPosVel("motor 0", PosVel(12,13,"motor 0"));
 
-    pose3.addPosVel("motor 3", PosVel(0,0));
-    pose3.addPosVel("motor 4", PosVel(0,0));
-    pose3.addPosVel("motor 5", PosVel(0,0));
+    pose3.addPosVel("motor 3", PosVel(14,15,"motor 3"));
+    pose3.addPosVel("motor 4", PosVel(16,17,"motor 4"));
+    pose3.addPosVel("motor 5", PosVel(18,19,"motor 5"));
 
     Page page1, page2, page3;
 
     page1.addPose(pose1);
+    page1.addPose(pose1);
+
+
+    page1.getPose(0).setTimestamp(0);
+    page1.getPose(1).setTimestamp(2);
+
+    page1.setTimesByTimestamp(4);
+    page1.computePageDuration();
+
     page2.addPose(pose2);
     page3.addPose(pose3);
 
+    page1.setModelName("model1");
+    page2.setModelName("model2");
+    page3.setModelName("model3");
 
-    std::cout << page2.matchPoses(page2) << std::endl;
-    std::cout << page1.matchPoses(page3) << std::endl;
+
+    //std::cout << page2.matchPoses(page2) << std::endl;
+    //std::cout << page1.matchPoses(page3) << std::endl;
+
+    PageSet pset;
+
+    std::cout << pset.setPage(page1) << std::endl;
+
+    std::cout << pset.setPage(page3) << std::endl;
+
+    std::cout << pset.setPage(page1) << std::endl;
+
+
+    std::cout << pset.toString() << std::endl;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +140,7 @@ int main(int _argc, char **_argv)
 
 //    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //    DummyMotionController motionController;
 

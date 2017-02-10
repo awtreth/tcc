@@ -78,6 +78,18 @@ bool Page::intersectPoses(Page otherPage)
     return false;
 }
 
+std::__cxx11::string Page::toString()
+{
+    std::string str;
+
+    str += "Model(" + this->modelName + ") Motion(" + this->motionName + ")\n";
+
+    for(auto pose : poses)
+        str += std::to_string(pose.getTimestamp()) + " " + std::to_string(pose.getTimeToNext()) + " " +  pose.toString() + "\n";
+
+    return str;
+}
+
 int Page::getLoopCount() const
 {
     return loopCount;

@@ -8,11 +8,19 @@
 
 struct PosVel {
 
-    //std::string jointName;
     double pos;
     double vel;
+    const char* jointName;
+    //int jointIndex = 0;
 
-    PosVel(double _pos, double _vel) : pos(_pos), vel(_vel){}//, std::string(_jointName) {}
+    //PosVel(double _pos, double _vel) : pos(_pos), vel(_vel), jointName(""){}
+
+    PosVel(double _pos, double _vel, const char* _jointName) : pos(_pos), vel(_vel), jointName(_jointName) {}
+
+    //PosVel(double _pos, double _vel, int idx) : pos(_pos), vel(_vel), jointIndex(idx){}
+
+    //PosVel(double _pos, double _vel, std::string _jointName, int idx) : pos(_pos), vel(_vel), std::string(_jointName) {}
+
 };
 
 
@@ -44,11 +52,11 @@ class Pose : public IJsonObject{
 
     Pose(const MapVec<PosVel>& value);
 
-    void addPosVel(const char* jointName, PosVel value);
+    void addPosVel(const char* jointName, const PosVel& value);
 
     void setPosVel(int index, PosVel posVel);
 
-    void setPosVel(const char* jointName, PosVel posVel);
+    void setPosVel(const char* jointName, const PosVel& posVel);
 
     PosVel getPosVel(int index) const;
 
@@ -76,6 +84,16 @@ class Pose : public IJsonObject{
 
     bool intersect(Pose otherPose);
 
+    bool append(Pose otherPose);
+
+    std::string toString(){
+        std::string str;
+
+        for(auto joint : values.getElements())
+            str += std::string(joint.jointName) + "(" + std::to_string(joint.pos) + "," + std::to_string(joint.vel) + ") ";
+
+        return str;
+    }
 };
 
 

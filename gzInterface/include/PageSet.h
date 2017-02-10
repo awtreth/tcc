@@ -11,7 +11,7 @@ class PageSet {
 
     MapVec<Page> pages;
 
-    bool checkMerge(Page page);
+    Pose currentPose;
 
     public:
 
@@ -19,13 +19,15 @@ class PageSet {
 
     bool setPage(Page& otherPage);
 
-    bool setPageSet(PageSet& otherPageSet);
-
     bool advanceTime(long tick);
 
-    bool getCurrentPose();
-
     MapVec<Page> getPages() const;
+
+    bool intersectPages(Page otherPage);
+
+    Pose getCurrentPose() const;
+
+    std::string toString();
 };
 
 

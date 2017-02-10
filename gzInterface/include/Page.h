@@ -87,6 +87,8 @@ class Page : public IJsonObject{
 
     bool intersectPoses(Page otherPage);
 
+    std::string toString();
+
 };
 
 
