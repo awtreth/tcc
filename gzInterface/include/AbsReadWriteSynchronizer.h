@@ -1,5 +1,5 @@
-#ifndef ABSMOTIONCONTROLLER_H
-#define ABSMOTIONCONTROLLER_H
+#ifndef AbsReadWriteSynchronizer_H
+#define AbsReadWriteSynchronizer_H
 
 #include <JointController.h>
 #include <Joint.h>
@@ -7,16 +7,20 @@
 #include <thread>
 #include <mutex>              // std::mutex, std::unique_lock
 #include <condition_variable> // std::condition_variable
+#include <pthread.h>
+#include <time.h>
 
 using namespace std::chrono;
 
-class AbsMotionController {
+class AbsReadWriteSynchronizer {
 
     private:
 
     //JointControllerPtr jointController ;
 
     std::thread mainThread;
+
+    pthread_t mainPThread;
 
     std::chrono::microseconds writePeriod;//TODO: colocar valor padrão
 
@@ -32,7 +36,10 @@ class AbsMotionController {
 
     steady_clock::time_point nextWriteTime;
 
-    void loop();
+    timespec nextReadTimeTs;
+
+    timespec nextWriteTimeTs;
+
 
     bool isPaused = true;
 
@@ -48,23 +55,29 @@ class AbsMotionController {
 
     bool isClosed = false;
 
+    static void loop(void*);
+
     protected:
 
-    virtual void onRead(){}
+    steady_clock::time_point getNextReadTime() const;
 
-    virtual void read(){}
+    steady_clock::time_point getNextWriteTime() const;
 
-    virtual void afterRead(){}
+    virtual void onRead()=0;
 
-    virtual void onWrite(){}
+    virtual void read()=0;
 
-    virtual void write(){}
+    virtual void afterRead()=0;
 
-    virtual void afterWrite(){}
+    virtual void onWrite()=0;
 
-    virtual void onReadMiss(){}
+    virtual void write()=0;
 
-    virtual void onWriteMiss(){}
+    virtual void afterWrite()=0;
+
+    virtual void onReadMiss()=0;
+
+    virtual void onWriteMiss()=0;
 
     void startIntervention();
 
@@ -72,7 +85,7 @@ class AbsMotionController {
 
     public:
 
-    AbsMotionController();
+    AbsReadWriteSynchronizer();
 
     unsigned int getWritePeriod() const;
     void setWritePeriod(unsigned int value);
@@ -83,9 +96,9 @@ class AbsMotionController {
     double getReadWriteShift() const;
     void setReadWriteShift(double value);
 
-    void resume(unsigned int readWaitTime);
+    void resumeLoop(long readWaitTime = 0);
 
-    void pause();
+    void pauseLoop();
 
     void close();
 };

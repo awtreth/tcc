@@ -21,8 +21,6 @@
 
 ////#include <GzMotionController.h>
 
-//#include <DummyMotionController.h>
-
 #include <iostream>
 #include <string>
 #include <MapVec.h>
@@ -31,284 +29,405 @@
 #include <Pose.h>
 #include <Page.h>
 #include <PageSet.h>
+#include <DummyReadWriteSynchronizer.h>
+#include <unistd.h>
+#include <algorithm>
+#include <cmath>
+#include <pthread.h>
+#include <sched.h>
+#include <sys/resource.h>
+
+#include <AsyncLogger.h>
+#include <memory>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
 
-    Pose p11, p12, p13, p21, p22;
-    Page page1, page2;
+    //std::make_shared<std::ostream>();
 
-    p11.addPosVel(PosVel(110,111,"motor0"));
-    p11.addPosVel(PosVel(112,113,"motor1"));
-    p11.setTimeToNext(2);
+//    std::cout << ESRCH << std::endl;
+//    std::cout << EINVAL << std::endl;
+//    std::cout << EPERM << std::endl;
+//    rlimit lim;
+//    getrlimit(RLIMIT_NICE,&lim);
+//    std::cout << lim.rlim_cur << " " << lim.rlim_max << std::endl;
 
-    p12.addPosVel(PosVel(120,121,"motor0"));
-    p12.addPosVel(PosVel(122,123,"motor1"));
-    p12.setTimeToNext(2);
+//    sched_param p;
+//    p.__sched_priority = 1;
 
-
-    p13.addPosVel(PosVel(132,133,"motor0"));
-    p13.addPosVel(PosVel(132,133,"motor1"));
-    p13.setTimeToNext(2);
+//    std::cout << sched_setscheduler(getpid(),SCHED_RR,&p) << std::endl;
 
 
-    p21.addPosVel(PosVel(210,211,"motor2"));
-    p21.addPosVel(PosVel(212,213,"motor3"));
-    p21.setTimeToNext(3);
-
-    p22.addPosVel(PosVel(222,223,"motor2"));
-    p22.addPosVel(PosVel(222,223,"motor3"));
-    p22.setTimeToNext(5);
-
-    page1.addPose(p11);
-    page1.addPose(p12);
-    page1.addPose(p13);
-
-    page1.setModelName("Model1");
-    page1.setMotionName("Motion1");
-    page1.setTimesByTimeToNext();
-
-    page2.addPose(p21);
-    page2.addPose(p22);
-
-    page2.setModelName("Model2");
-    page2.setMotionName("Motion2");
-    page2.setTimesByTimeToNext();
-
-    PageSet pset;
-
-    pset.setPage(page1);
-    pset.setPage(page2);
-
-    std::cout << pset.toString() << std::endl;
 
 
-    int i = 0;
+//    return 0;
 
-    std::cout << "currentTime = " << i << " hasPose ";
+        DummyReadWriteSynchronizer sync;
 
-    if(pset.resetTime()){
-        std::cout << true << std::endl;
-        std::cout << pset.getCurrentPose().toString() << std::endl;
-    }else
-        std::cout << false << std::endl;
+        sync.setReadPeriod((long)100e3);
+        sync.setWritePeriod((long)100e3);
+        sync.setReadWritePeriodRatio(0);
+        sync.setReadWriteShift(0.5);
 
-    for(i = 1; i < 18; i++){
-        std::cout << "currentTime = " << i << " hasPose ";
+        sync.resumeLoop();
 
-        if(pset.advanceTime(1)){
-            std::cout << true << std::endl;
-            std::cout << pset.getCurrentPose().toString() << std::endl;
-        }else
-            std::cout << false << std::endl;
+        sleep(10);
 
-    }
+    //    sync.pauseLoop();
+
+        //sleep(3);
+
+    //    sync.resumeLoop();
+
+        sync.close();
+
+        sync.readLog.erase(sync.readLog.begin());
+        sync.readLog.erase(sync.readLog.begin());
+        sync.writeLog.erase(sync.writeLog.begin());
+        sync.writeLog.erase(sync.writeLog.begin());
+
+        double periodAvg = 0;
+        double devAvg = 0;
+        double errAvg = 0;
+        double tsDevAvg = 0;
+
+        for(SyncLog log : sync.readLog){
+            periodAvg += log.period/((double)sync.readLog.size());
+            devAvg += log.deviation/((double)sync.readLog.size());
+            errAvg += log.error/((double)sync.readLog.size());
+            tsDevAvg += log.tsDeviation/((double)sync.readLog.size());
+        }
+
+        std::cout << "READ AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
+
+        periodAvg = 0;
+        devAvg = 0;
+        errAvg = 0;
+        tsDevAvg = 0;
+
+        for(SyncLog log : sync.writeLog){
+            periodAvg += log.period/((double)sync.writeLog.size());
+            devAvg += log.deviation/((double)sync.writeLog.size());
+            errAvg += log.error/((double)sync.writeLog.size());
+            tsDevAvg += log.tsDeviation/((double)sync.writeLog.size());
+        }
+
+        std::cout << "WRITE AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
+
+        double periodStd = 0;
+        double devStd = 0;
+        double errStd = 0;
+        double tsDevStd = 0;
+
+        for(SyncLog log : sync.readLog){
+            periodStd += pow(log.period-periodAvg,2);
+            devStd += pow(log.deviation-devAvg,2);
+            errStd += pow(log.error-errAvg,2);
+            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
+        }
+
+        periodStd = sqrt(periodStd/(sync.readLog.size()-1));
+        devStd = sqrt(devStd/(sync.readLog.size()-1));
+        errStd = sqrt(errStd/(sync.readLog.size()-1));
+        tsDevStd = sqrt(tsDevStd/(sync.readLog.size()-1));
+
+        std::cout << "READ STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
+
+        periodStd = 0;
+        devStd = 0;
+        errStd = 0;
+        tsDevStd = 0;
+
+        for(SyncLog log : sync.writeLog){
+            periodStd += pow(log.period-periodAvg,2);
+            devStd += pow(log.deviation-devAvg,2);
+            errStd += pow(log.error-errAvg,2);
+            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
+        }
+
+        periodStd = sqrt(periodStd/(sync.writeLog.size()-1));
+        devStd = sqrt(devStd/(sync.writeLog.size()-1));
+        errStd = sqrt(errStd/(sync.writeLog.size()-1));
+        tsDevStd = sqrt(tsDevStd/(sync.writeLog.size()-1));
+
+        std::cout << "WRITE STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
+
+    ////////////////////////////////////////////////////////
+
+    //    Pose p11, p12, p13, p21, p22;
+    //    Page page1, page2;
+
+    //    p11.addPosVel(PosVel(110,111,"motor0"));
+    //    p11.addPosVel(PosVel(112,113,"motor1"));
+    //    p11.setTimeToNext(2);
+
+    //    p12.addPosVel(PosVel(120,121,"motor0"));
+    //    p12.addPosVel(PosVel(122,123,"motor1"));
+    //    p12.setTimeToNext(2);
+
+
+    //    p13.addPosVel(PosVel(132,133,"motor0"));
+    //    p13.addPosVel(PosVel(132,133,"motor1"));
+    //    p13.setTimeToNext(2);
+
+
+    //    p21.addPosVel(PosVel(210,211,"motor2"));
+    //    p21.addPosVel(PosVel(212,213,"motor3"));
+    //    p21.setTimeToNext(3);
+
+    //    p22.addPosVel(PosVel(222,223,"motor2"));
+    //    p22.addPosVel(PosVel(222,223,"motor3"));
+    //    p22.setTimeToNext(5);
+
+    //    page1.addPose(p11);
+    //    page1.addPose(p12);
+    //    page1.addPose(p13);
+
+    //    page1.setModelName("Model1");
+    //    page1.setMotionName("Motion1");
+    //    page1.setTimesByTimeToNext();
+
+    //    page2.addPose(p21);
+    //    page2.addPose(p22);
+
+    //    page2.setModelName("Model2");
+    //    page2.setMotionName("Motion2");
+    //    page2.setTimesByTimeToNext();
+
+    //    PageSet pset;
+
+    //    pset.setPage(page1);
+    //    pset.setPage(page2);
+
+    //    std::cout << pset.toString() << std::endl;
+
+
+    //    int i = 0;
+
+    //    std::cout << "currentTime = " << i << " hasPose ";
+
+    //    if(pset.resetTime()){
+    //        std::cout << true << std::endl;
+    //        std::cout << pset.getCurrentPose().toString() << std::endl;
+    //    }else
+    //        std::cout << false << std::endl;
+
+    //    for(i = 1; i < 18; i++){
+    //        std::cout << "currentTime = " << i << " hasPose ";
+
+    //        if(pset.advanceTime(1)){
+    //            std::cout << true << std::endl;
+    //            std::cout << pset.getCurrentPose().toString() << std::endl;
+    //        }else
+    //            std::cout << false << std::endl;
+
+    //    }
 
 
     ///////////////////////////////////////////////////////////////
 
-//    Pose pose1, pose2, pose3;
+    //    Pose pose1, pose2, pose3;
 
-//    pose1.addPosVel("motor 0", PosVel(0,1,"motor 0"));
-//    pose1.addPosVel("motor 1", PosVel(2,3,"motor 1"));
-//    pose1.addPosVel("motor 2", PosVel(4,5,"motor 2"));
+    //    pose1.addPosVel("motor 0", PosVel(0,1,"motor 0"));
+    //    pose1.addPosVel("motor 1", PosVel(2,3,"motor 1"));
+    //    pose1.addPosVel("motor 2", PosVel(4,5,"motor 2"));
 
-//    pose2.addPosVel("motor 3", PosVel(6,7,"motor 3"));
-//    pose2.addPosVel("motor 4", PosVel(8,9,"motor 4"));
-//    pose2.addPosVel("motor 2", PosVel(10,11,"motor 2"));
-//    pose2.addPosVel("motor 0", PosVel(12,13,"motor 0"));
+    //    pose2.addPosVel("motor 3", PosVel(6,7,"motor 3"));
+    //    pose2.addPosVel("motor 4", PosVel(8,9,"motor 4"));
+    //    pose2.addPosVel("motor 2", PosVel(10,11,"motor 2"));
+    //    pose2.addPosVel("motor 0", PosVel(12,13,"motor 0"));
 
-//    pose3.addPosVel("motor 3", PosVel(14,15,"motor 3"));
-//    pose3.addPosVel("motor 4", PosVel(16,17,"motor 4"));
-//    pose3.addPosVel("motor 5", PosVel(18,19,"motor 5"));
+    //    pose3.addPosVel("motor 3", PosVel(14,15,"motor 3"));
+    //    pose3.addPosVel("motor 4", PosVel(16,17,"motor 4"));
+    //    pose3.addPosVel("motor 5", PosVel(18,19,"motor 5"));
 
-//    Page page1, page2, page3;
+    //    Page page1, page2, page3;
 
-//    page1.addPose(pose1);
-//    page1.addPose(pose1);
-
-
-//    page1.getPose(0).setTimestamp(0);
-//    page1.getPose(1).setTimestamp(2);
-
-//    page1.setTimesByTimestamp(4);
-//    page1.computePageDuration();
-
-//    page2.addPose(pose2);
-//    page3.addPose(pose3);
-
-//    page1.setModelName("model1");
-//    page2.setModelName("model2");
-//    page3.setModelName("model3");
+    //    page1.addPose(pose1);
+    //    page1.addPose(pose1);
 
 
-//    //std::cout << page2.matchPoses(page2) << std::endl;
-//    //std::cout << page1.matchPoses(page3) << std::endl;
+    //    page1.getPose(0).setTimestamp(0);
+    //    page1.getPose(1).setTimestamp(2);
 
-//    PageSet pset;
+    //    page1.setTimesByTimestamp(4);
+    //    page1.computePageDuration();
 
-//    pset.setPage(page1);
-//    pset.setPage(page3);
+    //    page2.addPose(pose2);
+    //    page3.addPose(pose3);
+
+    //    page1.setModelName("model1");
+    //    page2.setModelName("model2");
+    //    page3.setModelName("model3");
 
 
-//    std::cout << pset.setPage(page1) << std::endl;
+    //    //std::cout << page2.matchPoses(page2) << std::endl;
+    //    //std::cout << page1.matchPoses(page3) << std::endl;
+
+    //    PageSet pset;
+
+    //    pset.setPage(page1);
+    //    pset.setPage(page3);
 
 
-//    std::cout << pset.setPage(page1) << std::endl;
+    //    std::cout << pset.setPage(page1) << std::endl;
 
 
-//    std::cout << pset.toString() << std::endl;
+    //    std::cout << pset.setPage(page1) << std::endl;
+
+
+    //    std::cout << pset.toString() << std::endl;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    std::vector<Pose> poses = std::vector<Pose>(5);
+    //    std::vector<Pose> poses = std::vector<Pose>(5);
 
-//    poses[0].setTimestamp(0);
-//    poses[1].setTimestamp(12);
-//    poses[2].setTimestamp(36);
-//    poses[3].setTimestamp(78);
-//    poses[4].setTimestamp(132);
+    //    poses[0].setTimestamp(0);
+    //    poses[1].setTimestamp(12);
+    //    poses[2].setTimestamp(36);
+    //    poses[3].setTimestamp(78);
+    //    poses[4].setTimestamp(132);
 
-////    poses[0].setTimeToNext(12);
-////    poses[1].setTimeToNext(24);
-////    poses[2].setTimeToNext(42);
-////    poses[3].setTimeToNext(54);
-////    poses[4].setTimeToNext(86);
+    ////    poses[0].setTimeToNext(12);
+    ////    poses[1].setTimeToNext(24);
+    ////    poses[2].setTimeToNext(42);
+    ////    poses[3].setTimeToNext(54);
+    ////    poses[4].setTimeToNext(86);
 
 
-//    Page page(poses);
+    //    Page page(poses);
 
-//    //page.setTimesByPeriod(15);
+    //    //page.setTimesByPeriod(15);
 
-//    //page.setTimesByTimeToNext();
-//    page.setTimesByTimestamp(86);
+    //    //page.setTimesByTimeToNext();
+    //    page.setTimesByTimestamp(86);
 
-//    page.computePageDuration();
+    //    page.computePageDuration();
 
-//    for(auto i = 0; i < 15; i++){
-//        std::cout << page.advanceTime(20) << std::endl;
-//        std::cout << page.getCurrentPoseId() << " " << page.getLoopCount()<< " " << page.getPageTimeCount()<< " " << std::endl;
-//    }
+    //    for(auto i = 0; i < 15; i++){
+    //        std::cout << page.advanceTime(20) << std::endl;
+    //        std::cout << page.getCurrentPoseId() << " " << page.getLoopCount()<< " " << page.getPageTimeCount()<< " " << std::endl;
+    //    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    for(auto pose: page.getPoses()){
-//        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
-//    }
+    //    for(auto pose: page.getPoses()){
+    //        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+    //    }
 
-//    page.roundPoseTimes(10);
+    //    page.roundPoseTimes(10);
 
-//    for(auto pose: page.getPoses()){
-//        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
-//    }
+    //    for(auto pose: page.getPoses()){
+    //        std::cout << pose.getTimestamp() << " " << pose.getTimeToNext() << std::endl;
+    //    }
 
-//    std::cout << page.computePageDuration() << std::endl;
-
-
-//    TorqueWriteJointCommand cmd(2);
-
-//    //cmd.setTorque(34);
-
-//    std::cout << readJointStateCommand.getCmdID() << std::endl;
-//    //std::cout << ReadJointStateCommand.getTorque() << std::endl;
-
-//    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-//    DummyMotionController motionController;
-
-//        motionController.setReadPeriod(2e6);
-//        motionController.setWritePeriod(2e6);
-
-//        motionController.resume(3e6);
-
-//        sleep(5);
-
-//        motionController.close();
-//    std::vector<std::string> vecStr;
-
-//    vecStr.push_back("Motor 1");
-//    vecStr.push_back("Motor 2");
-
-//    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
-
-//    GzMotionController motionController(controller);
-
-//    motionController.setReadPeriod(2e6);
-//    motionController.setWritePeriod(2e6);
-
-//    motionController.resume(3e6);
-
-//    //getchar();
-
-//    sleep(5);
-
-//    motionController.pause();
-
-//    std::cout << "paused" << std::endl;
-
-//    getchar();
-
-//    motionController.close();
-
-//    return 0;
+    //    std::cout << page.computePageDuration() << std::endl;
 
 
-//    std::cout << "criando controller" << std::endl;
+    //    TorqueWriteJointCommand cmd(2);
 
-//    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
+    //    //cmd.setTorque(34);
 
-//    std::cout << "conexão estabelecida" << std::endl;
+    //    std::cout << readJointStateCommand.getCmdID() << std::endl;
+    //    //std::cout << ReadJointStateCommand.getTorque() << std::endl;
 
-//    PidValues pid(0.1,0,0);
+    //    std::cout << TorqueWriteJointCommand::CMD_ID << std::endl;
 
-//    std::cout << "write PID " + std::to_string(pid.kp) << std::endl;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    std::vector<PidValues> pidVec(2,pid);
+    //    DummyMotionController motionController;
+
+    //        motionController.setReadPeriod(2e6);
+    //        motionController.setWritePeriod(2e6);
+
+    //        motionController.resume(3e6);
+
+    //        sleep(5);
+
+    //        motionController.close();
+    //    std::vector<std::string> vecStr;
+
+    //    vecStr.push_back("Motor 1");
+    //    vecStr.push_back("Motor 2");
+
+    //    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
+
+    //    GzMotionController motionController(controller);
+
+    //    motionController.setReadPeriod(2e6);
+    //    motionController.setWritePeriod(2e6);
+
+    //    motionController.resume(3e6);
+
+    //    //getchar();
+
+    //    sleep(5);
+
+    //    motionController.pause();
+
+    //    std::cout << "paused" << std::endl;
+
+    //    getchar();
+
+    //    motionController.close();
+
+    //    return 0;
 
 
-//    controller.setPosVelPid(pidVec,pidVec);
+    //    std::cout << "criando controller" << std::endl;
 
-//    std::cout << "PID enviado" << std::endl;
+    //    GzJointController controller(vecStr,"~/simple_arm/writeRequest", "~/simple_arm/readRequest", "~/simple_arm/readResponse");
 
-//    std::cout << "writePosVel" << std::endl;
+    //    std::cout << "conexão estabelecida" << std::endl;
+
+    //    PidValues pid(0.1,0,0);
+
+    //    std::cout << "write PID " + std::to_string(pid.kp) << std::endl;
+
+    //    std::vector<PidValues> pidVec(2,pid);
 
 
-//    std::vector<JointCommandPtr> cmdVec;
+    //    controller.setPosVelPid(pidVec,pidVec);
 
-//    cmdVec.push_back(std::make_shared<JointPosVelCommand>(JointPosVelCommand(45*3.141592/180,0)));
-//    cmdVec.push_back(std::make_shared<JointPosVelCommand>(JointPosVelCommand(-15*3.141592/180,0)));
+    //    std::cout << "PID enviado" << std::endl;
 
-//    controller.sendCommand(cmdVec);
+    //    std::cout << "writePosVel" << std::endl;
 
-////    std::vector<JointPosVelCommand> posVelCmdVec;
 
-////    posVelCmdVec.push_back(JointPosVelCommand(45*3.141592/180,0));
-////    posVelCmdVec.push_back(JointPosVelCommand(-15*3.141592/180,0));
+    //    std::vector<JointCommandPtr> cmdVec;
 
-////    controller.goPosVel(posVelCmdVec);
+    //    cmdVec.push_back(std::make_shared<JointPosVelCommand>(JointPosVelCommand(45*3.141592/180,0)));
+    //    cmdVec.push_back(std::make_shared<JointPosVelCommand>(JointPosVelCommand(-15*3.141592/180,0)));
 
-//    std::cout << "PosVel enviado" << std::endl;
+    //    controller.sendCommand(cmdVec);
 
-//    //getchar();
+    ////    std::vector<JointPosVelCommand> posVelCmdVec;
 
-//    std::ofstream ofs("/tmp/gzLog.txt");
+    ////    posVelCmdVec.push_back(JointPosVelCommand(45*3.141592/180,0));
+    ////    posVelCmdVec.push_back(JointPosVelCommand(-15*3.141592/180,0));
 
-//    while(1) {
-//        std::cout << "read JointState" << std::endl;
+    ////    controller.goPosVel(posVelCmdVec);
 
-//        controller.readJointStates();
+    //    std::cout << "PosVel enviado" << std::endl;
 
-//        JointState jState = controller.getLastJointState(0);
+    //    //getchar();
 
-//        ofs << jState.position << " " << jState.velocity << std::endl;
+    //    std::ofstream ofs("/tmp/gzLog.txt");
 
-//        usleep(100000);
-//    }
+    //    while(1) {
+    //        std::cout << "read JointState" << std::endl;
 
-//    ofs.close();
+    //        controller.readJointStates();
+
+    //        JointState jState = controller.getLastJointState(0);
+
+    //        ofs << jState.position << " " << jState.velocity << std::endl;
+
+    //        usleep(100000);
+    //    }
+
+    //    ofs.close();
 
 
     //JointPosVelCommand jcmd(2,3);
