@@ -55,7 +55,7 @@ class AbsReadWriteSynchronizer {
 
     bool isClosed = false;
 
-    static void loop(void*);
+    static void* loop(void*);
 
     protected:
 

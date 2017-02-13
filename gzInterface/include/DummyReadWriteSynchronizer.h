@@ -12,6 +12,8 @@
 
 struct SyncLog {
     long period;
+    long ts;
+    long expected;
     long deviation;
     long tsDeviation;
     double error;
@@ -30,10 +32,10 @@ class DummyReadWriteSynchronizer : public AbsReadWriteSynchronizer {
     std::vector<SyncLog> readLog;
     std::vector<SyncLog> writeLog;
 
-    AsyncLogger logger;
+    //AsyncLogger logger;
 
     ~DummyReadWriteSynchronizer(){
-        logger.close();
+        //logger.close();
     }
 
     private:
@@ -61,11 +63,14 @@ class DummyReadWriteSynchronizer : public AbsReadWriteSynchronizer {
         log.deviation = (diff-getReadPeriod());
         log.error = (diff-getReadPeriod())/((double)getReadPeriod());
         log.tsDeviation = std::chrono::duration_cast<std::chrono::microseconds>(now-getNextReadTime()).count();
+        log.ts = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+        log.expected = std::chrono::duration_cast<std::chrono::microseconds>(getNextReadTime().time_since_epoch()).count();
+
 
         readLog.push_back(log);
 
-        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
-                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");
+//        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
+//                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");
 
         lastReadPoint = now;
     }
@@ -90,11 +95,14 @@ class DummyReadWriteSynchronizer : public AbsReadWriteSynchronizer {
         log.deviation = (diff-getWritePeriod());
         log.error = (diff-getWritePeriod())/((double)getWritePeriod());
         log.tsDeviation = std::chrono::duration_cast<std::chrono::microseconds>(now-getNextWriteTime()).count();
+        log.ts = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+        log.expected = std::chrono::duration_cast<std::chrono::microseconds>(getNextWriteTime().time_since_epoch()).count();
+
 
         writeLog.push_back(log);
 
-        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
-                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");
+//        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
+//                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");
         lastWritePoint = now;
     }
 

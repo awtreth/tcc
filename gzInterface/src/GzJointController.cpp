@@ -320,5 +320,4 @@ bool GzJointController::sendCommand(std::vector<JointCommandPtr> cmd)
     }
 
     return false;
-
 }

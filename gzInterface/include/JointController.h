@@ -167,6 +167,8 @@ class AbsJointController {
      */
     virtual bool readJointStates() = 0;
 
+    //virtual
+
     virtual bool sendCommand(std::vector<JointCommandPtr> cmd) = 0;
 
 };

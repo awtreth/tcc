@@ -21,6 +21,8 @@ class JointCommand {
 
     const char* cmdID;
 
+    std::string jointName;
+
     public:
 
     JointCommand() {

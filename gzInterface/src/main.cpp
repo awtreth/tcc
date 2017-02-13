@@ -21,24 +21,33 @@
 
 ////#include <GzMotionController.h>
 
-#include <iostream>
-#include <string>
-#include <MapVec.h>
-#include <map>
-#include <JointCommand.h>
-#include <Pose.h>
-#include <Page.h>
-#include <PageSet.h>
-#include <DummyReadWriteSynchronizer.h>
+//#include <iostream>
+//#include <string>
+//#include <MapVec.h>
+//#include <map>
+//#include <JointCommand.h>
+//#include <Pose.h>
+//#include <Page.h>
+//#include <PageSet.h>
+//#include <DummyReadWriteSynchronizer.h>
 #include <unistd.h>
-#include <algorithm>
-#include <cmath>
+//#include <algorithm>
+//#include <cmath>
 #include <pthread.h>
-#include <sched.h>
-#include <sys/resource.h>
+//#include <sched.h>
+//#include <sys/resource.h>
 
-#include <AsyncLogger.h>
-#include <memory>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <cstdlib>
+#include <time.h>
+
+//#include <AsyncLomake-kpkg cleangger.h>
+//#include <memory>
+
+#include <sys/mman.h>
+#include <sched.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
@@ -53,105 +62,150 @@ int main(int _argc, char **_argv)
 //    getrlimit(RLIMIT_NICE,&lim);
 //    std::cout << lim.rlim_cur << " " << lim.rlim_max << std::endl;
 
-//    sched_param p;
-//    p.__sched_priority = 1;
+    std::cout << mlockall(MCL_FUTURE) << std::endl;
 
-//    std::cout << sched_setscheduler(getpid(),SCHED_RR,&p) << std::endl;
+    sched_param p;
+    p.__sched_priority = 51;
+
+    std::cout << pthread_setschedparam(pthread_self(),SCHED_RR,&p)<< std::endl;
+
+    long tempo = 250;//ms
+
+    std::chrono::steady_clock::time_point old = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point next = old + std::chrono::milliseconds(tempo);
+    std::chrono::steady_clock::time_point now;
+
+    timespec oldTs, nowTs, nextTs;
+
+    clock_gettime(CLOCK_MONOTONIC,&oldTs);
+
+    nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
+    nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
+
+    long i = 0;
+
+    while(++i){
+
+        clock_nanosleep(CLOCK_MONOTONIC,TIMER_ABSTIME,&nextTs,NULL);
+        clock_gettime(CLOCK_MONOTONIC,&nowTs);
+
+        auto diff = ((nowTs.tv_sec*1e9+nowTs.tv_nsec)-(oldTs.tv_sec*1e9+oldTs.tv_nsec))/1e6;
+
+        std::cout << diff << std::endl;
+        oldTs = nowTs;
+        nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
+        nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
+
+//        std::this_thread::sleep_until(next);
+//        now = std::chrono::steady_clock::now();
+//        std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now-old).count()/1000. << std::endl;
+//        old = now;
+//        next = now + std::chrono::milliseconds(tempo);
+
+    }
+
+    munlockall();
 
 
+    return 0;
 
+        //DummyReadWriteSynchronizer sync;
 
-//    return 0;
+//        sync.setReadPeriod((long)50e3);
+//        sync.setWritePeriod((long)50e3);
+//        sync.setReadWritePeriodRatio(0);
+//        sync.setReadWriteShift(0.5);
 
-        DummyReadWriteSynchronizer sync;
+        //sleep(500);
 
-        sync.setReadPeriod((long)100e3);
-        sync.setWritePeriod((long)100e3);
-        sync.setReadWritePeriodRatio(0);
-        sync.setReadWriteShift(0.5);
+//        sync.resumeLoop();
 
-        sync.resumeLoop();
+//        sleep(500);
 
-        sleep(10);
+//    //    sync.pauseLoop();
 
-    //    sync.pauseLoop();
+//        //sleep(3);
 
-        //sleep(3);
+//    //    sync.resumeLoop();
 
-    //    sync.resumeLoop();
+//        sync.close();
 
-        sync.close();
+//        for(SyncLog log : sync.readLog)
+//            std::cout << "READ " << log.ts << " "<< log.period <<" " << log.expected << std::endl;
 
-        sync.readLog.erase(sync.readLog.begin());
-        sync.readLog.erase(sync.readLog.begin());
-        sync.writeLog.erase(sync.writeLog.begin());
-        sync.writeLog.erase(sync.writeLog.begin());
+//        for(SyncLog log : sync.writeLog)
+//            std::cout << "WRITE " << log.ts << " "<< log.period <<" " << log.expected << std::endl;
 
-        double periodAvg = 0;
-        double devAvg = 0;
-        double errAvg = 0;
-        double tsDevAvg = 0;
+//        sync.readLog.erase(sync.readLog.begin());
+//        sync.readLog.erase(sync.readLog.begin());
+//        sync.writeLog.erase(sync.writeLog.begin());
+//        sync.writeLog.erase(sync.writeLog.begin());
 
-        for(SyncLog log : sync.readLog){
-            periodAvg += log.period/((double)sync.readLog.size());
-            devAvg += log.deviation/((double)sync.readLog.size());
-            errAvg += log.error/((double)sync.readLog.size());
-            tsDevAvg += log.tsDeviation/((double)sync.readLog.size());
-        }
+//        double periodAvg = 0;
+//        double devAvg = 0;
+//        double errAvg = 0;
+//        double tsDevAvg = 0;
 
-        std::cout << "READ AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
+//        for(SyncLog log : sync.readLog){
+//            periodAvg += log.period/((double)sync.readLog.size());
+//            devAvg += log.deviation/((double)sync.readLog.size());
+//            errAvg += log.error/((double)sync.readLog.size());
+//            tsDevAvg += log.tsDeviation/((double)sync.readLog.size());
+//        }
 
-        periodAvg = 0;
-        devAvg = 0;
-        errAvg = 0;
-        tsDevAvg = 0;
+//        std::cout << "READ AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
 
-        for(SyncLog log : sync.writeLog){
-            periodAvg += log.period/((double)sync.writeLog.size());
-            devAvg += log.deviation/((double)sync.writeLog.size());
-            errAvg += log.error/((double)sync.writeLog.size());
-            tsDevAvg += log.tsDeviation/((double)sync.writeLog.size());
-        }
+//        periodAvg = 0;
+//        devAvg = 0;
+//        errAvg = 0;
+//        tsDevAvg = 0;
 
-        std::cout << "WRITE AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
+//        for(SyncLog log : sync.writeLog){
+//            periodAvg += log.period/((double)sync.writeLog.size());
+//            devAvg += log.deviation/((double)sync.writeLog.size());
+//            errAvg += log.error/((double)sync.writeLog.size());
+//            tsDevAvg += log.tsDeviation/((double)sync.writeLog.size());
+//        }
 
-        double periodStd = 0;
-        double devStd = 0;
-        double errStd = 0;
-        double tsDevStd = 0;
+//        std::cout << "WRITE AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
 
-        for(SyncLog log : sync.readLog){
-            periodStd += pow(log.period-periodAvg,2);
-            devStd += pow(log.deviation-devAvg,2);
-            errStd += pow(log.error-errAvg,2);
-            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
-        }
+//        double periodStd = 0;
+//        double devStd = 0;
+//        double errStd = 0;
+//        double tsDevStd = 0;
 
-        periodStd = sqrt(periodStd/(sync.readLog.size()-1));
-        devStd = sqrt(devStd/(sync.readLog.size()-1));
-        errStd = sqrt(errStd/(sync.readLog.size()-1));
-        tsDevStd = sqrt(tsDevStd/(sync.readLog.size()-1));
+//        for(SyncLog log : sync.readLog){
+//            periodStd += pow(log.period-periodAvg,2);
+//            devStd += pow(log.deviation-devAvg,2);
+//            errStd += pow(log.error-errAvg,2);
+//            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
+//        }
 
-        std::cout << "READ STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
+//        periodStd = sqrt(periodStd/(sync.readLog.size()-1));
+//        devStd = sqrt(devStd/(sync.readLog.size()-1));
+//        errStd = sqrt(errStd/(sync.readLog.size()-1));
+//        tsDevStd = sqrt(tsDevStd/(sync.readLog.size()-1));
 
-        periodStd = 0;
-        devStd = 0;
-        errStd = 0;
-        tsDevStd = 0;
+//        std::cout << "READ STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
 
-        for(SyncLog log : sync.writeLog){
-            periodStd += pow(log.period-periodAvg,2);
-            devStd += pow(log.deviation-devAvg,2);
-            errStd += pow(log.error-errAvg,2);
-            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
-        }
+//        periodStd = 0;
+//        devStd = 0;
+//        errStd = 0;
+//        tsDevStd = 0;
 
-        periodStd = sqrt(periodStd/(sync.writeLog.size()-1));
-        devStd = sqrt(devStd/(sync.writeLog.size()-1));
-        errStd = sqrt(errStd/(sync.writeLog.size()-1));
-        tsDevStd = sqrt(tsDevStd/(sync.writeLog.size()-1));
+//        for(SyncLog log : sync.writeLog){
+//            periodStd += pow(log.period-periodAvg,2);
+//            devStd += pow(log.deviation-devAvg,2);
+//            errStd += pow(log.error-errAvg,2);
+//            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
+//        }
 
-        std::cout << "WRITE STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
+//        periodStd = sqrt(periodStd/(sync.writeLog.size()-1));
+//        devStd = sqrt(devStd/(sync.writeLog.size()-1));
+//        errStd = sqrt(errStd/(sync.writeLog.size()-1));
+//        tsDevStd = sqrt(tsDevStd/(sync.writeLog.size()-1));
+
+//        std::cout << "WRITE STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
 
     ////////////////////////////////////////////////////////
 
