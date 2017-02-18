@@ -164,10 +164,10 @@ namespace gazebo
 
             gazebo::physics::JointWrench wrench = joints.at(i)->GetForceTorque(0);
 
-            response->add_torque(wrench.body1Torque.GetSum());
+            response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
 
-            std::cout << std::to_string(wrench.body1Torque.x) + " " + std::to_string(wrench.body1Torque.y) + " " +std::to_string(wrench.body1Torque.z)<< std::endl;
-            std::cout << std::to_string(wrench.body2Torque.x) + " " + std::to_string(wrench.body2Torque.y) + " " +std::to_string(wrench.body2Torque.z)<< std::endl;
+            std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
+            std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
 
             std::cout << "GetTorque of Joint " << response->jointids(i) << ": "<< response->torque(i) << std::endl;
         }
