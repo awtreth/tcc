@@ -1,11 +1,11 @@
-#ifndef IJOINTPOSVELCONTROLLER_H
-#define IJOINTPOSVELCONTROLLER_H
+#ifndef JOINTCONTROLLER_H
+#define JOINTCONTROLLER_H
 
 #include <vector>
 #include <string>
 #include <Joint.h>
 #include <memory>
-
+#include <JointCommand.h>
 /**
  * @brief
  *
@@ -40,7 +40,7 @@ class IPosVelJointController {
      * @param std::vector<JointPosVelCommand>
      * @return bool
      */
-    virtual bool goPosVel(std::vector<JointPosVelCommand>) = 0;
+    virtual bool goPosVel(std::vector<PosVelWriteJointCommand>) = 0;
 
 };
 
@@ -81,7 +81,7 @@ class ITorqueJointController {
      * @param std::vector<JointTorqueCommand>
      * @return bool
      */
-    virtual bool goTorque(std::vector<JointTorqueCommand>) = 0;
+    virtual bool goTorque(std::vector<TorqueWriteJointCommand>) = 0;
 };
 
 typedef std::shared_ptr<ITorqueJointController> ITorqueJointControllerPtr;
@@ -169,8 +169,13 @@ class AbsJointController {
 
     //virtual
 
-    virtual bool sendCommand(std::vector<JointCommandPtr> cmd) = 0;
+    virtual std::vector<Joint> sendReadCommand(std::vector<ReadJointCommandPtr> cmd) = 0;
 
+    virtual bool sendWriteCommand(std::vector<WriteJointCommandPtr> cmd) = 0;
+
+    JointVec getJointVec() const{
+        return jointVec;
+    }
 };
 
 typedef std::shared_ptr<AbsJointController> JointControllerPtr;
@@ -336,8 +341,10 @@ class AbsPidJointController : public AbsJointController {
      */
     virtual bool readJointStates() = 0;
 
+    virtual std::vector<Joint> sendReadCommand(std::vector<ReadJointCommandPtr> cmd) = 0;
+
     // AbsJointController interface
-    virtual bool sendCommand(std::vector<JointCommandPtr> cmd) = 0;
+    virtual bool sendWriteCommand(std::vector<WriteJointCommandPtr> cmd) = 0;
 };
 
 

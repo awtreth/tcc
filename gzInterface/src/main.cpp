@@ -48,10 +48,19 @@
 
 #include <sys/mman.h>
 #include <sched.h>
+#include <JointCommand.h>
+#include <memory>
+#include <DummyMotionController.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
+    DummyMotionController cont;
+
+
+    return 0;
+
+    ///////////////////////////////////////////////////////
 
     //std::make_shared<std::ostream>();
 
@@ -62,52 +71,52 @@ int main(int _argc, char **_argv)
 //    getrlimit(RLIMIT_NICE,&lim);
 //    std::cout << lim.rlim_cur << " " << lim.rlim_max << std::endl;
 
-    std::cout << mlockall(MCL_FUTURE) << std::endl;
+//    std::cout << mlockall(MCL_FUTURE) << std::endl;
 
-    sched_param p;
-    p.__sched_priority = 51;
+//    sched_param p;
+//    p.__sched_priority = 51;
 
-    std::cout << pthread_setschedparam(pthread_self(),SCHED_RR,&p)<< std::endl;
+//    std::cout << pthread_setschedparam(pthread_self(),SCHED_RR,&p)<< std::endl;
 
-    long tempo = 250;//ms
+//    long tempo = 1;//ms
 
-    std::chrono::steady_clock::time_point old = std::chrono::steady_clock::now();
-    std::chrono::steady_clock::time_point next = old + std::chrono::milliseconds(tempo);
-    std::chrono::steady_clock::time_point now;
+//    std::chrono::steady_clock::time_point old = std::chrono::steady_clock::now();
+//    std::chrono::steady_clock::time_point next = old + std::chrono::milliseconds(tempo);
+//    std::chrono::steady_clock::time_point now;
 
-    timespec oldTs, nowTs, nextTs;
+//    timespec oldTs, nowTs, nextTs;
 
-    clock_gettime(CLOCK_MONOTONIC,&oldTs);
+//    clock_gettime(CLOCK_MONOTONIC,&oldTs);
 
-    nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
-    nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
+//    nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
+//    nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
 
-    long i = 0;
+//    long i = 0;
 
-    while(++i){
+//    while(++i){
 
-        clock_nanosleep(CLOCK_MONOTONIC,TIMER_ABSTIME,&nextTs,NULL);
-        clock_gettime(CLOCK_MONOTONIC,&nowTs);
+//        clock_nanosleep(CLOCK_MONOTONIC,TIMER_ABSTIME,&nextTs,NULL);
+//        clock_gettime(CLOCK_MONOTONIC,&nowTs);
 
-        auto diff = ((nowTs.tv_sec*1e9+nowTs.tv_nsec)-(oldTs.tv_sec*1e9+oldTs.tv_nsec))/1e6;
+//        auto diff = ((nowTs.tv_sec*1e9+nowTs.tv_nsec)-(oldTs.tv_sec*1e9+oldTs.tv_nsec))/1e6;
 
-        std::cout << diff << std::endl;
-        oldTs = nowTs;
-        nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
-        nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
+//        std::cout << diff << std::endl;
+//        oldTs = nowTs;
+//        nextTs.tv_sec = oldTs.tv_sec + (oldTs.tv_nsec + (long)(tempo*1e6))/(long)1e9;
+//        nextTs.tv_nsec = (oldTs.tv_nsec + (long)(tempo*1e6))%(long)1e9;
 
-//        std::this_thread::sleep_until(next);
-//        now = std::chrono::steady_clock::now();
-//        std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now-old).count()/1000. << std::endl;
-//        old = now;
-//        next = now + std::chrono::milliseconds(tempo);
+////        std::this_thread::sleep_until(next);
+////        now = std::chrono::steady_clock::now();
+////        std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now-old).count()/1000. << std::endl;
+////        old = now;
+////        next = now + std::chrono::milliseconds(tempo);
 
-    }
+//    }
 
-    munlockall();
+//    munlockall();
 
 
-    return 0;
+//    return 0;
 
         //DummyReadWriteSynchronizer sync;
 

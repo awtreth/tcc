@@ -1,7 +1,8 @@
 #include <PageSet.h>
 
-Pose PageSet::getCurrentPose() const
+Pose PageSet::getCurrentPose()
 {
+    hasCurrentPoseFlag = false;
     return currentPose;
 }
 
@@ -20,17 +21,22 @@ bool PageSet::resetTime()
 {
     currentPose = Pose();
 
-    bool status = false;
+    hasCurrentPoseFlag = false;
 
     for(Page& page : pages.getElements()){
         if(page.resetTime()){
             currentPose.append(page.currentPose());
-            status = true;
+            hasCurrentPoseFlag = true;
         }
 
     }
 
-    return status;
+    return hasCurrentPoseFlag;
+}
+
+bool PageSet::hasCurrentPose() const
+{
+    return hasCurrentPoseFlag;
 }
 
 Page& PageSet::getPage(const char* name)
@@ -60,17 +66,17 @@ bool PageSet::advanceTime(long tick)
 
     currentPose = Pose();
 
-    bool status = false;
+    hasCurrentPoseFlag = false;
 
     for(Page& page : pages.getElements()){
         if(page.advanceTime(tick)){
             currentPose.append(page.currentPose());
-            status = true;
+            hasCurrentPoseFlag = true;
         }
 
     }
 
-    return status;
+    return hasCurrentPoseFlag;
 }
 
 

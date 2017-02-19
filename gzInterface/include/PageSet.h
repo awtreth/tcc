@@ -11,9 +11,13 @@ class PageSet {
 
     MapVec<Page> pages;
 
+    bool hasCurrentPoseFlag = false;
+
     Pose currentPose;
 
     public:
+
+    bool hasCurrentPose() const;
 
     Page& getPage(const char* name);
 
@@ -25,7 +29,7 @@ class PageSet {
 
     bool intersectPages(Page otherPage);
 
-    Pose getCurrentPose() const;
+    Pose getCurrentPose();
 
     std::string toString();
 

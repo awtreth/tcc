@@ -6,127 +6,166 @@
 #include <map>
 #include <memory>
 
-/**
- * @brief
- *
- */
-class AbsJointCommand {
+///**
+// * @brief
+// *
+// */
+//class AbsJointCommand {
 
-    protected:
+//    protected:
 
-    double pos = 0; /**< TODO: describe */
-    double vel = 0; /**< TODO: describe */
-    double torque = 0; /**< TODO: describe */
+//    double pos = 0; /**< TODO: describe */
+//    double vel = 0; /**< TODO: describe */
+//    double torque = 0; /**< TODO: describe */
 
-    public:
+//    public:
 
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    virtual bool hasPosVel() = 0;
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    virtual bool hasPosVel(){ return false;}
 
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    virtual bool hasTorque() = 0;
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    virtual bool hasTorque(){ return false; }
 
-};
+//    virtual bool hasPosVelPid(){ return false; }
 
-typedef std::shared_ptr<AbsJointCommand> JointCommandPtr;
+//};
 
-
-/**
- * @brief
- *
- */
-class JointPosVelCommand: public AbsJointCommand {
-
-    public:
-
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    bool hasPosVel(){return true;}
-
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    bool hasTorque(){return false;}
+//typedef std::shared_ptr<AbsJointCommand> JointCommandPtr;
 
 
-    /**
-     * @brief
-     *
-     * @param _pos
-     * @param _vel
-     */
-    JointPosVelCommand(double _pos, double _vel) { pos = _pos; vel = _vel;}
+//class JointReadCommand: public AbsJointCommand {
+
+//    private:
+//    bool posVel = true;
+//    bool torque = true;
+//    bool pid = true;
+
+//    // AbsJointCommand interface
+
+//    public:
+
+//    JointReadCommand(){
+
+//    }
+
+//    JointReadCommand(bool _posVel, bool _torque, bool _pid){
+//        posVel = _posVel;
+//        torque = _torque;
+//        pid = _pid;
+//    }
+
+//    bool hasPosVel(){return posVel;}
+//    bool hasTorque(){return torque;}
+//    bool hasPosVelPid(){return pid;}
+
+//    void addPosVel(){posVel = true;}
+//    void rmPosVel(){posVel = false;}
+//    void addTorque(){torque = true;}
+//    void rmTorque(){torque = false;}
+//    void addPosVelPid(){pid = true;}
+//    void rmPosVelPid(){pid = false;}
+//};
+
+///**
+// * @brief
+// *
+// */
+//class JointPosVelCommand: public AbsJointCommand {
+
+//    public:
+
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    bool hasPosVel(){return true;}
+
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    bool hasTorque(){return false;}
+
+//    //bool hasPosVelPid(){return false;}
 
 
-    /**
-     * @brief
-     *
-     * @return double
-     */
-    double getPos(){return pos;}
-
-    /**
-     * @brief
-     *
-     * @return double
-     */
-    double getVel(){return vel;}
-};
+//    /**
+//     * @brief
+//     *
+//     * @param _pos
+//     * @param _vel
+//     */
+//    JointPosVelCommand(double _pos, double _vel) { pos = _pos; vel = _vel;}
 
 
+//    /**
+//     * @brief
+//     *
+//     * @return double
+//     */
+//    double getPos(){return pos;}
 
-/**
- * @brief
- *
- */
-class JointTorqueCommand: public AbsJointCommand {
-
-    public:
-
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    bool hasPosVel(){return false;}
-
-    /**
-     * @brief
-     *
-     * @return bool
-     */
-    bool hasTorque(){return true;}
+//    /**
+//     * @brief
+//     *
+//     * @return double
+//     */
+//    double getVel(){return vel;}
 
 
-    /**
-     * @brief
-     *
-     * @param _torque
-     */
-    JointTorqueCommand(double _torque){ torque = _torque;}
+//};
 
 
-    /**
-     * @brief
-     *
-     * @return double
-     */
-    double getTorque(){return torque;}
 
-};
+///**
+// * @brief
+// *
+// */
+//class JointTorqueCommand: public AbsJointCommand {
+
+//    public:
+
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    bool hasPosVel(){return false;}
+
+//    /**
+//     * @brief
+//     *
+//     * @return bool
+//     */
+//    bool hasTorque(){return true;}
+
+
+//    /**
+//     * @brief
+//     *
+//     * @param _torque
+//     */
+//    JointTorqueCommand(double _torque){ torque = _torque;}
+
+
+//    /**
+//     * @brief
+//     *
+//     * @return double
+//     */
+//    double getTorque(){return torque;}
+
+//};
 
 
 /**

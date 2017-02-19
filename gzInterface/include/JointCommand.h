@@ -35,36 +35,88 @@ class JointCommand {
     }
 
     virtual Type getType() const{return type;}
+
     virtual const char* getCmdID() const{ return cmdID; }
+
+    virtual bool hasPosVel(){ return false;}
+
+    virtual bool hasTorque(){ return false; }
+
+    virtual bool hasPosVelPid(){ return false; }
+
+    std::string getJointName() const{return jointName;}
+    void setJointName(const std::string &value){jointName = value;}
 };
 
-
+typedef std::shared_ptr<JointCommand> JointCommandPtr;//FIXME: JointCommandPtr
 
 class ReadJointCommand : public JointCommand {
 
+    private:
+    bool posVel = true;
+    bool torque = true;
+    bool pid = false;
+
     public:
+
+    ReadJointCommand(){
+        type = JointCommand::Type::READ;
+    }
+
+    ReadJointCommand(std::string _jointName){
+        jointName = _jointName;
+    }
 
     ReadJointCommand(const char* _cmdID){
         type = JointCommand::Type::READ;
         cmdID = _cmdID;
     }
 
+    ReadJointCommand(const char* _cmdID, bool _posVel, bool _torque, bool _pid){
+        type = JointCommand::Type::READ;
+        cmdID = _cmdID;
+
+        posVel = _posVel;
+        torque = _torque;
+        pid = _pid;
+    }
+
+    bool hasPosVel(){return posVel;}
+    bool hasTorque(){return torque;}
+    bool hasPosVelPid(){return pid;}
+
+    void addPosVel(){posVel = true;}
+    void rmPosVel(){posVel = false;}
+    void addTorque(){torque = true;}
+    void rmTorque(){torque = false;}
+    void addPosVelPid(){pid = true;}
+    void rmPosVelPid(){pid = false;}
 
 };
 
-#define READ_JOINT_STATE_CMD_ID "READ_JOINT_STATE_COMMAND"
+typedef std::shared_ptr<ReadJointCommand> ReadJointCommandPtr;
 
-const ReadJointCommand readJointStateCommand(READ_JOINT_STATE_CMD_ID);
+#define READ_JOINT_STATE_CMD_ID "READ_JOINT_STATE_COMMAND"
+#define READ_PSOVEL_PID_STATE_CMD_ID "READ_POSVEL_PID_STATE_COMMAND"
+
+const ReadJointCommand readPosVelTorqueCommand(READ_JOINT_STATE_CMD_ID);
+const ReadJointCommand readPosVelPidCommand(READ_PSOVEL_PID_STATE_CMD_ID, false, false, true);
 
 
 class WriteJointCommand : public JointCommand {
 
     public:
 
+    const char* CMD_ID = "WRITE_JOINT_COMMAND";
+
     WriteJointCommand(){
         type = JointCommand::Type::WRITE;
+        cmdID = CMD_ID;
     }
 };
+
+typedef std::shared_ptr<WriteJointCommand> WriteJointCommandPtr;
+
 
 class PosVelWriteJointCommand : public WriteJointCommand {
 
@@ -75,13 +127,13 @@ class PosVelWriteJointCommand : public WriteJointCommand {
 
     public:
 
-    static const char * CMD_ID;
+    const char* CMD_ID = "POSVEL_WRITE_JOINT_COMMAND";
 
     PosVelWriteJointCommand(){
         cmdID = CMD_ID;
     }
 
-    PosVelWriteJointCommand(double _pos, double _vel){
+    PosVelWriteJointCommand(std::string jointName, double _pos, double _vel){
         cmdID = CMD_ID;
         pos = _pos;
         vel = _vel;
@@ -93,9 +145,10 @@ class PosVelWriteJointCommand : public WriteJointCommand {
     double getVel() const{return vel;}
     void setVel(double value){vel = value;}
 
+    bool hasPosVel(){return true;}
 };
 
-const char* PosVelWriteJointCommand::CMD_ID = "POSVEL_WRITE_JOINT_COMMAND";
+typedef std::shared_ptr<PosVelWriteJointCommand> PosVelWriteJointCommandPtr;
 
 
 class TorqueWriteJointCommand : public WriteJointCommand {
@@ -106,7 +159,7 @@ class TorqueWriteJointCommand : public WriteJointCommand {
 
     public:
 
-    static const char * CMD_ID;
+    const char * CMD_ID = "TORQUE_WRITE_JOINT_COMMAND";
 
     TorqueWriteJointCommand(double _torque){
         cmdID = CMD_ID;
@@ -117,9 +170,10 @@ class TorqueWriteJointCommand : public WriteJointCommand {
 
     void setTorque(double value){torque = value;}
 
+    bool hasTorque(){return true;}
 };
 
-const char* TorqueWriteJointCommand::CMD_ID = "TORQUE_WRITE_JOINT_COMMAND";
+typedef std::shared_ptr<TorqueWriteJointCommand> TorqueWriteJointCommandPtr;
+
 
 #endif
-

@@ -29,13 +29,13 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
     public:
     bool goTorque(double torque, int jointID) override;
     bool goTorque(double torque, std::__cxx11::string jointName) override;
-    bool goTorque(std::vector<JointTorqueCommand>) override;
+    bool goTorque(std::vector<TorqueWriteJointCommand>) override;
 
     // IJointPosVelController interface
     public:
     bool goPosVel(double pos, double vel, int jointID) override;//testado
     bool goPosVel(double pos, double vel, std::__cxx11::string jointName) override;//testado
-    bool goPosVel(std::vector<JointPosVelCommand>) override;//testado
+    bool goPosVel(std::vector<PosVelWriteJointCommand>) override;//testado
 
     // AbsJointController interface
     public:
@@ -57,8 +57,8 @@ class GzJointController : public AbsPidJointController, public IPosVelJointContr
     virtual bool setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids);//testado
 
     // AbsJointController interface
-    virtual bool sendCommand(std::vector<JointCommandPtr> cmd);
-
+    virtual bool sendWriteCommand(std::vector<WriteJointCommandPtr> cmd);
+    std::vector<Joint> sendReadCommand(std::vector<ReadJointCommandPtr> cmd);
 };
 
 #endif

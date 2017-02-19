@@ -31,10 +31,11 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 #add_library(gz_joint_controller SHARED GzJointController.cpp)
 #add_library(abs_motion_controller SHARED AbsMotionController.cpp)
 
-add_library(gz_interface SHARED ${PROTO_SRCS} GzSimplePlugin.cpp GzJointController.cpp AbsReadWriteSynchronizer.cpp Pose.cpp Page.cpp PageSet.cpp AsyncLogger.cpp)
+add_library(gz_interface SHARED ${PROTO_SRCS} GzSimplePlugin.cpp GzJointController.cpp AbsReadWriteSynchronizer.cpp Pose.cpp Page.cpp PageSet.cpp AsyncLogger.cpp MotionController.cpp)
 
 
 add_executable(main main.cpp)
+#add_executable(testeDummySynchronizer testeDummySynchronizer.cpp)
 
 #target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
 #target_link_libraries(gz_simple_plugin gz_interface_msgs ${GAZEBO_LIBRARIES})

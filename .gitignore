@@ -8,6 +8,7 @@ PropostaTCC*
 progressoTCC*
 esquemaPageSet.xlsx
 testes/
+build/
 
 # Compiled Object files
 *.slo

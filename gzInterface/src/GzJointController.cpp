@@ -60,7 +60,7 @@ bool GzJointController::goPosVel(double pos, double vel, std::__cxx11::string jo
 
 }
 
-bool GzJointController::goPosVel(std::vector<JointPosVelCommand> cmd) {
+bool GzJointController::goPosVel(std::vector<PosVelWriteJointCommand> cmd) {
 
     gz_msgs::GzWriteRequest msg;
 
@@ -96,7 +96,7 @@ bool GzJointController::goTorque(double torque, std::__cxx11::string jointName) 
 
 }
 
-bool GzJointController::goTorque(std::vector<JointTorqueCommand> cmd) {
+bool GzJointController::goTorque(std::vector<TorqueWriteJointCommand> cmd) {
 
     gz_msgs::GzWriteRequest msg;
 
@@ -289,17 +289,17 @@ bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector
     return false;
 }
 
-bool GzJointController::sendCommand(std::vector<JointCommandPtr> cmd)
+bool GzJointController::sendWriteCommand(std::vector<WriteJointCommandPtr> cmd)
 {
 
 
     if(cmd[0]->hasPosVel()) {
 
-        std::vector<JointPosVelCommand> posVelCmd;
+        std::vector<PosVelWriteJointCommand> posVelCmd;
 
-        for(JointCommandPtr cmdPtr : cmd) {
+        for(WriteJointCommandPtr cmdPtr : cmd) {
 
-            posVelCmd.push_back(static_cast<JointPosVelCommand&>(*cmdPtr));
+            posVelCmd.push_back(static_cast<PosVelWriteJointCommand&>(*cmdPtr));
         }
 
         this->goPosVel(posVelCmd);
@@ -308,10 +308,10 @@ bool GzJointController::sendCommand(std::vector<JointCommandPtr> cmd)
 
     }else if (cmd[0]->hasTorque()) {
 
-        std::vector<JointTorqueCommand> torqueCmd;
+        std::vector<TorqueWriteJointCommand> torqueCmd;
 
-        for(JointCommandPtr cmdPtr : cmd)
-            torqueCmd.push_back(static_cast<JointTorqueCommand&>(*cmdPtr));
+        for(WriteJointCommandPtr cmdPtr : cmd)
+            torqueCmd.push_back(static_cast<TorqueWriteJointCommand&>(*cmdPtr));
 
 
         this->goTorque(torqueCmd);
@@ -320,4 +320,9 @@ bool GzJointController::sendCommand(std::vector<JointCommandPtr> cmd)
     }
 
     return false;
+}
+
+std::vector<Joint> GzJointController::sendReadCommand(std::vector<ReadJointCommandPtr> cmd)
+{
+    return std::vector<Joint>();
 }

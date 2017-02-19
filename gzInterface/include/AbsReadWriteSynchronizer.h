@@ -3,6 +3,7 @@
 
 #include <JointController.h>
 #include <Joint.h>
+#include <JointCommand.h>
 #include <chrono>
 #include <thread>
 #include <mutex>              // std::mutex, std::unique_lock
@@ -16,13 +17,12 @@ class AbsReadWriteSynchronizer {
 
     private:
 
-    //JointControllerPtr jointController ;
 
     std::thread mainThread;
 
     pthread_t mainPThread;
 
-    std::chrono::microseconds writePeriod;//TODO: colocar valor padrão
+    std::chrono::microseconds writePeriod;//por padrão: 50ms
 
     std::chrono::microseconds readPeriod;
 
@@ -35,6 +35,7 @@ class AbsReadWriteSynchronizer {
     steady_clock::time_point nextReadTime;
 
     steady_clock::time_point nextWriteTime;
+
 
     timespec nextReadTimeTs;
 
@@ -63,21 +64,21 @@ class AbsReadWriteSynchronizer {
 
     steady_clock::time_point getNextWriteTime() const;
 
-    virtual void onRead()=0;
+    virtual void onRead(){}
 
     virtual void read()=0;
 
-    virtual void afterRead()=0;
+    virtual void afterRead(){}
 
-    virtual void onWrite()=0;
+    virtual void onWrite(){}
 
     virtual void write()=0;
 
-    virtual void afterWrite()=0;
+    virtual void afterWrite(){}
 
-    virtual void onReadMiss()=0;
+    virtual void onReadMiss(){}
 
-    virtual void onWriteMiss()=0;
+    virtual void onWriteMiss(){}
 
     void startIntervention();
 

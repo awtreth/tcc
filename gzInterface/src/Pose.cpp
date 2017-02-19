@@ -94,6 +94,17 @@ std::__cxx11::string Pose::toString()
     return str;
 }
 
+std::vector<PosVelWriteJointCommand> Pose::toJointCommand()
+{
+    std::vector<PosVelWriteJointCommand> vec = std::vector<PosVelWriteJointCommand>();
+
+    for(PosVel posVel : values.getElements())
+        vec.push_back(PosVelWriteJointCommand(posVel.jointName,posVel.pos,posVel.vel));
+
+    return vec;
+}
+
+
 void Pose::setTimeToNext(long value)
 {
     //TODO: throw exception when value <= 0

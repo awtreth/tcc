@@ -5,6 +5,7 @@
 
 #include <MapVec.h>
 #include <string>
+#include <JointCommand.h>
 
 class PosVel {
 
@@ -108,6 +109,8 @@ class Pose : public IJsonObject{
     bool append(Pose otherPose);
 
     std::string toString();
+
+    std::vector<PosVelWriteJointCommand> toJointCommand();
 };
 
 
