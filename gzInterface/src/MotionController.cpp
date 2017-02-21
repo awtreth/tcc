@@ -6,6 +6,11 @@ std::queue<PageSet> MotionController::getPageSetQueue() const
     return pageSetQueue;
 }
 
+bool MotionController::isMoving()
+{
+    return !this->isPaused();
+}
+
 void MotionController::onWrite()
 {
     if(currentPageSet.hasCurrentPose())

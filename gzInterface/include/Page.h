@@ -74,12 +74,14 @@ class Page : public IJsonObject{
     long roundPoseTimes(long resolution);
     long computePageDuration();
 
-    //Time Flow Methods
+    //Time Flow Methods (TODO: transferir para outra classe)
     bool advanceTime(long tick);
 
     bool resetTime();
 
     int advancePose();
+
+    bool hasFinished();
 
     Pose currentPose() const;
 
@@ -90,6 +92,7 @@ class Page : public IJsonObject{
     bool intersectPoses(Page otherPage);
 
     std::string toString();
+
 
 };
 

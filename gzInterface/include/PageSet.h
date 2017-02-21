@@ -23,7 +23,9 @@ class PageSet {
 
     bool setPage(Page& otherPage);
 
-    bool advanceTime(long tick);
+    bool advanceTime(long tick);//TODO: transferir para outra classe
+
+    bool hasFinished();//TODO: transferir para otura classe
 
     MapVec<Page> getPages() const;
 
@@ -33,7 +35,7 @@ class PageSet {
 
     std::string toString();
 
-    bool resetTime();
+    bool resetTime();//TODO: transferir para outra classe
 
 };
 

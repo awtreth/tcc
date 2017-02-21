@@ -69,14 +69,24 @@ bool PageSet::advanceTime(long tick)
     hasCurrentPoseFlag = false;
 
     for(Page& page : pages.getElements()){
-        if(page.advanceTime(tick)){
-            currentPose.append(page.currentPose());
-            hasCurrentPoseFlag = true;
+        if(!page.hasFinished()){
+            if(page.advanceTime(tick)){
+                currentPose.append(page.currentPose());
+                hasCurrentPoseFlag = true;
+            }
         }
-
     }
 
     return hasCurrentPoseFlag;
+}
+
+bool PageSet::hasFinished()
+{
+    for(auto page : pages.getElements()){
+        if(!page.hasFinished())
+            return false;
+    }
+    return true;
 }
 
 

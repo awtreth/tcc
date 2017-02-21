@@ -67,6 +67,11 @@ bool Page::resetTime()
 
 }
 
+bool Page::hasFinished()
+{
+    return (numberOfLoops>0 && loopCount>=numberOfLoops);
+}
+
 Pose Page::currentPose() const
 {
     return poses.at(currentPoseId);
