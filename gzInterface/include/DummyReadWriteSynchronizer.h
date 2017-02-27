@@ -67,10 +67,9 @@ class DummyReadWriteSynchronizer : public AbsReadWriteSynchronizer {
         log.expected = std::chrono::duration_cast<std::chrono::microseconds>(getNextReadTime().time_since_epoch()).count();
 
 
-        readLog.push_back(log);
+        //readLog.push_back(log);
 
-//        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
-//                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");
+        std::cout << "READ," + std::to_string(log.ts) + "," + std::to_string(log.period) + "," + std::to_string(log.expected) << std::endl;
 
         lastReadPoint = now;
     }
@@ -99,7 +98,8 @@ class DummyReadWriteSynchronizer : public AbsReadWriteSynchronizer {
         log.expected = std::chrono::duration_cast<std::chrono::microseconds>(getNextWriteTime().time_since_epoch()).count();
 
 
-        writeLog.push_back(log);
+        //writeLog.push_back(log);
+        std::cout << "WRITE," + std::to_string(log.ts) + "," + std::to_string(log.period) + "," + std::to_string(log.expected) << std::endl;
 
 //        logger.write("read: " + std::to_string(log.period) + " " + std::to_string(log.tsDeviation)
 //                      + " " + std::to_string(log.deviation)  + " " + std::to_string(log.error*100) + "%");

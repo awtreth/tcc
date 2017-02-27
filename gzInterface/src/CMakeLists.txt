@@ -31,7 +31,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 #add_library(gz_joint_controller SHARED GzJointController.cpp)
 #add_library(abs_motion_controller SHARED AbsMotionController.cpp)
 
-add_library(gz_interface SHARED ${PROTO_SRCS} GzSimplePlugin.cpp GzJointController.cpp AbsReadWriteSynchronizer.cpp Pose.cpp Page.cpp PageSet.cpp AsyncLogger.cpp MotionController.cpp)
+add_library(gz_interface SHARED ${PROTO_SRCS} GzSimplePlugin.cpp GzJointController.cpp Pose.cpp Page.cpp PageSet.cpp AsyncLogger.cpp MotionController.cpp)
 
 
 add_executable(main main.cpp)

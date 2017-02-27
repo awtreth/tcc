@@ -1,34 +1,97 @@
-#ifndef MOTION_CONTROLLER_H
-#define MOTION_CONTROLLER_H
+#ifndef MotionController_H
+#define MotionController_H
 
 #include <JointController.h>
-#include <AbsReadWriteSynchronizer.h>
-#include <PageSet.h>
-#include <JointCommand.h>
 #include <Joint.h>
+#include <JointCommand.h>
+#include <chrono>
+#include <thread>
+#include <mutex>              // std::mutex, std::unique_lock
+#include <condition_variable> // std::condition_variable
+#include <pthread.h>
+#include <time.h>
 #include <queue>
-#include <mutex>
+#include <PageSet.h>
+#include <Page.h>
+#include <Pose.h>
 
-class MotionController : public AbsReadWriteSynchronizer{
+using namespace std::chrono;
+
+class MotionController {
 
     private:
 
-    std::vector<WriteJointCommandPtr> wCmd;
-    std::vector<ReadJointCommandPtr> rCmd;
-    std::vector<Joint> joints;
 
-    // AbsReadWriteSynchronizer interface
-    void onWrite();
-    void write();
-    //void afterWrite();
+    std::thread mainThread;
 
-    void onRead();
-    void read();
-    void afterRead();
+    pthread_t mainPThread;
+
+    std::chrono::microseconds writePeriod;//por padrão: 50ms
+
+    std::chrono::microseconds readPeriod;
+
+    int readWritePeriodRatio = 1;
+
+    double readWriteShift = 0.5;
+
+    std::chrono::microseconds shiftDuration;
+
+    steady_clock::time_point nextReadTime;
+
+    steady_clock::time_point nextWriteTime;
+
+
+    timespec nextReadTimeTs;
+
+    timespec nextWriteTimeTs;
+
+
+    bool isPaused = true;
+
+    int requestCount = 0;
+
+    std::mutex pauseMtx;
+
+    std::mutex nextTimeMtx;
+
+    std::condition_variable pauseCv;
+
+    void updateShiftPeriod();
+
+    bool isClosed = false;
+
+    static void* loop(void*);
+
+    void initThread();
 
     protected:
 
+    steady_clock::time_point getNextReadTime() const;
+
+    steady_clock::time_point getNextWriteTime() const;
+
+//    virtual void onRead(){}
+
+//    virtual void read()=0;
+
+//    virtual void afterRead(){}
+
+//    virtual void onWrite(){}
+
+//    virtual void write()=0;
+
+//    virtual void afterWrite(){}
+
+//    virtual void onReadMiss(){}
+
+//    virtual void onWriteMiss(){}
+
+    void startIntervention();
+
+    void stopIntervention();
+
     JointControllerPtr jointController;
+    //std::vector<Joint> joints;
 
     PageSet currentPageSet;
     std::mutex currentPageSetMtx;
@@ -36,20 +99,25 @@ class MotionController : public AbsReadWriteSynchronizer{
     std::queue<PageSet> pageSetQueue;
     std::mutex pageSetQueueMtx;
 
-
     virtual std::vector<WriteJointCommandPtr> onWriteCmd(Pose currentPose);
     virtual void writeCmd(std::vector<WriteJointCommandPtr> cmd);
     virtual std::vector<ReadJointCommandPtr> onReadCmd();
     virtual std::vector<Joint> readCmd(std::vector<ReadJointCommandPtr> cmd);
     virtual void afterRead(std::vector<Joint> updatedJoints);
 
-    public:
+    void resumeLoop(long readWaitTime = 0);
 
+    void pauseLoop();
+
+    void close();
+
+    public:
 
     MotionController();
 
     MotionController(JointControllerPtr _jointController);//10ms
 
+    //Funcionalidades de controle de movimento
     PageSet getCurrentPageSet() const;
 
     std::queue<PageSet> getPageSetQueue() const;
@@ -70,6 +138,15 @@ class MotionController : public AbsReadWriteSynchronizer{
 
     bool stopMotion(bool waitPageEnd = true);
 
+    //Funcionalidades Básica de controle de loop
+    unsigned int getWritePeriod() const;
+    void setWritePeriod(unsigned int value);
+    unsigned int getReadPeriod() const;
+    void setReadPeriod(unsigned int value);
+    int getReadWritePeriodRatio() const;
+    void setReadWritePeriodRatio(int value);
+    double getReadWriteShift() const;
+    void setReadWriteShift(double value);
 
 };
 

@@ -176,4 +176,8 @@ class TorqueWriteJointCommand : public WriteJointCommand {
 typedef std::shared_ptr<TorqueWriteJointCommand> TorqueWriteJointCommandPtr;
 
 
+class PidWriteJointCommand : public WriteJointCommand {
+
+};
+
 #endif

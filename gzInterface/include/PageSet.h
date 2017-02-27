@@ -37,6 +37,8 @@ class PageSet {
 
     bool resetTime();//TODO: transferir para outra classe
 
+
+
 };
 
 

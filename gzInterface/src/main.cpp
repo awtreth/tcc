@@ -50,15 +50,12 @@
 #include <sched.h>
 #include <JointCommand.h>
 #include <memory>
-#include <DummyMotionController.h>
+//#include <DummyMotionController.h>
+//#include <DummyReadWriteSynchronizer.h>
 
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
-    DummyMotionController cont;
-
-
-    return 0;
 
     ///////////////////////////////////////////////////////
 
@@ -118,103 +115,26 @@ int main(int _argc, char **_argv)
 
 //    return 0;
 
-        //DummyReadWriteSynchronizer sync;
+//        mlockall(MCL_FUTURE);
 
-//        sync.setReadPeriod((long)50e3);
-//        sync.setWritePeriod((long)50e3);
-//        sync.setReadWritePeriodRatio(0);
+//        DummyReadWriteSynchronizer sync;
+
+//        long period = (long)10e3;
+
+//        sync.setReadPeriod(period);
+//        sync.setWritePeriod(period);
+//        sync.setReadWritePeriodRatio(1);
 //        sync.setReadWriteShift(0.5);
-
-        //sleep(500);
 
 //        sync.resumeLoop();
 
-//        sleep(500);
-
-//    //    sync.pauseLoop();
-
-//        //sleep(3);
-
-//    //    sync.resumeLoop();
+//        sleep(60);
 
 //        sync.close();
 
-//        for(SyncLog log : sync.readLog)
-//            std::cout << "READ " << log.ts << " "<< log.period <<" " << log.expected << std::endl;
+//        munlockall();
 
-//        for(SyncLog log : sync.writeLog)
-//            std::cout << "WRITE " << log.ts << " "<< log.period <<" " << log.expected << std::endl;
-
-//        sync.readLog.erase(sync.readLog.begin());
-//        sync.readLog.erase(sync.readLog.begin());
-//        sync.writeLog.erase(sync.writeLog.begin());
-//        sync.writeLog.erase(sync.writeLog.begin());
-
-//        double periodAvg = 0;
-//        double devAvg = 0;
-//        double errAvg = 0;
-//        double tsDevAvg = 0;
-
-//        for(SyncLog log : sync.readLog){
-//            periodAvg += log.period/((double)sync.readLog.size());
-//            devAvg += log.deviation/((double)sync.readLog.size());
-//            errAvg += log.error/((double)sync.readLog.size());
-//            tsDevAvg += log.tsDeviation/((double)sync.readLog.size());
-//        }
-
-//        std::cout << "READ AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
-
-//        periodAvg = 0;
-//        devAvg = 0;
-//        errAvg = 0;
-//        tsDevAvg = 0;
-
-//        for(SyncLog log : sync.writeLog){
-//            periodAvg += log.period/((double)sync.writeLog.size());
-//            devAvg += log.deviation/((double)sync.writeLog.size());
-//            errAvg += log.error/((double)sync.writeLog.size());
-//            tsDevAvg += log.tsDeviation/((double)sync.writeLog.size());
-//        }
-
-//        std::cout << "WRITE AVG: " << periodAvg << " "<< tsDevAvg <<" " << devAvg << " " << errAvg*100 << "%\n";
-
-//        double periodStd = 0;
-//        double devStd = 0;
-//        double errStd = 0;
-//        double tsDevStd = 0;
-
-//        for(SyncLog log : sync.readLog){
-//            periodStd += pow(log.period-periodAvg,2);
-//            devStd += pow(log.deviation-devAvg,2);
-//            errStd += pow(log.error-errAvg,2);
-//            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
-//        }
-
-//        periodStd = sqrt(periodStd/(sync.readLog.size()-1));
-//        devStd = sqrt(devStd/(sync.readLog.size()-1));
-//        errStd = sqrt(errStd/(sync.readLog.size()-1));
-//        tsDevStd = sqrt(tsDevStd/(sync.readLog.size()-1));
-
-//        std::cout << "READ STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
-
-//        periodStd = 0;
-//        devStd = 0;
-//        errStd = 0;
-//        tsDevStd = 0;
-
-//        for(SyncLog log : sync.writeLog){
-//            periodStd += pow(log.period-periodAvg,2);
-//            devStd += pow(log.deviation-devAvg,2);
-//            errStd += pow(log.error-errAvg,2);
-//            tsDevStd += pow(log.tsDeviation-tsDevAvg,2);
-//        }
-
-//        periodStd = sqrt(periodStd/(sync.writeLog.size()-1));
-//        devStd = sqrt(devStd/(sync.writeLog.size()-1));
-//        errStd = sqrt(errStd/(sync.writeLog.size()-1));
-//        tsDevStd = sqrt(tsDevStd/(sync.writeLog.size()-1));
-
-//        std::cout << "WRITE STD: " << periodStd << " "<< tsDevStd <<" " << devStd << " " << errStd*100 << "%\n";
+        return 0;
 
     ////////////////////////////////////////////////////////
 
