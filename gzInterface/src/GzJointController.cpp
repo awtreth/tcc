@@ -292,37 +292,59 @@ bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector
 bool GzJointController::sendWriteCommand(std::vector<WriteJointCommandPtr> cmd)
 {
 
+    if(cmd.size()>0){
+        if(cmd[0]->hasPosVel()) {
 
-    if(cmd[0]->hasPosVel()) {
+            std::vector<PosVelWriteJointCommand> posVelCmd;
 
-        std::vector<PosVelWriteJointCommand> posVelCmd;
+            for(WriteJointCommandPtr cmdPtr : cmd) {
 
-        for(WriteJointCommandPtr cmdPtr : cmd) {
+                posVelCmd.push_back(static_cast<PosVelWriteJointCommand&>(*cmdPtr));
+            }
 
-            posVelCmd.push_back(static_cast<PosVelWriteJointCommand&>(*cmdPtr));
+            this->goPosVel(posVelCmd);
+
+            return true;
+
+        }else if (cmd[0]->hasTorque()) {
+
+            std::vector<TorqueWriteJointCommand> torqueCmd;
+
+            for(WriteJointCommandPtr cmdPtr : cmd)
+                torqueCmd.push_back(static_cast<TorqueWriteJointCommand&>(*cmdPtr));
+
+            this->goTorque(torqueCmd);
+
+            return true;
+        }else if(cmd[0]->hasPosVelPid()){
+            std::vector<PidWriteJointCommand> pidCmd;
+
+            for(WriteJointCommandPtr cmdPtr : cmd)
+                pidCmd.push_back(static_cast<PidWriteJointCommand&>(*cmdPtr));
+
+            //TODO: send PID WriteCommand
+            //this->setPosVelPid()
         }
-
-        this->goPosVel(posVelCmd);
-
-        return true;
-
-    }else if (cmd[0]->hasTorque()) {
-
-        std::vector<TorqueWriteJointCommand> torqueCmd;
-
-        for(WriteJointCommandPtr cmdPtr : cmd)
-            torqueCmd.push_back(static_cast<TorqueWriteJointCommand&>(*cmdPtr));
-
-
-        this->goTorque(torqueCmd);
-
-        return true;
     }
-
     return false;
 }
 
 std::vector<Joint> GzJointController::sendReadCommand(std::vector<ReadJointCommandPtr> cmd)
 {
+    //FIXME: colocar genérico quando aos parâmetros de leitura (usar parâmetros booleanos)
+
+    gz_msgs::GzReadRequest msg;
+
+    msg.set_returntopic(sub->GetTopic());
+
+    msg.set_requestitem(msg.POS_VEL_TORQUE);
+
+    for(unsigned int i = 0; i < this->jointVec.size(); i++)
+        msg.add_jointids(i);
+
+    readPub->Publish(msg, false);
+
+    //return true;
+
     return std::vector<Joint>();
 }

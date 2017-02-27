@@ -143,25 +143,25 @@ int main(int _argc, char **_argv)
 
         p11.addPosVel(PosVel(110,111,"motor0"));
         p11.addPosVel(PosVel(112,113,"motor1"));
-        p11.setTimeToNext(200e3);
+        p11.setTimeToNext(30e3);
 
         p12.addPosVel(PosVel(120,121,"motor0"));
         p12.addPosVel(PosVel(122,123,"motor1"));
-        p12.setTimeToNext(200e3);
+        p12.setTimeToNext(30e3);
 
 
         p13.addPosVel(PosVel(132,133,"motor0"));
         p13.addPosVel(PosVel(132,133,"motor1"));
-        p13.setTimeToNext(200e3);
+        p13.setTimeToNext(30e3);
 
 
         p21.addPosVel(PosVel(210,211,"motor2"));
         p21.addPosVel(PosVel(212,213,"motor3"));
-        p21.setTimeToNext(300e3);
+        p21.setTimeToNext(30e3);
 
         p22.addPosVel(PosVel(222,223,"motor2"));
         p22.addPosVel(PosVel(222,223,"motor3"));
-        p22.setTimeToNext(500e3);
+        p22.setTimeToNext(30e3);
 
         page1.addPose(p11);
         page1.addPose(p12);
@@ -170,7 +170,7 @@ int main(int _argc, char **_argv)
         page1.setModelName("Model1");
         page1.setMotionName("Motion1");
         page1.setTimesByTimeToNext();
-        page1.setNumberOfLoops(2);
+        //page1.setNumberOfLoops(2);
 
         page2.addPose(p21);
         page2.addPose(p22);
@@ -178,25 +178,31 @@ int main(int _argc, char **_argv)
         page2.setModelName("Model2");
         page2.setMotionName("Motion2");
         page2.setTimesByTimeToNext();
-        page2.setNumberOfLoops(2);
+        //page2.setNumberOfLoops(2);
 
-        PageSet pset;
+        PageSet pset1,pset2;
 
-        pset.setPage(page1);
-        pset.setPage(page2);
+        pset1.setPage(page1);
+        pset2.setPage(page2);
 
-        DummyMotionController cont;
-        cont.setReadPeriod(100e3);
-        cont.setWritePeriod(100e3);
+        DummyMotionController cont1, cont2;
 
-        std::cout << cont.loadPageSet(pset) << std::endl;
-        std::cout << cont.startMotion() << std::endl;
-        std::cout << pset.getCurrentPose().getTimestamp() << std::endl;
+        cont1.setReadPeriod(30e3);
+        cont1.setWritePeriod(30e3);
+
+        cont2.setReadPeriod(30e3);
+        cont2.setWritePeriod(30e3);
+
+        cont1.loadPageSet(pset1);
+        cont2.loadPageSet(pset2);
+
+        cont1.startMotion();
+        cont2.startMotion();
 
         sleep(10);
 
-        cont.close();
-
+        cont1.close();
+        cont2.close();
         return 0;
 
 //        std::cout << pset.toString() << std::endl;

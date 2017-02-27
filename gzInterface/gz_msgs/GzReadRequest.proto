@@ -19,4 +19,9 @@ message GzReadRequest {
 
     repeated int32 jointIds = 3 [packed = true]; //Lista de IDs
 
+	optional bool pos = 4;
+	optional bool vel = 5;
+	optional bool torque = 6;
+	optional bool posPid = 7;
+	optional bool velPid = 8;
 }

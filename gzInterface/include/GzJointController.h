@@ -6,6 +6,8 @@
 #include <gazebo/transport/transport.hh>
 #include <GzReadResponse.pb.h>
 #include <memory>
+#include <mutex>
+#include <condition_variable>
 
 class GzJointController : public AbsPidJointController, public IPosVelJointController, public ITorqueJointController {
 
