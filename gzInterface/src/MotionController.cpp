@@ -262,16 +262,19 @@ void* MotionController::loop(void* param)
 
         }else {
 
-            std::vector<WriteJointCommandPtr> wCmd;
 
-            if(sync->currentPageSet.hasCurrentPose())
+            if(sync->currentPageSet.hasCurrentPose()){
+
+                std::vector<WriteJointCommandPtr> wCmd;
+
                 wCmd = sync->onWriteCmd(sync->currentPageSet.getCurrentPose());
 
+                std::this_thread::sleep_until(sync->nextWriteTime);
 
-            std::this_thread::sleep_until(sync->nextWriteTime);
+                sync->writeCmd(wCmd);
+                //            clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &sync->nextWriteTimeTs, NULL);
 
-            sync->writeCmd(wCmd);
-            //            clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &sync->nextWriteTimeTs, NULL);
+            }
 
             sync->currentPageSet.advanceTime(sync->getWritePeriod());
 
@@ -335,6 +338,7 @@ bool MotionController::loadPageSet(PageSet pset)
 
     if(currentPageSet.hasFinished()){
         currentPageSet = pset;
+        currentPageSet.resetTime();
         success = true;
     }
 
@@ -349,8 +353,10 @@ bool MotionController::startMotion()
 
     startIntervention();
 
-    if(!currentPageSet.hasFinished() && currentPageSet.getCurrentPose().getTimestamp()==0){
-        pauseCv.notify_all();
+    //FIXME: tem que verificar se o PageSet está resetado
+    if(!currentPageSet.hasFinished()){
+        stopIntervention();
+        resumeLoop();
         success = true;
     }else
         stopIntervention();

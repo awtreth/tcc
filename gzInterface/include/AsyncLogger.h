@@ -34,7 +34,6 @@ class AsyncLogger {
 
     void write(std::string str);
 
-
     void close();
 
 

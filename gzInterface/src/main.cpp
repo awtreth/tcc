@@ -50,7 +50,7 @@
 #include <sched.h>
 #include <JointCommand.h>
 #include <memory>
-//#include <DummyMotionController.h>
+#include <DummyMotionController.h>
 //#include <DummyReadWriteSynchronizer.h>
 
 /////////////////////////////////////////////////
@@ -134,78 +134,94 @@ int main(int _argc, char **_argv)
 
 //        munlockall();
 
-        return 0;
+        //return 0;
 
     ////////////////////////////////////////////////////////
 
-    //    Pose p11, p12, p13, p21, p22;
-    //    Page page1, page2;
+        Pose p11, p12, p13, p21, p22;
+        Page page1, page2;
 
-    //    p11.addPosVel(PosVel(110,111,"motor0"));
-    //    p11.addPosVel(PosVel(112,113,"motor1"));
-    //    p11.setTimeToNext(2);
+        p11.addPosVel(PosVel(110,111,"motor0"));
+        p11.addPosVel(PosVel(112,113,"motor1"));
+        p11.setTimeToNext(200e3);
 
-    //    p12.addPosVel(PosVel(120,121,"motor0"));
-    //    p12.addPosVel(PosVel(122,123,"motor1"));
-    //    p12.setTimeToNext(2);
-
-
-    //    p13.addPosVel(PosVel(132,133,"motor0"));
-    //    p13.addPosVel(PosVel(132,133,"motor1"));
-    //    p13.setTimeToNext(2);
+        p12.addPosVel(PosVel(120,121,"motor0"));
+        p12.addPosVel(PosVel(122,123,"motor1"));
+        p12.setTimeToNext(200e3);
 
 
-    //    p21.addPosVel(PosVel(210,211,"motor2"));
-    //    p21.addPosVel(PosVel(212,213,"motor3"));
-    //    p21.setTimeToNext(3);
-
-    //    p22.addPosVel(PosVel(222,223,"motor2"));
-    //    p22.addPosVel(PosVel(222,223,"motor3"));
-    //    p22.setTimeToNext(5);
-
-    //    page1.addPose(p11);
-    //    page1.addPose(p12);
-    //    page1.addPose(p13);
-
-    //    page1.setModelName("Model1");
-    //    page1.setMotionName("Motion1");
-    //    page1.setTimesByTimeToNext();
-
-    //    page2.addPose(p21);
-    //    page2.addPose(p22);
-
-    //    page2.setModelName("Model2");
-    //    page2.setMotionName("Motion2");
-    //    page2.setTimesByTimeToNext();
-
-    //    PageSet pset;
-
-    //    pset.setPage(page1);
-    //    pset.setPage(page2);
-
-    //    std::cout << pset.toString() << std::endl;
+        p13.addPosVel(PosVel(132,133,"motor0"));
+        p13.addPosVel(PosVel(132,133,"motor1"));
+        p13.setTimeToNext(200e3);
 
 
-    //    int i = 0;
+        p21.addPosVel(PosVel(210,211,"motor2"));
+        p21.addPosVel(PosVel(212,213,"motor3"));
+        p21.setTimeToNext(300e3);
 
-    //    std::cout << "currentTime = " << i << " hasPose ";
+        p22.addPosVel(PosVel(222,223,"motor2"));
+        p22.addPosVel(PosVel(222,223,"motor3"));
+        p22.setTimeToNext(500e3);
 
-    //    if(pset.resetTime()){
-    //        std::cout << true << std::endl;
-    //        std::cout << pset.getCurrentPose().toString() << std::endl;
-    //    }else
-    //        std::cout << false << std::endl;
+        page1.addPose(p11);
+        page1.addPose(p12);
+        page1.addPose(p13);
 
-    //    for(i = 1; i < 18; i++){
-    //        std::cout << "currentTime = " << i << " hasPose ";
+        page1.setModelName("Model1");
+        page1.setMotionName("Motion1");
+        page1.setTimesByTimeToNext();
+        page1.setNumberOfLoops(2);
 
-    //        if(pset.advanceTime(1)){
-    //            std::cout << true << std::endl;
-    //            std::cout << pset.getCurrentPose().toString() << std::endl;
-    //        }else
-    //            std::cout << false << std::endl;
+        page2.addPose(p21);
+        page2.addPose(p22);
 
-    //    }
+        page2.setModelName("Model2");
+        page2.setMotionName("Motion2");
+        page2.setTimesByTimeToNext();
+        page2.setNumberOfLoops(2);
+
+        PageSet pset;
+
+        pset.setPage(page1);
+        pset.setPage(page2);
+
+        DummyMotionController cont;
+        cont.setReadPeriod(100e3);
+        cont.setWritePeriod(100e3);
+
+        std::cout << cont.loadPageSet(pset) << std::endl;
+        std::cout << cont.startMotion() << std::endl;
+        std::cout << pset.getCurrentPose().getTimestamp() << std::endl;
+
+        sleep(10);
+
+        cont.close();
+
+        return 0;
+
+//        std::cout << pset.toString() << std::endl;
+
+
+//        int i = 0;
+
+//        std::cout << "currentTime = " << i << " hasPose ";
+
+//        if(pset.resetTime()){
+//            std::cout << true << std::endl;
+//            std::cout << pset.getCurrentPose().toString() << std::endl;
+//        }else
+//            std::cout << false << std::endl;
+
+//        for(i = 1; i < 18; i++){
+//            std::cout << "currentTime = " << i << " hasPose ";
+
+//            if(pset.advanceTime(1)){
+//                std::cout << true << std::endl;
+//                std::cout << pset.getCurrentPose().toString() << std::endl;
+//            }else
+//                std::cout << false << std::endl;
+
+//        }
 
 
     ///////////////////////////////////////////////////////////////

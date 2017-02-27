@@ -109,9 +109,9 @@ class MotionController {
 
     void pauseLoop();
 
-    void close();
 
     public:
+    void close();
 
     MotionController();
 
