@@ -1,3 +1,0 @@
-/home/mateus/tccMateus/gzInterface/CMakeFiles/CMakeTmp/CMakeFiles/rebuild_cache.dir
-/home/mateus/tccMateus/gzInterface/CMakeFiles/CMakeTmp/CMakeFiles/edit_cache.dir
-/home/mateus/tccMateus/gzInterface/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_5e28e.dir

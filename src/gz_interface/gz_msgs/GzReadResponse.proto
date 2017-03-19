@@ -1,0 +1,18 @@
+package gz_msgs;
+import "GzWriteRequest.proto";
+
+//Igual a escrita
+message GzReadResponse {
+
+    repeated int32 jointIds = 1 [packed = true]; //Lista de IDs
+
+
+    repeated double pos = 2 [packed = true];
+    repeated double vel = 3 [packed = true];
+    repeated double torque = 4 [packed = true];
+
+    repeated PidRequest posPid = 5;
+    repeated PidRequest velPid = 6;
+
+	repeated string jointNames = 7; //Lista dos nomes das juntas
+}
