@@ -1,5 +1,5 @@
-#ifndef MYJOINT_H
-#define MYJOINT_H
+#ifndef PID_VALUES_H
+#define PID_VALUES_H
 
 #include <string>
 #include <vector>

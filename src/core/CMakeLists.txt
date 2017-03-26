@@ -5,7 +5,7 @@ include_directories(
 	joint_motion
 	motion_controller
 	${CMAKE_SOURCE_DIR}/utils)
-#add_subdirectory(joint_command)
-#add_subdirectory(joint_controller)
+add_subdirectory(joint_command)
+add_subdirectory(joint_controller)
 add_subdirectory(joint_motion)
 add_subdirectory(motion_controller)
