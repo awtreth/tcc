@@ -19,7 +19,7 @@ void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     std::cout << "Plugin Loaded\n";
 
 
-    //Pega parãmetros por conveniência
+    //Pega parâmetros por conveniência
     this->model = _model;
 
     this->jointController = this->model->GetJointController();
@@ -29,7 +29,7 @@ void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // cria o nó
     this->node = transport::NodePtr(new transport::Node());
 
-    this->node->Init(this->model->GetWorld()->GetName());
+    this->node->Init(this->model->GetWorld()->Name());
 
     const std::string writeRequestTopicName = "~/" + this->model->GetName() + "/writeRequest";
 
@@ -46,29 +46,31 @@ void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
     this->pubMap[pub->GetTopic()] = pub;
 
+    int i = 0;
     for(auto joint: joints) {
         joint->SetProvideFeedback(true);
+        this->jointNameMap[joint->GetName()] = i++;//TODO: testar ciração do jointNameMap
     }
 }
 
 void GzSimplePlugin::handleWriteRequest(GzWriteRequestPtr &msg)
 {
+    //TODO: tratar exibição de mensagens de Debug como opcional, passado como argumento
     std::cout << "WriteRequest" << std::endl;
+    std::cout << std::to_string(msg->jointnames_size()) << std::endl;
 
-    std::cout << std::to_string(msg->jointids_size()) << std::endl;
+    if(msg->jointnames_size() > 0) {
 
-    if(msg->jointids_size() > 0) {
-
-        if(msg->jointids_size() == msg->pospid_size())
+        if(msg->jointnames_size() == msg->pospid_size())
             setPosPids(msg);
 
-        if(msg->jointids_size() == msg->velpid_size())
+        if(msg->jointnames_size() == msg->velpid_size())
             setVelPids(msg);
 
-        if(msg->jointids_size() == msg->pos_size() && msg->pos_size() == msg->vel_size()) {
+        if(msg->jointnames_size() == msg->pos_size() && msg->pos_size() == msg->vel_size()) {
             setPositions(msg);
             setVelocities(msg);
-        }else if (msg->jointids_size() == msg->torque_size())
+        }else if (msg->jointnames_size() == msg->torque_size())
             setTorques(msg);
     }
 }
@@ -77,80 +79,73 @@ void GzSimplePlugin::handleReadRequest(GzReadRequestPtr &msg) {
 
     std::cout << "readRequest" << std::endl;
 
-    if(msg->jointids_size() > 0){
+    if(msg->jointnames_size() > 0){
 
         gz_msgs::GzReadResponse response;
 
-        for(int i = 0; i < msg->jointids_size(); i++){
+        for(int i = 0; i < msg->jointnames_size(); i++)
             response.add_jointnames(msg->jointnames(i));
 
-//            response->add_vel(joints[i]->GetVelocity(0));
+        bool posCondition = msg->has_pos() && msg->pos();
+        bool velCondition = msg->has_vel() && msg->vel();
+        bool torqueCondition = msg->has_torque() && msg->torque();
+        bool posVelPidCondition = msg->has_posvelpid() && msg->posvelpid();
 
-//            std::cout << "GetVelocity of Joint " << response->jointids(i) << ": "<< response->vel(i) << std::endl;
-
-//            gazebo::physics::JointWrench wrench = joints.at(i)->GetForceTorque(0);
-
-//            response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
-
-//            std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
-//            std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
-
-//            std::cout << "GetTorque of Joint " << response->jointids(i) << ": "<< response->torque(i) << std::endl;
-//            if(msg->has_pos()){
-//                response->add_pos(joints[i]->GetAngle(0).Radian());
-//                std::cout << "GetPosition of Joint " << response->jointids(i) << ": "<< response->pos(i) << std::endl;
-//            }
-
+        if(posCondition && velCondition && torqueCondition){//situação comum
+            getJointStates(&response);
+        }else{
+            if(posCondition)
+                getPositions(&response);
+            if(velCondition)
+                getVelocities(&response);
+            if(torqueCondition)
+                getTorques(&response);
         }
 
-        if(msg->requestitem()==msg->POS_VEL_TORQUE && msg->jointids_size() > 0) {
+        if(posVelPidCondition)
+            getPosVelPids(&response);
 
-            gz_msgs::GzReadResponse response;
 
-            for(int i = 0; i < msg->jointids_size(); i++)
-                response.add_jointids(msg->jointids(i));
 
-            this->getJointStates(&response);
+        transport::PublisherPtr pub;
 
-            transport::PublisherPtr pub;
-
-            try {
-                pub = pubMap.at(msg->returntopic());
-            }catch(const std::out_of_range& ex) {
-                std::cout << "topic não reconhecido: " +  msg->returntopic() << std::endl;
-                pub = node->Advertise<gz_msgs::GzReadResponse>(msg->returntopic());
-                pubMap[msg->returntopic()] = pub;
-                std::cout << "topico criado e registrado" << std::endl;
-            }
-
-            pub->Publish(response, false);
-            std::cout << "mensagem enviada de volta" << std::endl;
-
+        try {
+            pub = pubMap.at(msg->returntopic());
+        }catch(const std::out_of_range& ex) {
+            std::cout << "topic não reconhecido: " +  msg->returntopic() << std::endl;
+            pub = node->Advertise<gz_msgs::GzReadResponse>(msg->returntopic());
+            pubMap[msg->returntopic()] = pub;
+            std::cout << "topico criado e registrado" << std::endl;
         }
+
+        pub->Publish(response, false);
+        std::cout << "mensagem enviada de volta" << std::endl;
+
     }
 
 }
 
 
 void GzSimplePlugin::setPositions(GzWriteRequestPtr &msg){
-    for(int i = 0; i < msg->jointids_size(); i++){
-        this->jointController->SetPositionTarget(this->joints.at(msg->jointids(i))->GetScopedName(),msg->pos(i));
-        std::cout << "SetPosition of Joint " << msg->jointids(i) << ": "<< msg->pos(i) << std::endl;
+    for(int i = 0; i < msg->jointnames_size(); i++){
+        this->jointController->SetPositionTarget(this->joints.at(jointNameMap[msg->jointnames(i)])->GetScopedName(),msg->pos(i));
+        std::cout << "SetPosition of Joint " << msg->jointnames(i) << ": "<< msg->pos(i) << std::endl;
     }
 }
 
 void GzSimplePlugin::setVelocities(GzWriteRequestPtr &msg){
-    for(int i = 0; i < msg->jointids_size(); i++){
-        this->jointController->SetVelocityTarget(this->joints.at(msg->jointids(i))->GetScopedName(),msg->vel(i));
-        std::cout << "SetVelocity of Joint " << msg->jointids(i) << ": "<< msg->vel(i) << std::endl;
+    for(int i = 0; i < msg->jointnames_size(); i++){
+        this->jointController->SetVelocityTarget(this->joints.at(jointNameMap[msg->jointnames(i)])->GetScopedName(),msg->vel(i));
+        std::cout << "SetVelocity of Joint " << msg->jointnames(i) << ": "<< msg->vel(i) << std::endl;
 
     }
 }
 
 void GzSimplePlugin::setTorques(GzWriteRequestPtr &msg){
-    for(int i = 0; i < msg->jointids_size(); i++){
-        this->joints.at(msg->jointids(i))->SetForce(0,msg->torque(i));
-        std::cout << "SetTorque of Joint " << msg->jointids(i) << ": "<< msg->torque(i) << std::endl;
+    for(int i = 0; i < msg->jointnames_size(); i++){
+        //TODO: verificar se esta força está coerente
+        this->joints.at(jointNameMap[msg->jointnames(i)])->SetForce(0,msg->torque(i));
+        std::cout << "SetTorque of Joint " << msg->jointnames(i) << ": "<< msg->torque(i) << std::endl;
 
     }
 }
@@ -161,44 +156,88 @@ std::string gzPidToString(gazebo::common::PID pid) {
 
 void GzSimplePlugin::setPosPids(GzWriteRequestPtr& msg)
 {
-    for (int i = 0; i < msg->jointids_size(); i++) {
+    for (int i = 0; i < msg->jointnames_size(); i++) {
         gazebo::common::PID gzPid(msg->pospid(i).kp(), msg->pospid(i).ki(), msg->pospid(i).kd());
-        jointController->SetPositionPID(this->joints.at(msg->jointids(i))->GetScopedName(),gzPid);
-        std::cout << "SetPositionPID of Joint " << msg->jointids(i) << ": "<< gzPidToString(gzPid) << std::endl;
+        jointController->SetPositionPID(this->joints.at(jointNameMap[msg->jointnames(i)])->GetScopedName(),gzPid);
+        std::cout << "SetPositionPID of Joint " << msg->jointnames(i) << ": "<< gzPidToString(gzPid) << std::endl;
     }
 }
 
 void GzSimplePlugin::setVelPids(GzWriteRequestPtr& msg)
 {
-    for (int i = 0; i < msg->jointids_size(); i++) {
+    for (int i = 0; i < msg->jointnames_size(); i++) {
         gazebo::common::PID gzPid(msg->velpid(i).kp(), msg->velpid(i).ki(), msg->velpid(i).kd());
-        jointController->SetVelocityPID(this->joints.at(msg->jointids(i))->GetScopedName(),gzPid);
-        std::cout << "SetVelocityPID of Joint " << msg->jointids(i) << ": "<< gzPidToString(gzPid) << std::endl;
+        jointController->SetVelocityPID(this->joints.at(jointNameMap[msg->jointnames(i)])->GetScopedName(),gzPid);
+        std::cout << "SetVelocityPID of Joint " << msg->jointnames(i) << ": "<< gzPidToString(gzPid) << std::endl;
     }
 }
 
 void GzSimplePlugin::getJointStates(gz_msgs::GzReadResponse *response) {
 
-    for (int i = 0; i < response->jointids_size(); i++) {
+    for (int i = 0; i < response->jointnames_size(); i++) {
+        //TODO: organizar para que não fique código repetido
 
-        response->add_pos(joints[i]->GetAngle(0).Radian());
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->Position(0));
 
-        std::cout << "GetPosition of Joint " << response->jointids(i) << ": "<< response->pos(i) << std::endl;
+        std::cout << "GetPosition of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
-        response->add_vel(joints[i]->GetVelocity(0));
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
 
-        std::cout << "GetVelocity of Joint " << response->jointids(i) << ": "<< response->vel(i) << std::endl;
+        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
-        gazebo::physics::JointWrench wrench = joints.at(i)->GetForceTorque(0);
+        gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
 
+        //FIXME: CÁLCULO ERRADO
         response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
 
         std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
         std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
 
-        std::cout << "GetTorque of Joint " << response->jointids(i) << ": "<< response->torque(i) << std::endl;
+        std::cout << "GetTorque of Joint " << response->jointnames(i) << ": "<< response->torque(i) << std::endl;
     }
 
 }
 
+void GzSimplePlugin::getPositions(gz_msgs::GzReadResponse *response)
+{
+    for (int i = 0; i < response->jointnames_size(); i++) {
+
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->Position(0));
+
+        std::cout << "GetPosition of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
+
+    }
+}
+
+void GzSimplePlugin::getVelocities(gz_msgs::GzReadResponse *response)
+{
+    for (int i = 0; i < response->jointnames_size(); i++) {
+
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
+
+        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
+
+    }
+}
+
+void GzSimplePlugin::getTorques(gz_msgs::GzReadResponse *response)
+{
+    for (int i = 0; i < response->jointnames_size(); i++) {
+
+        gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
+
+        //FIXME: CÁLCULO ERRADO
+        response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
+
+        std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
+        std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
+
+        std::cout << "GetTorque of Joint " << response->jointnames(i) << ": "<< response->torque(i) << std::endl;
+
+    }
+}
+
+void GzSimplePlugin::getPosVelPids(gz_msgs::GzReadResponse *response){
+
+}
 }

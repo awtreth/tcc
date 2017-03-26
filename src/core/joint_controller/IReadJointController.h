@@ -10,9 +10,13 @@
 
 class IReadJointController{
 
+    virtual bool sendRequest() = 0;
+
     virtual bool sendRequest(std::vector<ReadJointCommand> cmds) = 0;
 
-    virtual bool loadRequest(std::vector<ReadJointCommand> cmds) = 0;
+//    virtual bool addRequest(std::vector<ReadJointCommand> cmds) = 0;
+
+    virtual bool addRequest(ReadJointCommand cmd) = 0;
 
     virtual JointVec getLastJointState() = 0;
 

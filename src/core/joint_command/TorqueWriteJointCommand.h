@@ -30,6 +30,6 @@ class TorqueWriteJointCommand : public WriteJointCommand {
     bool hasTorque(){return true;}
 };
 
-typedef std::shared_ptr<TorqueWriteJointCommand> TorqueWriteJointCommandPtr;
+//typedef std::shared_ptr<TorqueWriteJointCommand> TorqueWriteJointCommandPtr;
 
 #endif

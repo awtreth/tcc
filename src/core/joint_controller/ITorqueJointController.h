@@ -11,15 +11,21 @@
  * @brief
  *
  */
-class TorqueJointController{
+class ITorqueJointController{
 
     public:
 
-    virtual bool sendCommand(std::vector<TorqueWriteJointCommand> cmd);
+    virtual bool sendTorqueCommand(std::vector<TorqueWriteJointCommand> cmd);
+
+    virtual bool sendTorqueCommand() = 0;
+
+//    virtual bool addTorqueCommand(std::vector<TorqueWriteJointCommand> cmds) = 0;
+
+    virtual bool addTorqueCommand(TorqueWriteJointCommand cmd) = 0;
 
 };
 
-typedef std::shared_ptr<TorqueJointController> TorqueJointControllerPtr;
+typedef std::shared_ptr<ITorqueJointController> TorqueJointControllerPtr;
 
 
 #endif

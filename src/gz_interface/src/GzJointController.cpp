@@ -5,6 +5,7 @@
 #include <GzReadRequest.pb.h>
 #include <gazebo/gazebo_client.hh>
 #include <memory>
+#include <cstring>
 
 
 GzJointController::GzJointController(std::vector<std::__cxx11::string> jointNames, std::string pubWriteTopic, std::string pubReadTopic, std::string subTopic) : AbsPidJointController(jointNames) {
@@ -37,79 +38,101 @@ GzJointController::~GzJointController()
     gazebo::client::shutdown();//TODO: verificar se é melhor aqui ou fora
 }
 
-
-
-bool GzJointController::goPosVel(double pos, double vel, int jointID) {
-
-    gz_msgs::GzWriteRequest msg;
-
-    msg.add_jointids(jointID);
-
-    msg.add_pos(pos);
-
-    msg.add_vel(vel);
-
-    writePub->Publish(msg, false);
-
-    return true;
+bool GzJointController::sendTorqueCommand()
+{
+    return sendCommand();//FIXME: enviar somente Torque
 }
 
-bool GzJointController::goPosVel(double pos, double vel, std::__cxx11::string jointName) {
+bool GzJointController::addTorqueCommand(TorqueWriteJointCommand cmd)
+{
+    writeCmd.add_jointnames(cmd.getJointName());
+    writeCmd.add_torque(cmd.getTorque());
+}
 
-    return this->goPosVel(pos, vel, this->jointNamesMap[jointName]);
+bool GzJointController::sendPosVelCommand()
+{
+    return sendCommand();//FIXME: enviar somente PosVel
+}
+
+bool GzJointController::sendPosVelCommand(std::vector<PosVelWriteJointCommand> cmd)
+{
+    for(auto command : cmd)
+        addPosVelCommand(command);
+
+    return sendPosVelCommand();
+}
+
+bool GzJointController::addPosVelCommand(PosVelWriteJointCommand cmd)
+{
+    writeCmd.add_jointnames(cmd.getJointName());
+    writeCmd.add_pos(cmd.getPos());
+    writeCmd.add_vel(cmd.getVel());
+}
+
+bool GzJointController::sendRequest()
+{
+    return sendReadMsg(readCmd);
+}
+
+bool GzJointController::sendRequest(std::vector<ReadJointCommand> cmds)
+{
+    for(auto command : cmds)
+        addRequest(command);
+
+    return sendReadMsg(readCmd);
+}
+
+bool GzJointController::addRequest(ReadJointCommand cmd)
+{
+    readCmd.add_jointnames(cmd.getJointName());
+    //TODO: separar Pos Vel
+    readCmd.set_pos(cmd.hasPosVel());
+    readCmd.set_vel(cmd.hasPosVel());
+    readCmd.set_torque(cmd.hasTorque());
+    //TODO: separar PosPid e VelPid
+    readCmd.set_posvelpid(cmd.hasPosVelPid());
 
 }
 
-bool GzJointController::goPosVel(std::vector<PosVelWriteJointCommand> cmd) {
+JointVec GzJointController::getLastJointState()
+{
 
-    gz_msgs::GzWriteRequest msg;
+}
 
-    for(unsigned int i = 0; i < cmd.size(); i++) {
-        msg.add_jointids(i);
-        msg.add_pos(cmd[i].getPos());
-        msg.add_vel(cmd[i].getVel());
+bool GzJointController::sendCommand()
+{
+    return sendWriteMsg(writeCmd);
+}
+
+bool GzJointController::sendCommand(std::vector<WriteJointCommand> cmds)
+{
+    for(auto command : cmd)
+        addCommand(command);
+
+    return sendCommand();
+}
+
+bool GzJointController::sendTorqueCommand(std::vector<TorqueWriteJointCommand> cmd)
+{
+
+    for(auto command : cmd)
+        addTorqueCommand(command);
+
+    return sendTorqueCommand();
+}
+
+bool GzJointController::addCommand(WriteJointCommand cmd)
+{
+
+    if(strcmp(cmd.getCmdID(),PosVelWriteJointCommand::CMD_ID)==0){
+        return addPosVelCommand(static_cast<PosVelWriteJointCommand&>(&cmd));
+    }else if(strcmp(cmd.getCmdID(),TorqueWriteJointCommand::CMD_ID)==0){
+        return addTorqueCommand(static_cast<TorqueWriteJointCommand&>(&cmd));
     }
 
-    writePub->Publish(msg, false);
-
-    return true;
-
+    return false;
 }
 
-bool GzJointController::goTorque(double torque, int jointID) {
-
-    gz_msgs::GzWriteRequest msg;
-
-    msg.add_jointids(jointID);
-
-    msg.add_torque(torque);
-
-    writePub->Publish(msg, false);
-
-    return true;
-
-}
-
-bool GzJointController::goTorque(double torque, std::__cxx11::string jointName) {
-
-    return goTorque(torque,this->jointNamesMap[jointName]);
-
-}
-
-bool GzJointController::goTorque(std::vector<TorqueWriteJointCommand> cmd) {
-
-    gz_msgs::GzWriteRequest msg;
-
-    for(unsigned int i = 0; i < cmd.size(); i++) {
-        msg.add_jointids(i);
-        msg.add_torque(cmd[i].getTorque());
-    }
-
-    writePub->Publish(msg, false);
-
-    return true;
-
-}
 
 bool GzJointController::readJointStates() {
 
@@ -130,221 +153,104 @@ bool GzJointController::readJointStates() {
 
 void GzJointController::onReadMsg(GzReadResponsePtr& msg)
 {
-    for(int i = 0; i < msg->jointids_size(); i++) {
+    for(int i = 0; i < msg->jointnames_size(); i++) {
 
-        JointState jstate(msg->pos(i),msg->vel(i),msg->torque(i));
+        if(msg->pos_size()>0)
+            jointMap.at(msg->jointnames(i)).setPos(msg->pos(i));
 
-        this->jointVec[i].setJointState(jstate);
+        if(msg->vel_size()>0)
+            jointMap.at(msg->jointnames(i)).setVel(msg->vel(i));
 
-        std::cout << "Joint " + std::to_string(i) + ": " + jstate.toString() << std::endl;
+        if(msg->torque_size()>0)
+            jointMap.at(msg->jointnames(i)).setTorque(msg->torque(i));
+
+        if(msg->pospid_size()>0)
+            jointMap.at(msg->jointnames(i)).SetPosPid(msg->pospid(i).kp(), msg->pospid(i).kd(), msg->pospid(i).ki());
+
+        if(msg->velpid_size()>0)
+            jointMap.at(msg->jointnames(i)).SetVelPid(msg->velpid(i).kp(), msg->velpid(i).kd(), msg->velpid(i).ki());
+
+        std::cout << "Joint " + std::to_string(i) + ": " + jointMap.at(msg->jointnames(i)).getJointState().toString() << std::endl;
     }
 
 }
 
-void addPidWriteMsg(gz_msgs::GzWriteRequest* msg, gz_msgs::PidRequest* pidMsg, PidValues pid) {
-    pidMsg->set_kp(pid.kp);
-    pidMsg->set_ki(pid.ki);
-    pidMsg->set_kd(pid.kd);
-
-}
-
-
-bool GzJointController::setPosPid(PidValues pid, int jointID)
+void GzJointController::sendWriteMsg(gz_msgs::GzWriteRequest msg)
 {
-    gz_msgs::GzWriteRequest msg;
-
-    gz_msgs::PidRequest* pidMsg = msg.add_pospid();
-
-    addPidWriteMsg(&msg, pidMsg, pid);
-
-    msg.add_jointids(jointID);
-
     writePub->Publish(msg, false);
-
-    AbsPidJointController::setPosPid(pid, jointID);
-
+    writeCmd = gz_msgs::GzWriteRequest();
     return true;
 }
 
-bool GzJointController::setPosPid(PidValues pid, std::__cxx11::string jointName)
+void GzJointController::sendReadMsg(gz_msgs::GzReadRequest msg)
 {
-
-    return setPosPid(pid,this->jointNamesMap[jointName]);
-
-}
-
-bool GzJointController::setPosPid(std::vector<PidValues> pids)
-{
-    gz_msgs::GzWriteRequest msg;
-
-    for (unsigned int i = 0; i < pids.size(); i++) {
-        gz_msgs::PidRequest* pidMsg = msg.add_pospid();
-        addPidWriteMsg(&msg, pidMsg,pids[i]);
-        msg.add_jointids(i);
-    }
-
-    writePub->Publish(msg, false);
-
-    AbsPidJointController::setPosPid(pids);
-
-    return true;
-}
-
-bool GzJointController::setVelPid(PidValues pid, int jointID)
-{
-
-    gz_msgs::GzWriteRequest msg;
-
-    gz_msgs::PidRequest* pidMsg = msg.add_velpid();
-
-    addPidWriteMsg(&msg, pidMsg, pid);
-
-    msg.add_jointids(jointID);
-
-    writePub->Publish(msg, false);
-
-    AbsPidJointController::setVelPid(pid, jointID);
-
-    return true;
-}
-
-bool GzJointController::setVelPid(PidValues pid, std::__cxx11::string jointName)
-{
-
-    return    setVelPid(pid,this->jointNamesMap[jointName]);
-
-}
-
-bool GzJointController::setVelPid(std::vector<PidValues> pids)
-{
-
-    gz_msgs::GzWriteRequest msg;
-
-    for (unsigned int i = 0; i < pids.size(); i++) {
-        gz_msgs::PidRequest* pidMsg = msg.add_velpid();
-        addPidWriteMsg(&msg, pidMsg,pids[i]);
-        msg.add_jointids(i);
-    }
-
-    writePub->Publish(msg, false);
-
-    AbsPidJointController::setVelPid(pids);
-
-    return true;
-}
-
-bool GzJointController::setPosVelPid(PidValues posPid, PidValues velPid, int jointID)
-{
-
-    gz_msgs::GzWriteRequest msg;
-
-    gz_msgs::PidRequest* posPidMsg = msg.add_pospid();
-
-    addPidWriteMsg(&msg, posPidMsg, posPid);
-
-    //std::cout << std::to_string(posPid.kp) + " " + std::to_string(msg.pospid(0).kp()) + " " + std::to_string(posPidMsg->kp()) << std::endl;
-
-    gz_msgs::PidRequest* velPidMsg = msg.add_velpid();
-
-    addPidWriteMsg(&msg, velPidMsg, velPid);
-
-    msg.add_jointids(jointID);
-
-    writePub->Publish(msg, false);
-
-    AbsPidJointController::setPosVelPid(posPid, velPid, jointID);
-
-    return true;
-
-}
-
-bool GzJointController::setPosVelPid(PidValues posPid, PidValues velPid, std::__cxx11::string jointName)
-{
-
-    return setPosVelPid(posPid, velPid, this->jointNamesMap[jointName]);
-
-}
-
-bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids)
-{
-
-    if(posPids.size() == velPids.size()) {
-        gz_msgs::GzWriteRequest msg;
-
-        for (unsigned int i = 0; i < posPids.size(); i++) {
-            gz_msgs::PidRequest* velPidMsg = msg.add_velpid();
-            addPidWriteMsg(&msg, velPidMsg,velPids[i]);
-            gz_msgs::PidRequest* posPidMsg = msg.add_pospid();
-            addPidWriteMsg(&msg, posPidMsg,posPids[i]);
-            msg.add_jointids(i);
-        }
-
-        writePub->Publish(msg, false);
-
-        AbsPidJointController::setPosVelPid(posPids, velPids);
-
-        return true;
-    }
-
-    return false;
-}
-
-bool GzJointController::sendWriteCommand(std::vector<WriteJointCommandPtr> cmd)
-{
-
-    if(cmd.size()>0){
-        if(cmd[0]->hasPosVel()) {
-
-            std::vector<PosVelWriteJointCommand> posVelCmd;
-
-            for(WriteJointCommandPtr cmdPtr : cmd) {
-
-                posVelCmd.push_back(static_cast<PosVelWriteJointCommand&>(*cmdPtr));
-            }
-
-            this->goPosVel(posVelCmd);
-
-            return true;
-
-        }else if (cmd[0]->hasTorque()) {
-
-            std::vector<TorqueWriteJointCommand> torqueCmd;
-
-            for(WriteJointCommandPtr cmdPtr : cmd)
-                torqueCmd.push_back(static_cast<TorqueWriteJointCommand&>(*cmdPtr));
-
-            this->goTorque(torqueCmd);
-
-            return true;
-        }else if(cmd[0]->hasPosVelPid()){
-            std::vector<PidWriteJointCommand> pidCmd;
-
-            for(WriteJointCommandPtr cmdPtr : cmd)
-                pidCmd.push_back(static_cast<PidWriteJointCommand&>(*cmdPtr));
-
-            //TODO: send PID WriteCommand
-            //this->setPosVelPid()
-        }
-    }
-    return false;
-}
-
-std::vector<Joint> GzJointController::sendReadCommand(std::vector<ReadJointCommandPtr> cmd)
-{
-    //FIXME: colocar genérico quando aos parâmetros de leitura (usar parâmetros booleanos)
-
-    gz_msgs::GzReadRequest msg;
-
-    msg.set_returntopic(sub->GetTopic());
-
-    msg.set_requestitem(msg.POS_VEL_TORQUE);
-
-    for(unsigned int i = 0; i < this->jointVec.size(); i++)
-        msg.add_jointids(i);
-
     readPub->Publish(msg, false);
-
-    //return true;
-
-    return std::vector<Joint>();
+    readCmd = gz_msgs::GzReadRequest();
+    return true;
 }
+
+//void addPidWriteMsg(gz_msgs::GzWriteRequest* msg, gz_msgs::PidRequest* pidMsg, PidValues pid) {
+//    pidMsg->set_kp(pid.kp);
+//    pidMsg->set_ki(pid.ki);
+//    pidMsg->set_kd(pid.kd);
+//}
+
+//bool GzJointController::setPosPid(std::vector<PidValues> pids)
+//{
+//    gz_msgs::GzWriteRequest msg;
+
+//    for (unsigned int i = 0; i < pids.size(); i++) {
+//        gz_msgs::PidRequest* pidMsg = msg.add_pospid();
+//        addPidWriteMsg(&msg, pidMsg,pids[i]);
+//        msg.add_jointids(i);
+//    }
+
+//    writePub->Publish(msg, false);
+
+//    AbsPidJointController::setPosPid(pids);
+
+//    return true;
+//}
+
+
+//bool GzJointController::setVelPid(std::vector<PidValues> pids)
+//{
+
+//    gz_msgs::GzWriteRequest msg;
+
+//    for (unsigned int i = 0; i < pids.size(); i++) {
+//        gz_msgs::PidRequest* pidMsg = msg.add_velpid();
+//        addPidWriteMsg(&msg, pidMsg,pids[i]);
+//        msg.add_jointids(i);
+//    }
+
+//    writePub->Publish(msg, false);
+
+//    AbsPidJointController::setVelPid(pids);
+
+//    return true;
+//}
+
+//bool GzJointController::setPosVelPid(std::vector<PidValues> posPids, std::vector<PidValues> velPids)
+//{
+
+//    if(posPids.size() == velPids.size()) {
+//        gz_msgs::GzWriteRequest msg;
+
+//        for (unsigned int i = 0; i < posPids.size(); i++) {
+//            gz_msgs::PidRequest* velPidMsg = msg.add_velpid();
+//            addPidWriteMsg(&msg, velPidMsg,velPids[i]);
+//            gz_msgs::PidRequest* posPidMsg = msg.add_pospid();
+//            addPidWriteMsg(&msg, posPidMsg,posPids[i]);
+//            msg.add_jointids(i);
+//        }
+
+//        writePub->Publish(msg, false);
+
+//        AbsPidJointController::setPosVelPid(posPids, velPids);
+
+//        return true;
+//    }
+
+//    return false;
+//}

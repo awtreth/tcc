@@ -59,6 +59,18 @@ class Joint {
      */
     JointState getJointState() { return jointState; }
 
+    double getPos() const{return jointState.position;}
+
+    double setPos(const double pos){jointState.position = pos;}
+
+    double getVel() const{return jointState.velocity;}
+
+    double setVel(const double vel){jointState.velocity = vel;}
+
+    double getTorque() const{return jointState.torque;}
+
+    double setTorque(const double torque){jointState.torque = torque;}
+
     /**
      * @brief
      *
@@ -73,7 +85,7 @@ class Joint {
      * @param ki
      * @param kd
      */
-    void setPosPID(double kp, double ki, double kd){posPID.kp=kp;posPID.ki=ki;posPID.kd=kd;}
+    void setPosPid(double kp, double ki, double kd){posPID.kp=kp;posPID.ki=ki;posPID.kd=kd;}
 
     /**
      * @brief
@@ -82,7 +94,7 @@ class Joint {
      * @param ki
      * @param kd
      */
-    void setVelPID(double kp, double ki, double kd){velPID.kp=kp;velPID.ki=ki;velPID.kd=kd;}
+    void setVelPid(double kp, double ki, double kd){velPID.kp=kp;velPID.ki=ki;velPID.kd=kd;}
 
 
     /**

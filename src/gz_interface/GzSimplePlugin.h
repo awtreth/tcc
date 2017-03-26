@@ -1,13 +1,11 @@
 #ifndef GZSIMPLEPLUGIN_H
 #define GZSIMPLEPLUGIN_H
 
-
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <boost/shared_ptr.hpp>
-//#include <gz_interface_msgs.pb.h>
 
 #include <GzWriteRequest.pb.h>
 #include <GzReadRequest.pb.h>
@@ -20,56 +18,68 @@
 
 namespace gazebo
 {
-    typedef const boost::shared_ptr<const gz_msgs::GzWriteRequest> GzWriteRequestPtr;
+typedef const boost::shared_ptr<const gz_msgs::GzWriteRequest> GzWriteRequestPtr;
 
-    typedef const boost::shared_ptr<const gz_msgs::GzReadRequest> GzReadRequestPtr;
+typedef const boost::shared_ptr<const gz_msgs::GzReadRequest> GzReadRequestPtr;
 
-    typedef const boost::shared_ptr<const gz_msgs::GzReadResponse> GzReadResponsePtr;
+typedef const boost::shared_ptr<const gz_msgs::GzReadResponse> GzReadResponsePtr;
 
-    class GzSimplePlugin :public ModelPlugin
-    {
-        private:
+class GzSimplePlugin :public ModelPlugin
+{
+private:
 
-        transport::NodePtr node;
+    transport::NodePtr node;
 
-        transport::SubscriberPtr readRequestSub;
+    transport::SubscriberPtr readRequestSub;
 
-        transport::SubscriberPtr writeRequestSub;
+    transport::SubscriberPtr writeRequestSub;
 
-        transport::PublisherPtr responsePub;
+    transport::PublisherPtr responsePub;
 
-        physics::ModelPtr model;
+    physics::ModelPtr model;
 
-        physics::Joint_V joints;
+    physics::Joint_V joints;
 
-        physics::JointControllerPtr jointController;
+    std::map<std::string,int> jointNameMap;
 
-        std::map<std::string,transport::PublisherPtr> pubMap;
+    physics::JointControllerPtr jointController;
 
-        public:
+    std::map<std::string,transport::PublisherPtr> pubMap;
 
-        GzSimplePlugin();
+public:
 
-        void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf) override;
+    GzSimplePlugin();
 
-        void handleWriteRequest(GzWriteRequestPtr &msg);
+    void Load(physics::ModelPtr _world, sdf::ElementPtr _sdf) override;
 
-        void handleReadRequest(GzReadRequestPtr &msg);
+    void handleWriteRequest(GzWriteRequestPtr &msg);
 
-        void setPositions(GzWriteRequestPtr &_msg);
+    void handleReadRequest(GzReadRequestPtr &msg);
 
-        void setVelocities(GzWriteRequestPtr &_msg);
+    void setPositions(GzWriteRequestPtr &_msg);
 
-        void setTorques(GzWriteRequestPtr &_msg);
+    void setVelocities(GzWriteRequestPtr &_msg);
 
-        void setPosPids(GzWriteRequestPtr &msg);
+    void setTorques(GzWriteRequestPtr &_msg);
 
-        void setVelPids(GzWriteRequestPtr &msg);
+    void setPosPids(GzWriteRequestPtr &msg);
 
-        void getJointStates(gz_msgs::GzReadResponse* msg);
+    void setVelPids(GzWriteRequestPtr &msg);
 
-    };
-    GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);
+    void getJointStates(gz_msgs::GzReadResponse* msg);
+
+    void getPositions(gz_msgs::GzReadResponse* response);
+
+    void getVelocities(gz_msgs::GzReadResponse* response);
+
+    void getTorques(gz_msgs::GzReadResponse* response);
+
+    void getPosVelPids(gz_msgs::GzReadResponse* response);
+
+
+};
+
+GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);
 }
 
 #endif // GZSIMPLEPLUGIN_H

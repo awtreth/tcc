@@ -16,6 +16,6 @@ class WriteJointCommand : public JointCommand {
     }
 };
 
-typedef std::shared_ptr<WriteJointCommand> WriteJointCommandPtr;
+//typedef std::shared_ptr<WriteJointCommand> WriteJointCommandPtr;
 
 #endif

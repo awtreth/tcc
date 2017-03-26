@@ -9,9 +9,13 @@ class IWriteJointController{
 
     public:
 
+    virtual bool sendCommand() = 0;
+
     virtual bool sendCommand(std::vector<WriteJointCommand> cmds) = 0;
 
-    virtual bool loadCommand(std::vector<WriteJointCommand> cmds) = 0;
+//    virtual bool loadCommand(std::vector<WriteJointCommand> cmds) = 0;
+
+    virtual bool addCommand(WriteJointCommand) = 0;
 
 };
 
