@@ -13,3 +13,6 @@ add_subdirectory(gz_interface)
 add_subdirectory(dxl_interface)
 add_subdirectory(core)
 add_subdirectory(utils)
+
+FILE(GLOB_RECURSE LibFiles "*.h")
+add_custom_target(headers SOURCES ${LibFiles})

@@ -39,7 +39,6 @@ class ReadJointCommand : public JointCommand {
 
 };
 
-typedef std::shared_ptr<ReadJointCommand> ReadJointCommandPtr;
-
+//typedef std::shared_ptr<ReadJointCommand> ReadJointCommandPtr;
 
 #endif

@@ -29,7 +29,11 @@ void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // cria o nó
     this->node = transport::NodePtr(new transport::Node());
 
+#if GAZEBO_MAJOR_VERSION >= 8
     this->node->Init(this->model->GetWorld()->Name());
+#else
+    this->node->Init(this->model->GetWorld()->GetName());
+#endif
 
     const std::string writeRequestTopicName = "~/" + this->model->GetName() + "/writeRequest";
 
@@ -177,7 +181,11 @@ void GzSimplePlugin::getJointStates(gz_msgs::GzReadResponse *response) {
     for (int i = 0; i < response->jointnames_size(); i++) {
         //TODO: organizar para que não fique código repetido
 
+#if GAZEBO_MAJOR_VERSION >= 8
         response->add_pos(joints[jointNameMap[response->jointnames(i)]]->Position(0));
+#else
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetAngle(0).Radian());
+#endif
 
         std::cout << "GetPosition of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
@@ -185,14 +193,17 @@ void GzSimplePlugin::getJointStates(gz_msgs::GzReadResponse *response) {
 
         std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
-        gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
+        //gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
 
+#if GAZEBO_MAJOR_VERSION >= 8
         //FIXME: CÁLCULO ERRADO
         response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
-
         std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
         std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
-
+#else
+        //TODO: verificar se esta certo
+        response->add_torque(joints[jointNameMap[response->jointnames(i)]]->GetForce(0));
+#endif
         std::cout << "GetTorque of Joint " << response->jointnames(i) << ": "<< response->torque(i) << std::endl;
     }
 
@@ -202,8 +213,11 @@ void GzSimplePlugin::getPositions(gz_msgs::GzReadResponse *response)
 {
     for (int i = 0; i < response->jointnames_size(); i++) {
 
+#if GAZEBO_MAJOR_VERSION >= 8
         response->add_pos(joints[jointNameMap[response->jointnames(i)]]->Position(0));
-
+#else
+        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetAngle(0).Radian());
+#endif
         std::cout << "GetPosition of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
     }
@@ -224,14 +238,18 @@ void GzSimplePlugin::getTorques(gz_msgs::GzReadResponse *response)
 {
     for (int i = 0; i < response->jointnames_size(); i++) {
 
-        gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
+        //gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
 
+#if GAZEBO_MAJOR_VERSION >= 8
         //FIXME: CÁLCULO ERRADO
         response->add_torque(wrench.body1Torque.X()+wrench.body1Torque.Y()+wrench.body1Torque.Z());
 
         std::cout << std::to_string(wrench.body1Torque.X()) + " " + std::to_string(wrench.body1Torque.Y()) + " " +std::to_string(wrench.body1Torque.Z())<< std::endl;
         std::cout << std::to_string(wrench.body2Torque.X()) + " " + std::to_string(wrench.body2Torque.Y()) + " " +std::to_string(wrench.body2Torque.Z())<< std::endl;
-
+#else
+        //TODO: verificar se esta certo
+        response->add_torque(joints[jointNameMap[response->jointnames(i)]]->GetForce(0));
+#endif
         std::cout << "GetTorque of Joint " << response->jointnames(i) << ": "<< response->torque(i) << std::endl;
 
     }

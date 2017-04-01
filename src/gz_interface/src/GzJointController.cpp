@@ -29,6 +29,9 @@ GzJointController::GzJointController(std::vector<std::__cxx11::string> jointName
     // Subscribe to the topic, and register a callback
     sub = node->Subscribe(subTopic, &GzJointController::onReadMsg, this);
 
+    for(auto name : jointNames)
+        jointMap[name] = Joint(name);
+
 }
 
 
@@ -71,7 +74,9 @@ bool GzJointController::addPosVelCommand(PosVelWriteJointCommand cmd)
 
 bool GzJointController::sendRequest()
 {
+    //readMsgMtx.lock();
     return sendReadMsg(readCmd);
+    //readMsgMtx.unlock();
 }
 
 bool GzJointController::sendRequest(std::vector<ReadJointCommand> cmds)
@@ -84,6 +89,7 @@ bool GzJointController::sendRequest(std::vector<ReadJointCommand> cmds)
 
 bool GzJointController::addRequest(ReadJointCommand cmd)
 {
+    readMsgMtx.lock();
     readCmd.add_jointnames(cmd.getJointName());
     //TODO: separar Pos Vel
     readCmd.set_pos(cmd.hasPosVel());
@@ -91,7 +97,8 @@ bool GzJointController::addRequest(ReadJointCommand cmd)
     readCmd.set_torque(cmd.hasTorque());
     //TODO: separar PosPid e VelPid
     readCmd.set_posvelpid(cmd.hasPosVelPid());
-
+    readMsgMtx.unlock();
+    return true;
 }
 
 JointVec GzJointController::getLastJointState()
@@ -134,22 +141,22 @@ bool GzJointController::addCommand(WriteJointCommand cmd)
 }
 
 
-bool GzJointController::readJointStates() {
+//bool GzJointController::readJointStates() {
 
-    gz_msgs::GzReadRequest msg;
+//    gz_msgs::GzReadRequest msg;
 
-    msg.set_returntopic(sub->GetTopic());
+//    msg.set_returntopic(sub->GetTopic());
 
-    msg.set_requestitem(msg.POS_VEL_TORQUE);
+//    msg.set_requestitem(msg.POS_VEL_TORQUE);
 
-    for(unsigned int i = 0; i < this->jointVec.size(); i++)
-        msg.add_jointids(i);
+//    for(unsigned int i = 0; i < this->jointVec.size(); i++)
+//        msg.add_jointids(i);
 
-    readPub->Publish(msg, false);
+//    readPub->Publish(msg, false);
 
-    return true;
+//    return true;
 
-}
+//}
 
 void GzJointController::onReadMsg(GzReadResponsePtr& msg)
 {
@@ -170,22 +177,26 @@ void GzJointController::onReadMsg(GzReadResponsePtr& msg)
         if(msg->velpid_size()>0)
             jointMap.at(msg->jointnames(i)).SetVelPid(msg->velpid(i).kp(), msg->velpid(i).kd(), msg->velpid(i).ki());
 
-        std::cout << "Joint " + std::to_string(i) + ": " + jointMap.at(msg->jointnames(i)).getJointState().toString() << std::endl;
+//        std::cout << "Joint " + std::to_string(i) + ": " + jointMap.at(msg->jointnames(i)).getJointState().toString() << std::endl;
     }
 
 }
 
-void GzJointController::sendWriteMsg(gz_msgs::GzWriteRequest msg)
+void GzJointController::sendWriteMsg()
 {
     writePub->Publish(msg, false);
     writeCmd = gz_msgs::GzWriteRequest();
     return true;
 }
 
-void GzJointController::sendReadMsg(gz_msgs::GzReadRequest msg)
+void GzJointController::sendReadMsg()
 {
+    readMsgMtx.lock();
+    if(readCmd)
+    gz_msgs::GzReadRequest msg = readCmd;//faz uma copia
     readPub->Publish(msg, false);
     readCmd = gz_msgs::GzReadRequest();
+    readMsgMtx.unlock();
     return true;
 }
 

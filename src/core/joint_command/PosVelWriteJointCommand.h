@@ -34,6 +34,6 @@ class PosVelWriteJointCommand : public WriteJointCommand {
     bool hasPosVel(){return true;}
 };
 
-typedef std::shared_ptr<PosVelWriteJointCommand> PosVelWriteJointCommandPtr;
+//typedef std::shared_ptr<PosVelWriteJointCommand> PosVelWriteJointCommandPtr;
 
 #endif

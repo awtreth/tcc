@@ -37,6 +37,6 @@ class AbsJointController {
     void setJointNames(const std::vector<std::string> &value){jointNames = value;}
 };
 
-typedef std::shared_ptr<AbsJointController> JointControllerPtr;
+//typedef std::shared_ptr<AbsJointController> JointControllerPtr;
 
 #endif
