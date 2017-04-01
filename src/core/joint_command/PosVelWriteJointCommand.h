@@ -12,7 +12,7 @@ class PosVelWriteJointCommand : public WriteJointCommand {
 
     public:
 
-    const char* CMD_ID = "POSVEL_WRITE_JOINT_COMMAND";
+    static constexpr const char* CMD_ID = "POSVEL_WRITE_JOINT_COMMAND";
 
     PosVelWriteJointCommand(){
         cmdID = CMD_ID;

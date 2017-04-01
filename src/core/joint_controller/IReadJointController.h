@@ -18,7 +18,7 @@ class IReadJointController{
 
     virtual bool addRequest(ReadJointCommand cmd) = 0;
 
-    virtual JointVec getLastJointState() = 0;
+    virtual JointMap getLastJointState() = 0;
 
 };
 

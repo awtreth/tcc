@@ -61,15 +61,15 @@ class Joint {
 
     double getPos() const{return jointState.position;}
 
-    double setPos(const double pos){jointState.position = pos;}
+    void setPos(const double pos){jointState.position = pos;}
 
     double getVel() const{return jointState.velocity;}
 
-    double setVel(const double vel){jointState.velocity = vel;}
+    void setVel(const double vel){jointState.velocity = vel;}
 
     double getTorque() const{return jointState.torque;}
 
-    double setTorque(const double torque){jointState.torque = torque;}
+    void setTorque(const double torque){jointState.torque = torque;}
 
     /**
      * @brief

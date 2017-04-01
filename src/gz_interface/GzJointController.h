@@ -8,9 +8,9 @@
 #include <IReadJointController.h>
 #include <string>
 #include <gazebo/transport/transport.hh>
-#include <gz_interface/GzReadResponse.pb.h>
-#include <gz_interface/GzWriteRequest.pb.h>
-#include <gz_interface/GzReadRequest.pb.h>
+#include <GzReadResponse.pb.h>
+#include <GzWriteRequest.pb.h>
+#include <GzReadRequest.pb.h>
 #include <memory>
 #include <mutex>
 #include <condition_variable>
@@ -39,8 +39,12 @@ private:
     JointMap jointMap;
 
     bool waitingResponse = false;
+
     std::mutex readMsgMtx;
     std::mutex writeMsgMtx;
+    std::mutex waitResponseMtx;
+
+    std::condition_variable waitResponseCv;
 
 public:
 
@@ -66,7 +70,7 @@ private:
     bool sendRequest();
     bool sendRequest(std::vector<ReadJointCommand> cmds);
     bool addRequest(ReadJointCommand cmd);
-    JointVec getLastJointState();
+    JointMap getLastJointState();
 
     // IWriteJointController interface
 public:

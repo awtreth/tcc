@@ -8,7 +8,7 @@ class WriteJointCommand : public JointCommand {
 
     public:
 
-    const char* CMD_ID = "WRITE_JOINT_COMMAND";
+    static constexpr const char* CMD_ID = "WRITE_JOINT_COMMAND";
 
     WriteJointCommand(){
         type = JointCommand::Type::WRITE;

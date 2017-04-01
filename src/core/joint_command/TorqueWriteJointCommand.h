@@ -11,7 +11,7 @@ class TorqueWriteJointCommand : public WriteJointCommand {
 
     public:
 
-    const char * CMD_ID = "TORQUE_WRITE_JOINT_COMMAND";
+    static constexpr const char * CMD_ID = "TORQUE_WRITE_JOINT_COMMAND";
 
     TorqueWriteJointCommand(){
         cmdID = CMD_ID;
