@@ -66,7 +66,7 @@ public:
     bool addPosVelCommand(PosVelWriteJointCommand cmd);
 
     // IReadJointController interface
-private:
+public:
     bool sendRequest();
     bool sendRequest(std::vector<ReadJointCommand> cmds);
     bool addRequest(ReadJointCommand cmd);

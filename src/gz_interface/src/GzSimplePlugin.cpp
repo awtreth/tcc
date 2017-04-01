@@ -48,7 +48,7 @@ void GzSimplePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
     gazebo::transport::PublisherPtr pub = node->Advertise<gz_msgs::GzReadResponse>(readResponseTopicName);
 
-    this->pubMap[pub->GetTopic()] = pub;
+    this->pubMap[readResponseTopicName] = pub;
 
     int i = 0;
     for(auto joint: joints) {
@@ -108,8 +108,6 @@ void GzSimplePlugin::handleReadRequest(GzReadRequestPtr &msg) {
 
         if(posVelPidCondition)
             getPosVelPids(&response);
-
-
 
         transport::PublisherPtr pub;
 
@@ -189,9 +187,9 @@ void GzSimplePlugin::getJointStates(gz_msgs::GzReadResponse *response) {
 
         std::cout << "GetPosition of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
 
-        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
+        response->add_vel(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
 
-        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
+        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->vel(i) << std::endl;
 
         //gazebo::physics::JointWrench wrench = joints.at(jointNameMap[response->jointnames(i)])->GetForceTorque(0);
 
@@ -227,9 +225,9 @@ void GzSimplePlugin::getVelocities(gz_msgs::GzReadResponse *response)
 {
     for (int i = 0; i < response->jointnames_size(); i++) {
 
-        response->add_pos(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
+        response->add_vel(joints[jointNameMap[response->jointnames(i)]]->GetVelocity(0));
 
-        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->pos(i) << std::endl;
+        std::cout << "GetVelocity of Joint " << response->jointnames(i) << ": "<< response->vel(i) << std::endl;
 
     }
 }

@@ -13,8 +13,6 @@
 #include <map>
 #include <string>
 
-#define DEFAULT_GZ_WRITE_REQUEST_TOPIC_NAME "/simple_plugin/cmd"
-#define DEFAULT_GZ_READ_ANSWER_TOPIC_NAME   "/simple_plugin/status"
 
 namespace gazebo
 {
@@ -79,7 +77,7 @@ public:
 
 };
 
-GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin);
+GZ_REGISTER_MODEL_PLUGIN(GzSimplePlugin)
 }
 
 #endif // GZSIMPLEPLUGIN_H

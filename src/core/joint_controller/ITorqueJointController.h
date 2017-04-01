@@ -15,7 +15,7 @@ class ITorqueJointController{
 
     public:
 
-    virtual bool sendTorqueCommand(std::vector<TorqueWriteJointCommand> cmd);
+    virtual bool sendTorqueCommand(std::vector<TorqueWriteJointCommand> cmd) = 0;
 
     virtual bool sendTorqueCommand() = 0;
 

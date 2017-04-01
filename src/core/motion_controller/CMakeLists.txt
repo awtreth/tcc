@@ -1,5 +1,5 @@
 #add_subdirectory(joint_command)
 #add_subdirectory(joint_controller)
 #add_subdirectory(joint_motion)
-add_subdirectory(tests)
+#add_subdirectory(tests)
 add_library(motion_controller SHARED src/MotionController.cpp)

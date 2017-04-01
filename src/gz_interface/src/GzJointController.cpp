@@ -27,7 +27,7 @@ GzJointController::GzJointController(std::vector<std::__cxx11::string> jointName
     readPub->WaitForConnection();
 
     // Subscribe to the topic, and register a callback
-    sub = node->Subscribe(subTopic, &GzJointController::onReadMsg, this);
+    sub = node->Subscribe(subTopic, &GzJointController::onReadMsg, this,true);
 
     for(auto name : jointNames)
         jointMap[name] = Joint(name);
@@ -108,6 +108,7 @@ bool GzJointController::addRequest(ReadJointCommand cmd)
 JointMap GzJointController::getLastJointState()
 {
     std::unique_lock<std::mutex> lk(waitResponseMtx);
+
     if(waitingResponse)
         waitResponseCv.wait(lk);
 
@@ -171,9 +172,10 @@ bool GzJointController::addCommand(WriteJointCommand cmd)
 
 void GzJointController::onReadMsg(GzReadResponsePtr& msg)
 {
+    waitResponseMtx.lock();
+
     for(int i = 0; i < msg->jointnames_size(); i++) {
 
-        waitResponseMtx.lock();
         if(msg->pos_size()>0)
             jointMap.at(msg->jointnames(i)).setPos(msg->pos(i));
 
@@ -189,12 +191,13 @@ void GzJointController::onReadMsg(GzReadResponsePtr& msg)
         if(msg->velpid_size()>0)
             jointMap.at(msg->jointnames(i)).setVelPid(msg->velpid(i).kp(), msg->velpid(i).kd(), msg->velpid(i).ki());
 
-        waitingResponse = false;
-        waitResponseMtx.unlock();
-        waitResponseCv.notify_all();
 
 //        std::cout << "Joint " + std::to_string(i) + ": " + jointMap.at(msg->jointnames(i)).getJointState().toString() << std::endl;
+
     }
+    waitingResponse = false;
+    waitResponseMtx.unlock();
+    waitResponseCv.notify_all();
 
 }
 

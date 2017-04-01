@@ -10,6 +10,8 @@
 
 class IReadJointController{
 
+public:
+
     virtual bool sendRequest() = 0;
 
     virtual bool sendRequest(std::vector<ReadJointCommand> cmds) = 0;

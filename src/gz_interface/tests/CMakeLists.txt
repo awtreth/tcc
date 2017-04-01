@@ -1,0 +1,7 @@
+
+
+#add_definitions(DBOOST_SYSTEM_NO_DEPRECATED)
+
+add_executable(gz_joint_controller_test gz_joint_controller_test.cpp)
+
+target_link_libraries(gz_joint_controller_test gz_joint_controller)
