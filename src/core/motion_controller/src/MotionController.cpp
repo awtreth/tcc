@@ -107,38 +107,40 @@ void MotionController::stopIntervention()
     pauseMtx.unlock();
 }
 
-std::vector<WriteJointCommandPtr> MotionController::onWriteCmd(Pose currentPose)
+std::vector<WriteJointCommand> MotionController::onWriteCmd(Pose currentPose)
 {
     auto posVelCmds = currentPose.toJointCommand();
-    auto ret = std::vector<WriteJointCommandPtr>();
+    std::vector<WriteJointCommand> ret;
 
     for(auto posVelCmd : posVelCmds)
-        ret.push_back(std::make_shared<PosVelWriteJointCommand>(posVelCmd));
+        ret.push_back(posVelCmd);
 
     return ret;
 }
 
-void MotionController::writeCmd(std::vector<WriteJointCommandPtr> cmd)
+void MotionController::writeCmd(std::vector<WriteJointCommand> cmd)
 {
-    jointController->sendWriteCommand(cmd);
+    writeJointController->sendCommand(cmd);
 }
 
-std::vector<ReadJointCommandPtr> MotionController::onReadCmd()
+std::vector<ReadJointCommand> MotionController::onReadCmd()
 {
-    auto ret = std::vector<ReadJointCommandPtr>();
+    std::vector<ReadJointCommand> ret;
 
-    for(Joint joint : jointController->getJointVec())
-        ret.push_back(std::make_shared<ReadJointCommand>(ReadJointCommand(joint.getName())));
+    //TODO: posso deixar fixo
+    for(auto jmap : readJointController->getLastJointState())
+        ret.push_back(ReadJointCommand(jmap.second.getName()));
 
     return ret;
 }
 
-std::vector<Joint> MotionController::readCmd(std::vector<ReadJointCommandPtr> cmd)
+JointMap MotionController::readCmd(std::vector<ReadJointCommand> cmd)
 {
-    return jointController->sendReadCommand(cmd);
+    readJointController->sendRequest(cmd);
+    return readJointController->getLastJointState();
 }
 
-void MotionController::afterRead(std::vector<Joint> updatedJoints)
+void MotionController::afterRead(JointMap updatedJoints)
 {
 
 }
@@ -265,9 +267,9 @@ void* MotionController::loop(void* param)
 
             if(sync->currentPageSet.hasCurrentPose()){
 
-                std::vector<WriteJointCommandPtr> wCmd;
+                //std::vector<WriteJointCommand> wCmd;
 
-                wCmd = sync->onWriteCmd(sync->currentPageSet.getCurrentPose());
+                auto wCmd = sync->onWriteCmd(sync->currentPageSet.getCurrentPose());
 
                 std::this_thread::sleep_until(sync->nextWriteTime);
 
@@ -312,12 +314,23 @@ void MotionController::initThread()
 }
 
 
-MotionController::MotionController(JointControllerPtr _jointController){
-    jointController = _jointController;
-    //joints = jointController->getJointVec();
+MotionController::MotionController(IWriteJointController *writeJointController_, IReadJointController *readJointController_){
+
+    loadControllers(writeJointController_,readJointController_);
+}
+
+bool MotionController::loadControllers(IWriteJointController *writeJointController_, IReadJointController *readJointController_)
+{
+    writeJointController = std::shared_ptr<IWriteJointController>(writeJointController_);
+    readJointController = std::shared_ptr<IReadJointController>(readJointController_);
+
     pageSetQueue = std::queue<PageSet>();
 
+    //jointNames = _jointNames;
+
     initThread();
+
+    return true;
 }
 
 PageSet MotionController::getCurrentPageSet() const
@@ -367,10 +380,4 @@ bool MotionController::startMotion()
 
 MotionController::MotionController()
 {
-
-    jointController = JointControllerPtr();
-    currentPageSet = PageSet();
-    pageSetQueue = std::queue<PageSet>();
-
-    initThread();
 }

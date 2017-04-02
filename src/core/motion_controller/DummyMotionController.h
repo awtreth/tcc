@@ -1,7 +1,7 @@
 #ifndef DUMMY_MOTION_CONTROLLER_H
 #define DUMMY_MOTION_CONTROLLER_H
 
-#include <MotionController.h>
+#include <motion_controller/MotionController.h>
 #include <AsyncLogger.h>
 #include <chrono>
 #include <thread>
@@ -24,7 +24,7 @@ private:
     // MotionController interface
 protected:
 
-    void writeCmd(std::vector<WriteJointCommandPtr> cmd){
+    void writeCmd(std::vector<WriteJointCommand> cmd){
         now = std::chrono::steady_clock::now();
         long period = std::chrono::duration_cast<std::chrono::microseconds>(now-lastWritePoint).count();
         long ts = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
@@ -41,11 +41,11 @@ protected:
         std::this_thread::sleep_for(delayTime);
     }
 
-    std::vector<ReadJointCommandPtr> onReadCmd(){
-        return std::vector<ReadJointCommandPtr>();
+    std::vector<ReadJointCommand> onReadCmd(){
+        return std::vector<ReadJointCommand>();
     }
 
-    std::vector<Joint> readCmd(std::vector<ReadJointCommandPtr> cmd){
+    JointMap readCmd(std::vector<ReadJointCommand> cmd){
         now = std::chrono::steady_clock::now();
         long period = std::chrono::duration_cast<std::chrono::microseconds>(now-lastReadPoint).count();
         long ts = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
@@ -61,10 +61,10 @@ protected:
 
         std::this_thread::sleep_for(delayTime);
 
-        return std::vector<Joint>();
+        return JointMap();
     }
 
-    std::vector<WriteJointCommandPtr> onWriteCmd(Pose currentPose){
+    std::vector<WriteJointCommand> onWriteCmd(Pose currentPose){
         pose = currentPose;
         return MotionController::onWriteCmd(currentPose);
     }
@@ -73,6 +73,7 @@ public:
 
     DummyMotionController(long _delayTime = 10e3){
         delayTime = std::chrono::microseconds(_delayTime);
+        initThread();
     }
 
     ~DummyMotionController(){

@@ -1,5 +1,5 @@
 
-add_executable(main main.cpp)
+add_executable(DummyMotionController_test DummyMotionController_test.cpp)
 #add_executable(testeDummySynchronizer testeDummySynchronizer.cpp)
 
 #target_link_libraries(gz_interface_msgs ${PROTOBUF_LIBRARY})
@@ -8,4 +8,4 @@ add_executable(main main.cpp)
 #target_link_libraries(gz_joint_controller ${GAZEBO_LIBRARIES} ${PROTOBUF_LIBRARY} gz_interface_msgs)
 
 #target_link_libraries(gz_interface ${GAZEBO_LIBRARIES} pthread)
-target_link_libraries(main pthread motion_controller jointMotion async_logger)
+target_link_libraries(DummyMotionController_test motion_controller jointMotion async_logger pthread)

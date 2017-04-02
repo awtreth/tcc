@@ -5,7 +5,7 @@
 
 #include <MapVec.h>
 #include <string>
-#include <JointCommand.h>
+#include <PosVelWriteJointCommand.h>
 
 class PosVel {
 

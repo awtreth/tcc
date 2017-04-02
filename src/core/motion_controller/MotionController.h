@@ -1,7 +1,8 @@
 #ifndef MotionController_H
 #define MotionController_H
 
-#include <JointController.h>
+#include <IWriteJointController.h>
+#include <IReadJointController.h>
 #include <Joint.h>
 #include <JointCommand.h>
 #include <chrono>
@@ -11,9 +12,9 @@
 #include <pthread.h>
 #include <time.h>
 #include <queue>
-#include <PageSet.h>
-#include <Page.h>
-#include <Pose.h>
+#include <joint_motion/PageSet.h>
+#include <joint_motion/Page.h>
+#include <joint_motion/Pose.h>
 
 using namespace std::chrono;
 
@@ -62,36 +63,20 @@ class MotionController {
 
     static void* loop(void*);
 
-    void initThread();
 
     protected:
+    void initThread();
 
     steady_clock::time_point getNextReadTime() const;
 
     steady_clock::time_point getNextWriteTime() const;
 
-//    virtual void onRead(){}
-
-//    virtual void read()=0;
-
-//    virtual void afterRead(){}
-
-//    virtual void onWrite(){}
-
-//    virtual void write()=0;
-
-//    virtual void afterWrite(){}
-
-//    virtual void onReadMiss(){}
-
-//    virtual void onWriteMiss(){}
-
     void startIntervention();
 
     void stopIntervention();
 
-    JointControllerPtr jointController;
-    //std::vector<Joint> joints;
+    WriteJointControllerPtr writeJointController;
+    ReadJointControllerPtr readJointController;
 
     PageSet currentPageSet;
     std::mutex currentPageSetMtx;
@@ -99,23 +84,26 @@ class MotionController {
     std::queue<PageSet> pageSetQueue;
     std::mutex pageSetQueueMtx;
 
-    virtual std::vector<WriteJointCommandPtr> onWriteCmd(Pose currentPose);
-    virtual void writeCmd(std::vector<WriteJointCommandPtr> cmd);
-    virtual std::vector<ReadJointCommandPtr> onReadCmd();
-    virtual std::vector<Joint> readCmd(std::vector<ReadJointCommandPtr> cmd);
-    virtual void afterRead(std::vector<Joint> updatedJoints);
+    virtual std::vector<WriteJointCommand> onWriteCmd(Pose currentPose);
+    virtual void writeCmd(std::vector<WriteJointCommand> cmd);
+    virtual std::vector<ReadJointCommand> onReadCmd();
+    virtual JointMap readCmd(std::vector<ReadJointCommand> cmd);
+    virtual void afterRead(JointMap updatedJoints);
 
     void resumeLoop(long readWaitTime = 0);
 
     void pauseLoop();
 
+    std::vector<std::string> jointNames;
 
     public:
     void close();
 
     MotionController();
 
-    MotionController(JointControllerPtr _jointController);//10ms
+    MotionController(IWriteJointController* writeJointController_, IReadJointController* readJointController_);//10ms
+
+    bool loadControllers(IWriteJointController* writeJointController_, IReadJointController* readJointController_);
 
     //Funcionalidades de controle de movimento
     PageSet getCurrentPageSet() const;
