@@ -16,12 +16,14 @@
 
 using namespace std::chrono;
 
-unsigned int MotionController::getWritePeriod() const
+template<class JointController, class JointCommand>
+unsigned int MotionController<JointController,JointCommand>::getWritePeriod() const
 {
     return writePeriod.count();
 }
 
-void MotionController::setWritePeriod(unsigned value)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::setWritePeriod(unsigned value)
 {
     requestCount++;
 
@@ -36,12 +38,14 @@ void MotionController::setWritePeriod(unsigned value)
     pauseMtx.unlock();
 }
 
-unsigned int MotionController::getReadPeriod() const
+template<class JointController, class JointCommand>
+unsigned int MotionController<JointController,JointCommand>::getReadPeriod() const
 {
     return readPeriod.count();
 }
 
-void MotionController::setReadPeriod(unsigned value)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::setReadPeriod(unsigned value)
 {
 
     requestCount++;
@@ -55,12 +59,14 @@ void MotionController::setReadPeriod(unsigned value)
     pauseMtx.unlock();
 }
 
-int MotionController::getReadWritePeriodRatio() const
+template<class JointController, class JointCommand>
+int MotionController<JointController,JointCommand>::getReadWritePeriodRatio() const
 {
     return readWritePeriodRatio;
 }
 
-void MotionController::setReadWritePeriodRatio(int value)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::setReadWritePeriodRatio(int value)
 {
 
     requestCount++;
@@ -77,53 +83,51 @@ void MotionController::setReadWritePeriodRatio(int value)
 
 }
 
-double MotionController::getReadWriteShift() const
+template<class JointController, class JointCommand>
+double MotionController<JointController,JointCommand>::getReadWriteShift() const
 {
     return readWriteShift;
 }
 
-steady_clock::time_point MotionController::getNextReadTime() const
+template<class JointController, class JointCommand>
+steady_clock::time_point MotionController<JointController,JointCommand>::getNextReadTime() const
 {
     return nextReadTime;
 }
 
-steady_clock::time_point MotionController::getNextWriteTime() const
+template<class JointController, class JointCommand>
+steady_clock::time_point MotionController<JointController,JointCommand>::getNextWriteTime() const
 {
     return nextWriteTime;
 }
 
-void MotionController::updateShiftPeriod()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::updateShiftPeriod()
 {
     this->shiftDuration = std::chrono::microseconds( (unsigned) (std::min(this->readPeriod.count(),this->writePeriod.count())*this->readWriteShift));
 }
 
-void MotionController::startIntervention()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::startIntervention()
 {
     pauseMtx.lock();
 }
 
-void MotionController::stopIntervention()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::stopIntervention()
 {
     pauseMtx.unlock();
 }
 
-std::vector<WriteJointCommand> MotionController::onWriteCmd(Pose currentPose)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::writeCmd(std::vector<JointCommand> cmd)
 {
-    auto posVelCmds = currentPose.toJointCommand();
-    std::vector<WriteJointCommand> ret;
 
-    for(auto posVelCmd : posVelCmds)
-        ret.push_back(posVelCmd);
-
-    return ret;
-}
-
-void MotionController::writeCmd(std::vector<WriteJointCommand> cmd)
-{
     writeJointController->sendCommand(cmd);
 }
 
-std::vector<ReadJointCommand> MotionController::onReadCmd()
+template<class JointController, class JointCommand>
+std::vector<ReadJointCommand> MotionController<JointController, JointCommand>::onReadCmd()
 {
     std::vector<ReadJointCommand> ret;
 
@@ -134,18 +138,21 @@ std::vector<ReadJointCommand> MotionController::onReadCmd()
     return ret;
 }
 
-JointMap MotionController::readCmd(std::vector<ReadJointCommand> cmd)
+template<class JointController, class JointCommand>
+JointMap MotionController<JointController,JointCommand>::readCmd(std::vector<ReadJointCommand> cmd)
 {
     readJointController->sendRequest(cmd);
     return readJointController->getLastJointState();
 }
 
-void MotionController::afterRead(JointMap updatedJoints)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::afterRead(JointMap updatedJoints)
 {
 
 }
 
-void MotionController::setReadWriteShift(double value)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::setReadWriteShift(double value)
 {
     if(value > 0 && value < 1){
 
@@ -163,7 +170,8 @@ void MotionController::setReadWriteShift(double value)
     }
 }
 
-void MotionController::resumeLoop(long readWaitTime)
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::resumeLoop(long readWaitTime)
 {
     requestCount++;
 
@@ -190,7 +198,8 @@ void MotionController::resumeLoop(long readWaitTime)
 
 }
 
-void MotionController::pauseLoop()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::pauseLoop()
 {
     requestCount++;
 
@@ -205,7 +214,8 @@ void MotionController::pauseLoop()
 
 }
 
-void MotionController::close()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::close()
 {
 
     requestCount++;
@@ -227,7 +237,8 @@ void MotionController::close()
     //pthread_join(mainPThread,NULL);
 }
 
-void* MotionController::loop(void* param)
+template<class JointController, class JointCommand>
+void* MotionController<JointController,JointCommand>::loop(void* param)
 {
     MotionController *sync = (MotionController *) param;
 
@@ -293,7 +304,8 @@ void* MotionController::loop(void* param)
     return NULL;
 }
 
-void MotionController::initThread()
+template<class JointController, class JointCommand>
+void MotionController<JointController,JointCommand>::initThread()
 {
     setReadPeriod(50e3);
 
@@ -313,15 +325,16 @@ void MotionController::initThread()
 
 }
 
-
-MotionController::MotionController(IWriteJointController *writeJointController_, IReadJointController *readJointController_){
+template<class JointController, class JointCommand>
+MotionController<JointController,JointCommand>::MotionController(JointController *writeJointController_, IReadJointController *readJointController_){
 
     loadControllers(writeJointController_,readJointController_);
 }
 
-bool MotionController::loadControllers(IWriteJointController *writeJointController_, IReadJointController *readJointController_)
+template<class JointController, class JointCommand>
+bool MotionController<JointController,JointCommand>::loadControllers(JointController *writeJointController_, IReadJointController *readJointController_)
 {
-    writeJointController = std::shared_ptr<IWriteJointController>(writeJointController_);
+    writeJointController = std::shared_ptr<JointController>(writeJointController_);
     readJointController = std::shared_ptr<IReadJointController>(readJointController_);
 
     pageSetQueue = std::queue<PageSet>();
@@ -333,17 +346,20 @@ bool MotionController::loadControllers(IWriteJointController *writeJointControll
     return true;
 }
 
-PageSet MotionController::getCurrentPageSet() const
+template<class JointController, class JointCommand>
+PageSet MotionController<JointController,JointCommand>::getCurrentPageSet() const
 {
     return currentPageSet;
 }
 
-std::queue<PageSet> MotionController::getPageSetQueue() const
+template<class JointController, class JointCommand>
+std::queue<PageSet> MotionController<JointController,JointCommand>::getPageSetQueue() const
 {
     return this->pageSetQueue;
 }
 
-bool MotionController::loadPageSet(PageSet pset)
+template<class JointController, class JointCommand>
+bool MotionController<JointController,JointCommand>::loadPageSet(PageSet pset)
 {
     bool success = false;
 
@@ -360,7 +376,8 @@ bool MotionController::loadPageSet(PageSet pset)
     return success;
 }
 
-bool MotionController::startMotion()
+template<class JointController, class JointCommand>
+bool MotionController<JointController,JointCommand>::startMotion()
 {
     bool success = false;
 
@@ -378,6 +395,7 @@ bool MotionController::startMotion()
     return success;
 }
 
-MotionController::MotionController()
+template<class JointController, class JointCommand>
+MotionController<JointController,JointCommand>::MotionController()
 {
 }

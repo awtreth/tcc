@@ -1,24 +1,14 @@
-#include <PosVelMotionController.h>
+#include<PosVelMotionController.h>
 
 
-
-PosVelMotionController::PosVelMotionController(PosVelJointControllerPtr _jointController):AbsMotionController()
-{
-this->jointController = _jointController;
+PosVelMotionController::PosVelMotionController(){
+    
 }
 
-void PosVelMotionController::read()
-{
+PosVelMotionController::PosVelMotionController(IPosVelJointController *wjc, IReadJointController *rjc){
+    
 }
 
-void PosVelMotionController::afterRead()
-{
-}
-
-void PosVelMotionController::onWrite()
-{
-}
-
-void PosVelMotionController::write()
-{
+std::vector<PosVelWriteJointCommand> PosVelMotionController::onWriteCmd(Pose currentPose){
+    return currentPose.toJointCommand();
 }

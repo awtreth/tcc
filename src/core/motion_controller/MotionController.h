@@ -18,6 +18,7 @@
 
 using namespace std::chrono;
 
+template<typename JointController, typename JointCommand>
 class MotionController {
 
     private:
@@ -75,7 +76,8 @@ class MotionController {
 
     void stopIntervention();
 
-    WriteJointControllerPtr writeJointController;
+    //WriteJointControllerPtr writeJointController;
+    std::shared_ptr<JointController> writeJointController;
     ReadJointControllerPtr readJointController;
 
     PageSet currentPageSet;
@@ -84,8 +86,8 @@ class MotionController {
     std::queue<PageSet> pageSetQueue;
     std::mutex pageSetQueueMtx;
 
-    virtual std::vector<WriteJointCommand> onWriteCmd(Pose currentPose);
-    virtual void writeCmd(std::vector<WriteJointCommand> cmd);
+    virtual std::vector<JointCommand> onWriteCmd(Pose currentPose){return std::vector<JointCommand>();}
+    virtual void writeCmd(std::vector<JointCommand> cmd);
     virtual std::vector<ReadJointCommand> onReadCmd();
     virtual JointMap readCmd(std::vector<ReadJointCommand> cmd);
     virtual void afterRead(JointMap updatedJoints);
@@ -101,9 +103,9 @@ class MotionController {
 
     MotionController();
 
-    MotionController(IWriteJointController* writeJointController_, IReadJointController* readJointController_);//10ms
+    MotionController(JointController* writeJointController_, IReadJointController* readJointController_);//10ms
 
-    bool loadControllers(IWriteJointController* writeJointController_, IReadJointController* readJointController_);
+    bool loadControllers(JointController* writeJointController_, IReadJointController* readJointController_);
 
     //Funcionalidades de controle de movimento
     PageSet getCurrentPageSet() const;
@@ -138,7 +140,23 @@ class MotionController {
 
 };
 
+#include <IPosVelJointController.h>
 
+template class MotionController<IPosVelJointController, PosVelWriteJointCommand>;
+
+class PosVelMotionController : public MotionController<IPosVelJointController, PosVelWriteJointCommand> {
+
+    // MotionController interface
+protected:
+
+    PosVelMotionController():MotionController<IPosVelJointController, PosVelWriteJointCommand>(){}
+
+    PosVelMotionController(IPosVelJointController* wjc, IReadJointController* rjc):MotionController<IPosVelJointController, PosVelWriteJointCommand>(wjc,rjc){}
+
+    virtual std::vector<PosVelWriteJointCommand> onWriteCmd(Pose currentPose) override{
+        return currentPose.toJointCommand();
+    }
+};
 
 
 #endif

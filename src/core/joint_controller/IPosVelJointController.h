@@ -8,13 +8,13 @@ class IPosVelJointController {
 
     public:
 
-    virtual bool sendPosVelCommand(std::vector<PosVelWriteJointCommand> cmd) = 0;
+    virtual bool sendCommand(std::vector<PosVelWriteJointCommand> cmd) = 0;
 
-    virtual bool sendPosVelCommand() = 0;
+    //virtual bool sendPosVelCommand() = 0;
 
 //    virtual bool addTorqueCommand(std::vector<PosVelWriteJointCommand> cmds) = 0;
 
-    virtual bool addPosVelCommand(PosVelWriteJointCommand cmd) = 0;
+    virtual bool addCommand(PosVelWriteJointCommand cmd) = 0;
 
 };
 

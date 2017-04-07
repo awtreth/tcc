@@ -18,7 +18,7 @@ int main(){
     writeCmd.push_back(PosVelWriteJointCommand(jointVec[0],-1,0));
     writeCmd.push_back(PosVelWriteJointCommand(jointVec[1],2,0));
 
-    cont.sendPosVelCommand(writeCmd);
+    cont.sendCommand(writeCmd);
 
     std::vector<ReadJointCommand> readCmd;
     readCmd.push_back(ReadJointCommand(jointVec[0]));

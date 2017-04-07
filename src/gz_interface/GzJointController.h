@@ -62,8 +62,8 @@ public:
     // IPosVelJointController interface
 public:
     bool sendPosVelCommand();
-    bool sendPosVelCommand(std::vector<PosVelWriteJointCommand> cmd);
-    bool addPosVelCommand(PosVelWriteJointCommand cmd);
+    bool sendCommand(std::vector<PosVelWriteJointCommand> cmd);
+    bool addCommand(PosVelWriteJointCommand cmd);
 
     // IReadJointController interface
 public:
@@ -76,7 +76,7 @@ public:
 public:
     bool sendCommand();
     bool sendCommand(std::vector<WriteJointCommand> cmds);
-    bool addCommand(WriteJointCommand cmd);
+    bool addCommand(WriteJointCommand &cmd);
 };
 
 #endif

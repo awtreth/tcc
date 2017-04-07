@@ -2,6 +2,10 @@
 
 #add_definitions(DBOOST_SYSTEM_NO_DEPRECATED)
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/core/motion_controller)
+
 add_executable(gz_joint_controller_test gz_joint_controller_test.cpp)
+add_executable(gz_motion_controller_test gz_motion_controller_test.cpp)
 
 target_link_libraries(gz_joint_controller_test gz_joint_controller)
+target_link_libraries(gz_motion_controller_test gz_joint_controller motion_controller jointMotion)

@@ -7,6 +7,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 add_definitions(-std=c++11 -Wall -O ${CMAKE_CXX_FLAGS_DEBUG})
 
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 include_directories(core)
 
 add_subdirectory(gz_interface)

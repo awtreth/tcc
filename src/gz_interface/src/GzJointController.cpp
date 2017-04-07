@@ -60,18 +60,21 @@ bool GzJointController::sendPosVelCommand()
     return sendCommand();//FIXME: enviar somente PosVel
 }
 
-bool GzJointController::sendPosVelCommand(std::vector<PosVelWriteJointCommand> cmd)
+bool GzJointController::sendCommand(std::vector<PosVelWriteJointCommand> cmd)
 {
-    for(auto command : cmd)
-        addPosVelCommand(command);
+    for(auto command : cmd){
+        addCommand(command);
+
+    }
 
     return sendPosVelCommand();
 }
 
-bool GzJointController::addPosVelCommand(PosVelWriteJointCommand cmd)
+bool GzJointController::addCommand(PosVelWriteJointCommand cmd)
 {
     writeMsgMtx.lock();
     writeCmd.add_jointnames(cmd.getJointName());
+//    std::cout << cmd.getPos() << " " << cmd.getVel() << std::endl;
     writeCmd.add_pos(cmd.getPos());
     writeCmd.add_vel(cmd.getVel());
     writeMsgMtx.unlock();
@@ -140,11 +143,14 @@ bool GzJointController::sendTorqueCommand(std::vector<TorqueWriteJointCommand> c
     return sendTorqueCommand();
 }
 
-bool GzJointController::addCommand(WriteJointCommand cmd)
+bool GzJointController::addCommand(WriteJointCommand& cmd)
 {
 
     if(strcmp(cmd.getCmdID(),PosVelWriteJointCommand::CMD_ID)==0){
-        return addPosVelCommand(static_cast<PosVelWriteJointCommand&>(cmd));
+        PosVelWriteJointCommand& pVel = static_cast<PosVelWriteJointCommand&>(cmd);
+        //std::cout << pVel.getPos() << " " << pVel.getVel() << std::endl;
+         return addCommand(pVel);
+                //return addPosVelCommand(static_cast<PosVelWriteJointCommand&>(cmd));
     }else if(strcmp(cmd.getCmdID(),TorqueWriteJointCommand::CMD_ID)==0){
         return addTorqueCommand(static_cast<TorqueWriteJointCommand&>(cmd));
     }

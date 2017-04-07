@@ -1,36 +1,27 @@
 #ifndef POS_VEL_MOTION_CONTROLLER_H
 #define POS_VEL_MOTION_CONTROLLER_H
 
-#include <AbsMotionController.h>
-#include <JointController.h>
+#include <IPosVelJointController.h>
+#include <MotionController.h>
+#include <PosVelWriteJointCommand.h>
 #include <iostream>
 #include <memory>
 
-class PosVelMotionController : public AbsMotionController {
+class PosVelMotionController : public MotionController<IPosVelJointController, PosVelWriteJointCommand> {
 
 
-    private:
+    // MotionController interface
+protected:
 
-    PosVelJointControllerPtr jointController;
+    PosVelMotionController();
 
+    PosVelMotionController(IPosVelJointController* wjc, IReadJointController* rjc);
 
-    public:
-
-    PosVelMotionController(PosVelJointControllerPtr _jointController);
-
-
-    // AbsMotionController interface
-    protected:
-    virtual void read();
-
-    virtual void afterRead();
-
-    virtual void onWrite();
-
-    virtual void write();
+    virtual std::vector<PosVelWriteJointCommand> onWriteCmd(Pose currentPose);
 };
 
 
 
 
 #endif
+
