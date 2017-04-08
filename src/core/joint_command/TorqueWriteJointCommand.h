@@ -26,8 +26,6 @@ class TorqueWriteJointCommand : public WriteJointCommand {
 
     void setTorque(double value){torque = value;}
 
-    //FIXME: métodos do tipo has*() podem gerar problemas
-    bool hasTorque(){return true;}
 };
 
 //typedef std::shared_ptr<TorqueWriteJointCommand> TorqueWriteJointCommandPtr;

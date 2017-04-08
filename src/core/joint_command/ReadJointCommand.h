@@ -5,12 +5,15 @@
 
 class ReadJointCommand : public JointCommand {
 
-    private:
-    bool posVel = true;
+private:
+    bool pos = true;
+    bool vel = true;
     bool torque = true;
-    bool pid = false;
+    //    bool posPid = false;
+    //    bool velPid = false;
 
-    public:
+
+public:
 
     const char* CMD_ID = "READ_JOINT_COMMAND";
 
@@ -19,24 +22,26 @@ class ReadJointCommand : public JointCommand {
         cmdID = CMD_ID;
     }
 
-    ReadJointCommand(std::string _jointName, bool hasPosVel = true, bool hasTorque = true, bool hasPid = false):ReadJointCommand(){
-        jointName = _jointName;
-        posVel = hasPosVel;
-        torque = hasTorque;
-        pid = hasPid;
-    }
-
-    bool hasPosVel(){return posVel;}
+    bool hasPos(){return pos;}
+    bool hasVel(){return vel;}
     bool hasTorque(){return torque;}
-    bool hasPosVelPid(){return pid;}
+    bool hasPosVel(){return pos&&vel;}
+    bool hasJointState(){return pos&&vel&&torque;}
 
-    void addPosVel(){posVel = true;}
-    void rmPosVel(){posVel = false;}
+    void addPos(){pos = true;}
+    void rmPos(){pos = false;}
+
+    void addVel(){vel = true;}
+    void rmVel(){vel = false;}
+
     void addTorque(){torque = true;}
     void rmTorque(){torque = false;}
-    void addPosVelPid(){pid = true;}
-    void rmPosVelPid(){pid = false;}
 
+    void addPosVel(){addPos();addVel();}
+    void rmPosVel(){rmPos();rmVel();}
+
+    void addJointState(){addPos();addVel();addTorque();}
+    void rmJointState(){rmPos();rmVel();rmTorque();}
 };
 
 //typedef std::shared_ptr<ReadJointCommand> ReadJointCommandPtr;

@@ -103,7 +103,7 @@ bool GzJointController::addRequest(ReadJointCommand cmd)
     readCmd.set_vel(cmd.hasPosVel());
     readCmd.set_torque(cmd.hasTorque());
     //TODO: separar PosPid e VelPid
-    readCmd.set_posvelpid(cmd.hasPosVelPid());
+    //readCmd.set_posvelpid(cmd.hasPosVelPid());
     readMsgMtx.unlock();
     return true;
 }

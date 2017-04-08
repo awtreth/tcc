@@ -30,8 +30,6 @@ class PosVelWriteJointCommand : public WriteJointCommand {
     double getVel() const{return vel;}
     void setVel(double value){vel = value;}
 
-    //FIXME: métodos do tipo has*() podem gerar problemas
-    bool hasPosVel(){return true;}
 };
 
 //typedef std::shared_ptr<PosVelWriteJointCommand> PosVelWriteJointCommandPtr;

@@ -32,18 +32,11 @@ class JointCommand {
 
     virtual const char* getCmdID() const{ return cmdID; }
 
-    //FIXME: métodos do tipo has*() podem gerar problemas
-    virtual bool hasPosVel(){ return false;}
-
-    virtual bool hasTorque(){ return false; }
-
-    virtual bool hasPosVelPid(){ return false; }
-
     std::string getJointName() const{return jointName;}
 
     void setJointName(const std::string &value){jointName = value;}
 };
 
-typedef std::shared_ptr<JointCommand> JointCommandPtr;
+//typedef std::shared_ptr<JointCommand> JointCommandPtr;
 
 #endif
