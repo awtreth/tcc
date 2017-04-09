@@ -25,6 +25,18 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::stopIntervention()
 template<typename Controller, typename HardwareInterface>
 bool ControllerTimeHandler<Controller,HardwareInterface>::update()
 {
+    for(auto controller : controllers)
+        controller.second.update(std::chrono::steady_clock::now());
+
+    return true;
+}
+
+template<typename Controller, typename HardwareInterface>
+bool ControllerTimeHandler::prepareRead()
+{
+    for(auto controller : controllers)
+        controller.second.prepareRead(std::chrono::steady_clock::now());
+
     return true;
 }
 

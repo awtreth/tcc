@@ -87,4 +87,7 @@ public:
     double getPeriodShift();
 
 };
+
+
+
 #endif
