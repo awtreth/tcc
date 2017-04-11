@@ -3,9 +3,10 @@
 
 class IHardwareInterface {
 
-    bool write() = 0;
+    public:
+    virtual bool write() = 0;
 
-    bool read() = 0;
+    virtual bool read() = 0;
 };
 
 #endif

@@ -32,10 +32,10 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::update()
 }
 
 template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler::prepareRead()
+bool ControllerTimeHandler<Controller,HardwareInterface>::prepareRead()
 {
     for(auto controller : controllers)
-        controller.second.prepareRead(std::chrono::steady_clock::now());
+        controller.second->prepareRead(std::chrono::steady_clock::now());
 
     return true;
 }
