@@ -20,9 +20,11 @@ private:
 
     std::thread mainThread;
 
-    std::chrono::microseconds period;//por padrão: 50ms
+    HardwareInterfacePtr hardwareInterface;
+    std::map<std::string,ControllerPtr> controllers;
 
-    double periodShift = 0.5;
+    std::chrono::microseconds period = std::chrono::microseconds(20e3);//por padrão: 20ms
+
 
     std::chrono::microseconds shiftDuration;
 
@@ -30,21 +32,18 @@ private:
 
     std::chrono::steady_clock::time_point nextWriteTime;
 
+    double periodShift = 0.5;
+
     bool isPaused = true;
 
-    int requestCount = 0;
-
-    std::mutex requestCountMtx;
+    bool isClosed = false;
 
     std::mutex pauseMtx;
-
-    std::mutex nextTimeMtx;
 
     std::condition_variable pauseCv;
 
     bool updateShiftPeriod();
 
-    bool isClosed = false;
 
     static void* loop(void*);
 
@@ -53,21 +52,20 @@ private:
     bool startIntervention();
     bool stopIntervention();
 
-    HardwareInterfacePtr hardwareInterface;
-    //std::map<std::string,HardwareInterfacePtr> hardwareInterfaces;
-    std::map<std::string,ControllerPtr> controllers;
-
+    std::chrono::steady_clock::time_point resumeTime;
 
 protected:
     //permite outras implementações
     virtual bool update();//entre a leitura e a escrita
     virtual bool prepareRead();//entre a escrita e a leitura
-    virtual bool onReadMiss();
-    virtual bool onWriteMiss();
+    virtual bool onReadMiss(std::chrono::steady_clock::time_point desired, std::chrono::steady_clock::time_point realization);
+    virtual bool onWriteMiss(std::chrono::steady_clock::time_point desired, std::chrono::steady_clock::time_point realization);
 public:
 
     ControllerTimeHandler();
     ControllerTimeHandler(HardwareInterface* hwInterface);
+
+    bool setHardwareInterface(HardwareInterface* hwInterface);
 
     bool loadController(std::string controllerName, Controller* controller);
     bool unloadController(std::string controllerName, Controller* controller_out = NULL);
@@ -76,7 +74,7 @@ public:
     bool setPeriod(const std::chrono::microseconds duration);
     std::chrono::microseconds getPeriod() const;
 
-    bool resumeLoop(long readWaitTime = 0);
+    bool resumeLoop(std::chrono::microseconds readWaitTime = getPeriod());
     bool pauseLoop();
     bool close();
 
@@ -84,7 +82,7 @@ public:
     double getFrequency();
 
     bool setPeriodShift(double shift);
-    double getPeriodShift();
+    double getPeriodShift() const;
 
 };
 
