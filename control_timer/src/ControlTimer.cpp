@@ -1,39 +1,36 @@
-#include <ControllerTimeHandler.h>
-
+#include <ControlTimer.h>
 #include <iostream>
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::updateShiftPeriod()
+//#define DEBUG
+
+
+bool ControlTimer::updateShiftPeriod()
 {
-    this->shiftDuration = std::chrono::microseconds( period*this->periodShift);
+    this->shiftDuration = std::chrono::microseconds(long(period.count()*this->periodShift));
+
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::startIntervention()
-{
-    pauseMtx.lock();
-    return true;
-}
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::stopIntervention()
-{
-    pauseMtx.unlock();
-    return true;
-}
+bool ControlTimer::update()
+{    
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::update()
-{
     for(auto controller : controllers)
         controller.second->update(std::chrono::steady_clock::now());
 
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::prepareRead()
+void ControlTimer::defaultInit()
+{
+    setPeriod(std::chrono::milliseconds(20));
+    setPeriodShift(0.5);
+    updateShiftPeriod();
+    initThread();
+}
+
+
+bool ControlTimer::prepareRead()
 {
     for(auto controller : controllers)
         controller.second->prepareRead(std::chrono::steady_clock::now());
@@ -41,8 +38,8 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::prepareRead()
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::onReadMiss(std::chrono::_V2::steady_clock::time_point desired, std::chrono::_V2::steady_clock::time_point realization)
+
+bool ControlTimer::onReadMiss(std::chrono::_V2::steady_clock::time_point desired, std::chrono::_V2::steady_clock::time_point realization)
 {
     //FIXME: cout nao me parece adequado para implementacao padrao, pois gera atraso
     //TODO: evitar repeticao de codigo com onWriteMiss
@@ -54,8 +51,8 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::onReadMiss(std::chrono
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::onWriteMiss(std::chrono::_V2::steady_clock::time_point desired, std::chrono::_V2::steady_clock::time_point realization)
+
+bool ControlTimer::onWriteMiss(std::chrono::_V2::steady_clock::time_point desired, std::chrono::_V2::steady_clock::time_point realization)
 {
     //FIXME: cout nao me parece adequado para implementacao padrao, pois gera atraso
     //TODO: evitar repeticao de codigo com onReadMiss
@@ -66,87 +63,86 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::onWriteMiss(std::chron
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-ControllerTimeHandler<Controller, HardwareInterface>::ControllerTimeHandler()
+
+ControlTimer::ControlTimer()
 {
-    periodShift = 0.5;
-    period = std::chrono::milliseconds(20);
-    updateShiftPeriod();
-    initThread();
+    defaultInit();
 }
 
-template<typename Controller, typename HardwareInterface>
-ControllerTimeHandler<Controller, HardwareInterface>::ControllerTimeHandler(HardwareInterface *hwInterface)
+
+ControlTimer::ControlTimer(HardwareInterfacePtr hwInterface)
 {
-    ControllerTimeHandler<Controller,HardwareInterface>();
+    defaultInit();
     setHardwareInterface(hwInterface);
     resumeLoop();
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller, HardwareInterface>::setHardwareInterface(HardwareInterface *hwInterface)
-{
-    startIntervention();
-    this->hardwareInterface = HardwareInterfacePtr(hwInterface);
-    stopIntervention();
 
-    return this->hardwareInterface;
+bool ControlTimer::setHardwareInterface(HardwareInterfacePtr hwInterface)
+{
+//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    pauseMtx.lock();
+    //this->hardwareInterface = HardwareInterfacePtr(hwInterface);
+    hardwareInterface = hwInterface;
+    pauseMtx.unlock();
+
+    return this->hardwareInterface.operator bool();
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::loadController(std::__cxx11::string controllerName, Controller *controller)
+
+bool ControlTimer::loadController(std::string controllerName, ControllerPtr controller)
 {
     //TODO: fazer tratamentos adequados para nao substituir existentes
-    startIntervention();
-    this->controllers[controllerName] = ControllerPtr(controller);
-    stopIntervention();
+//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    pauseMtx.lock();
+    //this->controllers[controllerName] = ControllerPtr(controller);
+    this->controllers[controllerName] = controller;
+    pauseMtx.unlock();
 
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::unloadController(std::__cxx11::string controllerName, Controller *controller_out)
+
+ControllerPtr ControlTimer::unloadController(std::string controllerName)
 {
     //TODO: fazer tratamentos adequados para retirar um controller
-    startIntervention();
-
-    if(controller_out != NULL)
-        controller_out = controllers[controllerName].get();
+//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    pauseMtx.lock();
+    auto controller_out = controllers[controllerName];
 
     controllers.erase(controllerName);
 
-    stopIntervention();
+    pauseMtx.unlock();
 
-    return true;
+    return controller_out;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::switchController(std::__cxx11::string controller_out_name, std::__cxx11::string controller_in_name, Controller *controller_in, Controller *controller_out)
+
+ControllerPtr ControlTimer::switchController(std::string controller_out_name, std::string controller_in_name, ControllerPtr controller_in)
 {
     //TODO: fazer tratamentos adequados do switch
-
-    startIntervention();
-
-    if(controller_out != NULL)
-        controller_out = controllers[controller_out_name].get();
+//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    pauseMtx.lock();
+    auto controller_out = controllers[controller_out_name];
 
     controllers.erase(controller_out_name);
 
-    this->controllers[controller_in_name] = ControllerPtr(controller_in);
+    //controllers[controller_in_name] = ControllerPtr(controller_in);
+    controllers[controller_in_name] = controller_in;
 
-    stopIntervention();
+    pauseMtx.unlock();
 
-    return true;
+    return controller_out;
 }
 
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::setPeriodShift(double value)
+
+bool ControlTimer::setPeriodShift(double value)
 {
     if(value > 0 && value < 1){
 
-        std::unique_lock<std::mutex> lck(pauseMtx);
-
+        //        std::unique_lock<std::mutex> lck(pauseMtx);
+        pauseMtx.lock();
         periodShift = value;
         updateShiftPeriod();
 
@@ -156,27 +152,27 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::setPeriodShift(double 
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-double ControllerTimeHandler<Controller,HardwareInterface>::getPeriodShift() const
+
+double ControlTimer::getPeriodShift() const
 {
     return periodShift;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::resumeLoop(std::chrono::microseconds readWaitTime)
+
+bool ControlTimer::resumeLoop(std::chrono::microseconds readWaitTime)
 {
 
-    std::unique_lock<std::mutex> lck(pauseMtx);
+    std::lock_guard<std::mutex> lck(this->pauseMtx);
 
-    if(this->HardwareInterfacePtr){
+    if(this->hardwareInterface){
         this->nextReadTime = std::chrono::steady_clock::now() + readWaitTime;
         this->nextWriteTime = this->nextReadTime + this->shiftDuration;
 
         this->isPaused = false;
         this->resumeTime = nextReadTime;
 
-        pauseCv.notify_all();
-        pauseMtx.unlock();
+        this->pauseCv.notify_all();
+        this->pauseMtx.unlock();
         return true;
     }else{
         pauseMtx.unlock();
@@ -186,83 +182,87 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::resumeLoop(std::chrono
 }
 
 
-template<typename Controller, typename HardwareInterface>
-void *ControllerTimeHandler<Controller,HardwareInterface>::loop(void * param)
+#include <unistd.h>
+void ControlTimer::loop()
 {
-    ControllerTimeHandler<Controller,HardwareInterface> *sync = (ControllerTimeHandler<Controller,HardwareInterface> *) param;
-
     bool evaluateMiss = true;
 
     std::chrono::steady_clock::time_point now;
 
     while(true) {
 
-        std::unique_lock<std::mutex> lck(sync->pauseMtx);
+        std::unique_lock<std::mutex> lck(pauseMtx);
 
-        while(sync->isPaused)
-            sync->pauseCv.wait(lck);
+        while(isPaused)
+            pauseCv.wait(lck);
 
-        if (sync->isClosed)
+        if (isClosed)
             break;
 
-        sync->prepareRead();
+        prepareRead();
 
-        if(sync->nextReadTime < sync->resumeTime)
+        if(nextReadTime <= resumeTime)
             evaluateMiss=false;
         else
             evaluateMiss=true;
 
         now = std::chrono::steady_clock::now();
 
-        std::this_thread::sleep_until(sync->nextReadTime);
-        sync->hardwareInterface->read();
+        std::this_thread::sleep_until(nextReadTime);
+#ifdef DEBUG
+        std::cout << "READ" << std::endl;
+#endif
+        hardwareInterface->read();
 
-        if(evaluateMiss && now > sync->nextReadTime)
-            onReadMiss(sync->nextReadTime, now);
+        if(evaluateMiss && now > nextReadTime)
+            onReadMiss(nextReadTime, now);
 
-        sync->update();
+        update();
 
         now = std::chrono::steady_clock::now();
 
-        std::this_thread::sleep_until(sync->nextWriteTime);
-        sync->hardwareInterface->write();
+        std::this_thread::sleep_until(nextWriteTime);
+#ifdef DEBUG
+        std::cout << "WRITE" << std::endl;
+#endif
+        hardwareInterface->write();
 
-        if(evaluateMiss && now > sync->nextWriteTime)
-            onWriteMiss(sync->nextWriteTime, now);
+        if(evaluateMiss && now > nextWriteTime)
+            onWriteMiss(nextWriteTime, now);
 
-        sync->nextReadTime += sync->period;
-        sync->nextWriteTime += sync->period;
+        nextReadTime += period;
+        nextWriteTime += period;
 
-        sync->pauseMtx.unlock();
+        pauseMtx.unlock();
 
     }
 
-    return NULL;
+    //    return NULL;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::initThread()
+
+bool ControlTimer::initThread()
 {
     this->isPaused = true;
 
-    isClosed = false;
+    this->isClosed = false;
 
-    mainThread = std::thread(&this->loop, this);
+    mainThread = std::thread(&ControlTimer::loop, this);
 
     mainThread.detach();
 
-    struct sched_param param;
+    //    struct sched_param param;
 
-    param.__sched_priority = 51;
+    //    param.__sched_priority = 51;
 
-    //TODO: colocar verificacao se a priorida foi configurada mesmo
-    pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
+    //    //TODO: colocar verificacao se a priorida foi configurada mesmo
+    //    pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
 
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::close()
+
+bool ControlTimer::close()
 {
     std::unique_lock<std::mutex> lck(pauseMtx);
 
@@ -278,32 +278,33 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::close()
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::setFrequency(double freq)
+
+bool ControlTimer::setFrequency(double freq)
 {
     //TODO: exception?
     if(freq<=0)
         return false;
 
-    setPeriod(std::chrono::microseconds((1/freq)*1e6));
+    setPeriod(std::chrono::microseconds(long((1/freq)*1e6)));
 
     return true;
 
 }
 
-template<typename Controller, typename HardwareInterface>
-double ControllerTimeHandler<Controller,HardwareInterface>::getFrequency()
+
+double ControlTimer::getFrequency()
 {
-    return (1./(period.count()/(double)1e6));
+    return (1./(period.count()/double(1e6)));
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::setPeriod(const std::chrono::microseconds duration)
+
+bool ControlTimer::setPeriod(const std::chrono::microseconds duration)
 {
     if(duration.count()<=0)
         return false;
 
-    std::unique_lock<std::mutex> lck(pauseMtx);
+    //    std::unique_lock<std::mutex> lck(pauseMtx);
+    pauseMtx.lock();
 
     period = duration;
 
@@ -314,16 +315,16 @@ bool ControllerTimeHandler<Controller,HardwareInterface>::setPeriod(const std::c
     return true;
 }
 
-template<typename Controller, typename HardwareInterface>
-std::chrono::microseconds ControllerTimeHandler<Controller,HardwareInterface>::getPeriod() const
+
+std::chrono::microseconds ControlTimer::getPeriod() const
 {
     return period;
 }
 
-template<typename Controller, typename HardwareInterface>
-bool ControllerTimeHandler<Controller,HardwareInterface>::pauseLoop()
+
+bool ControlTimer::pauseLoop()
 {
-    std::unique_lock<std::mutex> lck(pauseMtx);
+    std::lock_guard<std::mutex> lck(pauseMtx);
 
     isPaused = true;
 

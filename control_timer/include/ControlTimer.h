@@ -5,32 +5,31 @@
 #include <string>
 #include <chrono>
 #include <thread>
-#include <mutex>              // std::mutex, std::unique_lock
-#include <condition_variable> // std::condition_variable
+#include <mutex>              // mutex, unique_lock
+#include <condition_variable> // condition_variable
 #include <IController.h>
 #include <IHardwareInterface.h>
+#include <memory>
+#include <iostream>
 
-template<typename Controller = IController, typename HardwareInterface = IHardwareInterface>
-class ControllerTimeHandler {
+using namespace std;
+
+class ControlTimer {
 
 private:
 
-    typedef std::shared_ptr<Controller> ControllerPtr;
-    typedef std::shared_ptr<HardwareInterface> HardwareInterfacePtr;
-
-    std::thread mainThread;
+    thread mainThread;
 
     HardwareInterfacePtr hardwareInterface;
-    std::map<std::string,ControllerPtr> controllers;
+    map<string,ControllerPtr> controllers;
 
-    std::chrono::microseconds period = std::chrono::microseconds(20e3);//por padrão: 20ms
+    chrono::microseconds period = chrono::microseconds(long(20e3));//por padrão: 20ms
 
+    chrono::microseconds shiftDuration;
 
-    std::chrono::microseconds shiftDuration;
+    chrono::steady_clock::time_point nextReadTime;
 
-    std::chrono::steady_clock::time_point nextReadTime;
-
-    std::chrono::steady_clock::time_point nextWriteTime;
+    chrono::steady_clock::time_point nextWriteTime;
 
     double periodShift = 0.5;
 
@@ -38,43 +37,46 @@ private:
 
     bool isClosed = false;
 
-    std::mutex pauseMtx;
+    mutex pauseMtx;
 
-    std::condition_variable pauseCv;
+    condition_variable pauseCv;
 
     bool updateShiftPeriod();
 
-
-    static void* loop(void*);
+    void loop();
 
     bool initThread();
 
-    bool startIntervention();
-    bool stopIntervention();
+    chrono::steady_clock::time_point resumeTime;
 
-    std::chrono::steady_clock::time_point resumeTime;
+    bool update();
+
+    void defaultInit();
 
 protected:
-    //permite outras implementações
-    virtual bool update();//entre a leitura e a escrita
+
     virtual bool prepareRead();//entre a escrita e a leitura
-    virtual bool onReadMiss(std::chrono::steady_clock::time_point desired, std::chrono::steady_clock::time_point realization);
-    virtual bool onWriteMiss(std::chrono::steady_clock::time_point desired, std::chrono::steady_clock::time_point realization);
+    virtual bool onReadMiss(chrono::steady_clock::time_point desired, chrono::steady_clock::time_point realization);
+    virtual bool onWriteMiss(chrono::steady_clock::time_point desired, chrono::steady_clock::time_point realization);
+
 public:
 
-    ControllerTimeHandler();
-    ControllerTimeHandler(HardwareInterface* hwInterface);
+    ControlTimer();
+    ControlTimer(HardwareInterfacePtr hwInterface);
 
-    bool setHardwareInterface(HardwareInterface* hwInterface);
+    virtual ~ControlTimer(){std::cout << "DESTRUCTOR" << std::endl;}
 
-    bool loadController(std::string controllerName, Controller* controller);
-    bool unloadController(std::string controllerName, Controller* controller_out = NULL);
-    bool switchController(std::string controller_out_name, std::string controller_in_name, Controller* controller_in, Controller* controller_out = NULL);
+    bool setHardwareInterface(HardwareInterfacePtr hwInterface);
 
-    bool setPeriod(const std::chrono::microseconds duration);
-    std::chrono::microseconds getPeriod() const;
+    //TODO: check if it works
+    bool loadController(string controllerName, ControllerPtr controller);
+    ControllerPtr unloadController(string controllerName);
+    ControllerPtr switchController(string controller_out_name, string controller_in_name, ControllerPtr controller_in);
 
-    bool resumeLoop(std::chrono::microseconds readWaitTime = getPeriod());
+    bool setPeriod(const chrono::microseconds duration);
+    chrono::microseconds getPeriod() const;
+
+    bool resumeLoop(chrono::microseconds readWaitTime = chrono::microseconds(0));
     bool pauseLoop();
     bool close();
 
@@ -85,7 +87,5 @@ public:
     double getPeriodShift() const;
 
 };
-
-//#include <src/ControllerTimeHandler.cpp>
 
 #endif

@@ -23,7 +23,6 @@ class AsyncLogger {
 
     bool isOn = true;
 
-
     void logTFunc();
 
     public:
