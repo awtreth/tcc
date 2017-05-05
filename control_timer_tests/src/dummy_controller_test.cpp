@@ -23,11 +23,12 @@ int main(int argc, char** argv){
 
     auto controller = std::make_shared<DummyController>(interface);
 
-    controller->setMsg("oi");
+    controller->setMsg("MENSAGEM MAIOR");
+    controller->setPerLetterDuration(microseconds(long(100e3)));
 
     ControlTimer controlTimer(interface);
 
-    controlTimer.setPeriod(microseconds(long(2e6)));
+    controlTimer.setPeriod(microseconds(long(500e3)));
 
     controlTimer.loadController("DummyController",controller);
 

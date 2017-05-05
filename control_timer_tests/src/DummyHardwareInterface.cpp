@@ -18,14 +18,6 @@ void DummyHardwareInterface::defaultWrite(){
 
 DummyHardwareInterface::DummyHardwareInterface(){}
 
-//DummyHardwareInterface::~DummyHardwareInterface()
-//{
-
-//}
-
-//DummyHardwareInterface::~DummyHardwareInterface(){}
-
-
 bool DummyHardwareInterface::read(){
     defaultRead();
     return true;

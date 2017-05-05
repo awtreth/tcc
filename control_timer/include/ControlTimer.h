@@ -11,6 +11,7 @@
 #include <IHardwareInterface.h>
 #include <memory>
 #include <iostream>
+#include <functional>
 
 using namespace std;
 
@@ -24,34 +25,38 @@ private:
     map<string,ControllerPtr> controllers;
 
     chrono::microseconds period = chrono::microseconds(long(20e3));//por padrão: 20ms
-
-    chrono::microseconds shiftDuration;
-
-    chrono::steady_clock::time_point nextReadTime;
-
-    chrono::steady_clock::time_point nextWriteTime;
-
     double periodShift = 0.5;
-
-    bool isPaused = true;
-
-    bool isClosed = false;
-
-    mutex pauseMtx;
-
-    condition_variable pauseCv;
-
-    bool updateShiftPeriod();
-
-    void loop();
-
-    bool initThread();
+    chrono::microseconds shiftDuration;
 
     chrono::steady_clock::time_point resumeTime;
 
-    bool update();
+    bool hasUpdate = true;
+    bool isPaused = true;
+    bool isClosed = false;
 
+    mutex pauseMtx;
+    condition_variable pauseCv;
+
+
+    chrono::steady_clock::time_point nextReadTime;
+    chrono::steady_clock::time_point nextWriteTime;
+
+    //Generic helper methods
+    void updateShiftDuration();
+
+    //Initialization helper methods
     void defaultInit();
+    bool initThread();
+
+    void read();
+    bool update();
+    void write();
+
+    void loop();
+    void onReadWrite(bool evaluateMiss, chrono::steady_clock::time_point timePoint, std::function<void()> readWrite,
+                     std::function<bool (chrono::steady_clock::time_point,chrono::steady_clock::time_point)> onMiss);
+    void onWrite(bool evaluateMiss);
+
 
 protected:
 

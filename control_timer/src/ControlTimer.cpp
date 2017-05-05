@@ -1,14 +1,10 @@
 #include <ControlTimer.h>
 #include <iostream>
+#include <functional>
 
-//#define DEBUG
-
-
-bool ControlTimer::updateShiftPeriod()
+void ControlTimer::updateShiftDuration()
 {
     this->shiftDuration = std::chrono::microseconds(long(period.count()*this->periodShift));
-
-    return true;
 }
 
 
@@ -21,11 +17,16 @@ bool ControlTimer::update()
     return true;
 }
 
+void ControlTimer::write()
+{
+    hardwareInterface->write();
+}
+
 void ControlTimer::defaultInit()
 {
     setPeriod(std::chrono::milliseconds(20));
     setPeriodShift(0.5);
-    updateShiftPeriod();
+    updateShiftDuration();
     initThread();
 }
 
@@ -141,15 +142,13 @@ bool ControlTimer::setPeriodShift(double value)
 {
     if(value > 0 && value < 1){
 
-        //        std::unique_lock<std::mutex> lck(pauseMtx);
-        pauseMtx.lock();
+        pauseLoop();
         periodShift = value;
-        updateShiftPeriod();
-
-        pauseMtx.unlock();
-
+        updateShiftDuration();
+        return resumeLoop();
     }
-    return true;
+
+    return false;
 }
 
 
@@ -165,11 +164,12 @@ bool ControlTimer::resumeLoop(std::chrono::microseconds readWaitTime)
     std::lock_guard<std::mutex> lck(this->pauseMtx);
 
     if(this->hardwareInterface){
-        this->nextReadTime = std::chrono::steady_clock::now() + readWaitTime;
+        this->resumeTime = std::chrono::steady_clock::now();
+
+        this->nextReadTime = this->resumeTime + readWaitTime;
         this->nextWriteTime = this->nextReadTime + this->shiftDuration;
 
         this->isPaused = false;
-        this->resumeTime = nextReadTime;
 
         this->pauseCv.notify_all();
         this->pauseMtx.unlock();
@@ -182,7 +182,6 @@ bool ControlTimer::resumeLoop(std::chrono::microseconds readWaitTime)
 }
 
 
-#include <unistd.h>
 void ControlTimer::loop()
 {
     bool evaluateMiss = true;
@@ -191,44 +190,35 @@ void ControlTimer::loop()
 
     while(true) {
 
+
+        //Verifica se esta pausado
         std::unique_lock<std::mutex> lck(pauseMtx);
 
         while(isPaused)
             pauseCv.wait(lck);
 
+        //Sai se o ControlTimer for fechado
         if (isClosed)
             break;
 
-        prepareRead();
-
+        //Para evitar Miss na primeira iteracao
         if(nextReadTime <= resumeTime)
             evaluateMiss=false;
         else
             evaluateMiss=true;
 
-        now = std::chrono::steady_clock::now();
 
-        std::this_thread::sleep_until(nextReadTime);
-#ifdef DEBUG
-        std::cout << "READ" << std::endl;
-#endif
-        hardwareInterface->read();
+        //Rotina a ser executada antes da leitura
+        prepareRead();
 
-        if(evaluateMiss && now > nextReadTime)
-            onReadMiss(nextReadTime, now);
+        using namespace std::placeholders;
+        //read
+        onReadWrite(evaluateMiss,nextReadTime,std::bind(&ControlTimer::read,this),std::bind(&ControlTimer::onReadMiss,this,_1,_2));
 
         update();
 
-        now = std::chrono::steady_clock::now();
-
-        std::this_thread::sleep_until(nextWriteTime);
-#ifdef DEBUG
-        std::cout << "WRITE" << std::endl;
-#endif
-        hardwareInterface->write();
-
-        if(evaluateMiss && now > nextWriteTime)
-            onWriteMiss(nextWriteTime, now);
+        //write;
+        onReadWrite(evaluateMiss,nextWriteTime,std::bind(&ControlTimer::write,this),std::bind(&ControlTimer::onWriteMiss,this,_1,_2));
 
         nextReadTime += period;
         nextWriteTime += period;
@@ -238,6 +228,19 @@ void ControlTimer::loop()
     }
 
     //    return NULL;
+}
+
+void ControlTimer::onReadWrite(bool evaluateMiss, chrono::steady_clock::time_point timePoint, std::function<void()> readWrite,
+                               std::function<bool (chrono::steady_clock::time_point,chrono::steady_clock::time_point)> onMiss)
+{
+    auto now = std::chrono::steady_clock::now();
+
+    std::this_thread::sleep_until(timePoint);
+
+    readWrite();
+
+    if(evaluateMiss && now > timePoint)
+        onMiss(timePoint, now);
 }
 
 
@@ -251,14 +254,19 @@ bool ControlTimer::initThread()
 
     mainThread.detach();
 
-    //    struct sched_param param;
+        struct sched_param param;
 
-    //    param.__sched_priority = 51;
+        param.__sched_priority = 51;
 
-    //    //TODO: colocar verificacao se a priorida foi configurada mesmo
-    //    pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
+        //TODO: colocar verificacao se a priorida foi configurada mesmo
+        pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
 
     return true;
+}
+
+void ControlTimer::read()
+{
+    hardwareInterface->read();
 }
 
 
@@ -304,15 +312,12 @@ bool ControlTimer::setPeriod(const std::chrono::microseconds duration)
         return false;
 
     //    std::unique_lock<std::mutex> lck(pauseMtx);
-    pauseMtx.lock();
+    pauseLoop();
 
     period = duration;
+    updateShiftDuration();
 
-    updateShiftPeriod();
-
-    pauseMtx.unlock();
-
-    return true;
+    return resumeLoop();
 }
 
 

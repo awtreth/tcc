@@ -22,14 +22,16 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 set(dummy_controller_srcs
     src/DummyControllerBase.cpp
     src/DummyHardwareInterface.cpp
-    src/DummyController.cpp)
-#    src/DummyRosController.cpp)
+    src/DummyController.cpp
+    src/DummyRosController.cpp)
 
 add_library(dummy_controller ${dummy_controller_srcs})
 add_executable(dummy_controller_test src/dummy_controller_test.cpp)
+add_executable(dummy_ros_controller_test src/dummy_ros_controller_test.cpp)
 
 target_link_libraries(dummy_controller ${catkin_LIBRARIES})
 target_link_libraries(dummy_controller_test dummy_controller ${catkin_LIBRARIES})
+target_link_libraries(dummy_ros_controller_test ${catkin_LIBRARIES} dummy_controller)
 
 #Somente para exibir os headers na arvore do Qt Creator
 FILE(GLOB_RECURSE headers "*.h")

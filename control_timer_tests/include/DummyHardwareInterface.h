@@ -7,7 +7,8 @@
 #include <mutex>
 #include <memory>
 
-class DummyHardwareInterface : public IHardwareInterface {
+class DummyHardwareInterface : public IHardwareInterface,
+        public hardware_interface::HardwareInterface, public hardware_interface::RobotHW{
 
 protected:
     std::mutex mtx;
@@ -31,12 +32,6 @@ public:
 
     void setMsg(const std::string &value);
 
-    // RobotHW interface
-public:
-//    bool init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh);
-//    bool checkForConflict(const std::list<hardware_interface::ControllerInfo> &info) const;
-//    bool prepareSwitch(const std::list<hardware_interface::ControllerInfo> &start_list, const std::list<hardware_interface::ControllerInfo> &stop_list);
-//    void doSwitch(const std::list<hardware_interface::ControllerInfo> &, const std::list<hardware_interface::ControllerInfo> &);
 };
 
 typedef std::shared_ptr<DummyHardwareInterface> DummyHardwareInterfacePtr;
