@@ -17,17 +17,17 @@ private:
     std::mutex durationMtx;
 
 protected:
-    DummyHardwareInterfacePtr hardwareInterface;
+    DummyHardwareInterface* hardwareInterface;
 
 public:
 
     DummyControllerBase();
 
-    DummyControllerBase(DummyHardwareInterfacePtr iface);
+    DummyControllerBase(DummyHardwareInterface* iface);
 
     virtual ~DummyControllerBase();
 
-    void loadInterface(DummyHardwareInterfacePtr iface);
+    void loadInterface(DummyHardwareInterface* iface);
 
     std::chrono::microseconds getPerLetterDuration();
 

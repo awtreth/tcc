@@ -19,10 +19,10 @@ public:
     }
 
     template<typename ParamType>
-    static void setSharedParam(std::mutex& mtx, ParamType& param, const ParamType& newValue){
-        mtx.lock();
+    static void setSharedParam(std::mutex* mtx, ParamType& param, const ParamType& newValue){
+        mtx->lock();
         param = newValue;
-        mtx.unlock();
+        mtx->unlock();
     }
 
 };

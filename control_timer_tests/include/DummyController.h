@@ -13,11 +13,11 @@ class DummyController : public DummyControllerBase, public IController{
     // IController interface
 public:
 
-    virtual ~DummyController();
+//    virtual ~DummyController();
 
     DummyController();
 
-    DummyController(DummyHardwareInterfacePtr iface);
+    DummyController(DummyHardwareInterface *iface);
 
     bool prepareRead(std::chrono::steady_clock::time_point);
 

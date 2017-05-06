@@ -75,7 +75,7 @@ ControlTimer::ControlTimer(HardwareInterfacePtr hwInterface)
 {
     defaultInit();
     setHardwareInterface(hwInterface);
-    resumeLoop();
+//    resumeLoop();
 }
 
 

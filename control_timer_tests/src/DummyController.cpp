@@ -1,14 +1,12 @@
 #include <DummyController.h>
 
-DummyController::~DummyController(){
-}
 
 DummyController::DummyController()
 {
 
 }
 
-DummyController::DummyController(DummyHardwareInterfacePtr iface){
+DummyController::DummyController(DummyHardwareInterface* iface){
     loadInterface(iface);
 }
 

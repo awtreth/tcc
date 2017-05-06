@@ -6,41 +6,83 @@
 #include <DummyHardwareInterface.h>
 #include <ros/ros.h>
 
+#include <string>
+#include <vector>
+
 using namespace controller_manager;
 using namespace std::chrono;
 
 int main(int argc, char** argv){
 
-    auto interface = std::make_shared<DummyHardwareInterface>();
 
     ros::init(argc, argv, "DummyTest");
 
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+
+    DummyHardwareInterface hw;
+
+    hw.setMsg("message");
+    std::cout << hw.getMsg() << std::endl;
     ros::NodeHandle nh;
+    controller_manager::ControllerManager cm(&hw, nh);
 
-    auto controllerManager = std::make_shared<ControllerManager>(interface.get(),nh);
+//    cm.loadController("MyController");
+//    std::vector<std::string> controllerList;
+//    std::vector<std::string> outputList;
+//    controllerList.push_back("MyController");
 
-    auto rosControllerManagerAdapter = std::make_shared<RosControllerManagerAdapter>(controllerManager);
+//    ros::Duration period(1.0);
 
-    for(auto claim : interface->getClaims())
-        std::cout << claim << std::endl;
+//    getchar();
+//    std::cout << "FOI" << std::endl;
 
-    //std::cout << dummyRosController->isRunning() << std::endl;
-    //std::cout << interface-> << std::endl;
+//    cm.switchController(controllerList,outputList,2);
+    ros::Duration period(1.0);
 
-    //    std::cout << dummyRosController->getHardwareInterfaceType() << std::endl;
-//    std::cout << controllerManager->getControllerNames(std::vector<std::string>()) << std::endl;
-//    std::cout << dummyRosController->getHardwareInterfaceType() << std::endl;
+    while (ros::ok())
+    {
+        hw.read();
+        cm.update(ros::Time::now(), period);
+        hw.write();
+        period.sleep();
+    }
+
+    //    ros::init(argc, argv, "DummyTest");
+
+    //    ros::NodeHandle nh;
+
+    //    ros::AsyncSpinner spinner(1);
+    //    spinner.start();
+
+    ////    auto interface = std::make_shared<DummyHardwareInterface>();
+    //    DummyHardwareInterface iface;
+
+    //    ControllerManager controllerManager(&iface,nh);
+
+    //    controllerManager->loadController("DummyRosController");
+
+    //    auto controllerManager = std::make_shared<ControllerManager>(interface.get(),nh);
+
+    //    auto rosControllerManagerAdapter = std::make_shared<RosControllerManagerAdapter>(controllerManager);
+
+    //    ControlTimer controlTimer;
+
+    //    controlTimer.setFrequency(1);
+
+    //    controlTimer.setHardwareInterface(interface);
+
+    //    controllerManager->loadController("DummyRosController");
+
+    //    std::vector<std::string> controllerList;
+    //    controllerList.push_back("DummyRosController");
+
+    //    controllerManager->switchController(controllerList,std::vector<std::string>(),2);
 
 
+    //controlTimer.resumeLoop();
 
-//    ControlTimer controlTimer(interface);
+    sleep(9999999);
 
-//    controlTimer.setPeriod(microseconds(long(500e3)));
-
-//    controlTimer.loadController("DummyController",rosControllerManagerAdapter);
-
-//    sleep(1000);
-
-
-	return 0;
+    return 0;
 }

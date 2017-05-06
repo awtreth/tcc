@@ -1,11 +1,11 @@
 #include <DummyRosController.h>
 #include <pluginlib/class_list_macros.h>
 
-DummyRosController::~DummyRosController(){}
+//DummyRosController::~DummyRosController(){}
 
 DummyRosController::DummyRosController(){}
 
-DummyRosController::DummyRosController(DummyHardwareInterfacePtr iface){
+DummyRosController::DummyRosController(DummyHardwareInterface* iface){
     loadInterface(iface);
 }
 
@@ -14,10 +14,14 @@ void DummyRosController::update(const ros::Time &, const ros::Duration &){
 
     auto currentMsg = getMsg();
 
+    std::cout << "Configurou mensagem" << std::endl;
+
     for(auto letter : currentMsg){
         std::cout << letter;
         std::this_thread::sleep_for(getPerLetterDuration());
     }
+
+    std::cout << "Exibiu msg" << std::endl;
 
     hardwareInterface->setMsg(currentMsg);
 
@@ -26,5 +30,11 @@ void DummyRosController::update(const ros::Time &, const ros::Duration &){
     //return true;
 }
 
+bool DummyRosController::init(DummyHardwareInterface * iface, ros::NodeHandle &){
+    loadInterface(iface);
+
+    return true;
+
+}
 
 PLUGINLIB_EXPORT_CLASS(DummyRosController, controller_interface::ControllerBase)

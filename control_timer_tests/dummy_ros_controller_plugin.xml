@@ -1,0 +1,7 @@
+<library path="lib/libdummy_controller">
+  <class name="control_timer_tests/DummyRosController" type="DummyRosController" base_class_type="controller_interface::ControllerBase">
+  <description>
+	Implementação básica de DummyRosController.    
+  </description>
+</class>
+</library>

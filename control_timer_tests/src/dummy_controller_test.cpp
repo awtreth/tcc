@@ -13,26 +13,26 @@ using namespace std::chrono;
 
 int main(int argc, char** argv){
 
-    auto interface = std::make_shared<DummyHardwareInterface>();
+//    auto interface = std::make_shared<DummyHardwareInterface>();
 
-//    ros::init(argc, argv, "DummyTest");
+////    ros::init(argc, argv, "DummyTest");
 
-//    ros::NodeHandle nh;
+////    ros::NodeHandle nh;
 
-//    bool init_success = interface.init(nh, nh);
+////    bool init_success = interface.init(nh, nh);
 
-    auto controller = std::make_shared<DummyController>(interface);
+//    auto controller = std::make_shared<DummyController>(interface);
 
-    controller->setMsg("MENSAGEM MAIOR");
-    controller->setPerLetterDuration(microseconds(long(100e3)));
+//    controller->setMsg("MENSAGEM MAIOR");
+//    controller->setPerLetterDuration(microseconds(long(100e3)));
 
-    ControlTimer controlTimer(interface);
+//    ControlTimer controlTimer(interface);
 
-    controlTimer.setPeriod(microseconds(long(500e3)));
+//    controlTimer.setPeriod(microseconds(long(500e3)));
 
-    controlTimer.loadController("DummyController",controller);
+//    controlTimer.loadController("DummyController",controller);
 
-    sleep(1000);
+//    sleep(1000);
 
 	return 0;
 }

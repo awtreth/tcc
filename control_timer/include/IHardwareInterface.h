@@ -8,9 +8,9 @@ using namespace std;
 class IHardwareInterface {
 
     public:
-    virtual bool write() = 0;
+    virtual void write() = 0;
 
-    virtual bool read() = 0;
+    virtual void read() = 0;
 
     virtual ~IHardwareInterface(){}
 };
