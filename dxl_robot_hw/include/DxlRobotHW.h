@@ -18,6 +18,11 @@ private:
         double eff;
         double vel;
 
+        uint16_t posCmd_dxl;
+        uint16_t pos_dxl;
+        uint16_t eff_dxl;
+        uint16_t vel_dxl;
+
         DxlInfo(int _id){
             id = _id;
         }
@@ -30,14 +35,14 @@ private:
 
     std::vector<DxlInfo> dxlInfos;
 
-    dynamixel::GroupBulkRead readPacket_;
+//    dynamixel::GroupBulkRead readPacket_;
 //    dynamixel::GroupSyncRead writePacket_;
 
     hardware_interface::JointStateInterface    jointStateInterface_;
     hardware_interface::PositionJointInterface   positionInterface_;
 
 public:
-    DxlRobotHW(dynamixel::PortHandler* portHandler, dynamixel::PacketHandler* packetHandler, std::map<std::string,int> dxlMap);
+    DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName = "/dev/ttyUSB0", const float protocol = 1.0, const int baud_rate = 1000000);
 
 
     // IHardwareInterface interface

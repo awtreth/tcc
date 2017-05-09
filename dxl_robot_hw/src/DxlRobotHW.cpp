@@ -7,17 +7,30 @@ using namespace hardware_interface;
 
 #define WORD_LEN            2
 
-#define GOAL_POS_ADDR       32
+#define GOAL_POS_ADDR       30
 
 #define PRESENT_POS_ADDR    36
 #define PRESENT_VEL_ADDR    38
 #define PRESENT_EFF_ADDR    40
 
-DxlRobotHW::DxlRobotHW(dynamixel::PortHandler *portHandler, dynamixel::PacketHandler *packetHandler, std::map<std::string, int> dxlMap):
-    readPacket_(portHandler,packetHandler)
+DxlRobotHW::DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName, const float protocol, const int baud_rate)
+    //:readPacket_(portHandler,packetHandler)
 {
-    portHandler_ = portHandler;
-    packetHandler_ = packetHandler;
+
+    portHandler_ = dynamixel::PortHandler::getPortHandler(deviceName);
+    packetHandler_ = dynamixel::PacketHandler::getPacketHandler(protocol);
+
+    // Open port
+    if (portHandler_->openPort())
+        printf("Succeeded to open the port!\n");
+    else
+        printf("Failed to open the port!\n");
+
+    // Set port baudrate
+    if (portHandler_->setBaudRate(baud_rate))
+        printf("Succeeded to change the baudrate!\n");
+    else
+        printf("Failed to change the baudrate!\n");
 
     for(auto pair : dxlMap){
         auto jointName = pair.first;
@@ -30,10 +43,6 @@ DxlRobotHW::DxlRobotHW(dynamixel::PortHandler *portHandler, dynamixel::PacketHan
 
         registerInterface(&jointStateInterface_);
         registerInterface(&positionInterface_);
-
-        readPacket_.addParam(uint8_t(pair.second),PRESENT_POS_ADDR,WORD_LEN);
-        readPacket_.addParam(uint8_t(pair.second),PRESENT_VEL_ADDR,WORD_LEN);
-        readPacket_.addParam(uint8_t(pair.second),PRESENT_EFF_ADDR,WORD_LEN);
     }
 }
 
@@ -43,24 +52,28 @@ void DxlRobotHW::write()
 
     std::cout << "WRITE" << std::endl;
 
-    for(auto dxl : dxlInfos){
+    for(DxlInfo& dxl : dxlInfos){
         std::cout << "ID: " << dxl.id << " POS: " << dxl.posCmd << std::endl;
-        writePacket.addParam(dxl.id,(uint8_t*)(&dxl.posCmd));
+        dxl.posCmd_dxl = uint16_t(dxl.posCmd);
+        writePacket.addParam(dxl.id,(uint8_t*)(&dxl.posCmd_dxl));
     }
+
     writePacket.txPacket();
 
 }
 
 void DxlRobotHW::read()
 {
-    readPacket_.txRxPacket();
-
     std::cout << "READ" << std::endl;
 
-    for(auto dxl : dxlInfos){
-        dxl.pos = readPacket_.getData(dxl.id,PRESENT_POS_ADDR,WORD_LEN);
-        dxl.vel = readPacket_.getData(dxl.id,PRESENT_VEL_ADDR,WORD_LEN);
-        dxl.eff = readPacket_.getData(dxl.id,PRESENT_EFF_ADDR,WORD_LEN);
+    uint16_t values[3];
+
+    for(DxlInfo& dxl : dxlInfos){
+        auto result = packetHandler_->readTxRx(portHandler_,dxl.id,PRESENT_POS_ADDR,6,(uint8_t*)values);
+
+        dxl.pos = double(values[0]);
+        dxl.vel = double(values[1]);
+        dxl.eff = double(values[2]);
         std::cout << "POS: " << dxl.pos << " VEL: " << dxl.vel << " EFF: " << dxl.eff << std::endl;
     }
 }
