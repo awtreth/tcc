@@ -75,13 +75,13 @@ ControlTimer::ControlTimer(HardwareInterfacePtr hwInterface)
 {
     defaultInit();
     setHardwareInterface(hwInterface);
-//    resumeLoop();
+    //    resumeLoop();
 }
 
 
 bool ControlTimer::setHardwareInterface(HardwareInterfacePtr hwInterface)
 {
-//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    //    std::unique_lock<std::mutex> lck(this->pauseMtx);
     pauseMtx.lock();
     //this->hardwareInterface = HardwareInterfacePtr(hwInterface);
     hardwareInterface = hwInterface;
@@ -94,7 +94,7 @@ bool ControlTimer::setHardwareInterface(HardwareInterfacePtr hwInterface)
 bool ControlTimer::loadController(std::string controllerName, ControllerPtr controller)
 {
     //TODO: fazer tratamentos adequados para nao substituir existentes
-//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    //    std::unique_lock<std::mutex> lck(this->pauseMtx);
     pauseMtx.lock();
     //this->controllers[controllerName] = ControllerPtr(controller);
     this->controllers[controllerName] = controller;
@@ -107,7 +107,7 @@ bool ControlTimer::loadController(std::string controllerName, ControllerPtr cont
 ControllerPtr ControlTimer::unloadController(std::string controllerName)
 {
     //TODO: fazer tratamentos adequados para retirar um controller
-//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    //    std::unique_lock<std::mutex> lck(this->pauseMtx);
     pauseMtx.lock();
     auto controller_out = controllers[controllerName];
 
@@ -122,7 +122,7 @@ ControllerPtr ControlTimer::unloadController(std::string controllerName)
 ControllerPtr ControlTimer::switchController(std::string controller_out_name, std::string controller_in_name, ControllerPtr controller_in)
 {
     //TODO: fazer tratamentos adequados do switch
-//    std::unique_lock<std::mutex> lck(this->pauseMtx);
+    //    std::unique_lock<std::mutex> lck(this->pauseMtx);
     pauseMtx.lock();
     auto controller_out = controllers[controller_out_name];
 
@@ -254,12 +254,12 @@ bool ControlTimer::initThread()
 
     mainThread.detach();
 
-        struct sched_param param;
+    struct sched_param param;
 
-        param.__sched_priority = 51;
+    param.__sched_priority = 51;
 
-        //TODO: colocar verificacao se a priorida foi configurada mesmo
-        pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
+    //TODO: colocar verificacao se a priorida foi configurada mesmo
+    pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
 
     return true;
 }

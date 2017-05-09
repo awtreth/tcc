@@ -69,7 +69,7 @@ public:
     ControlTimer();
     ControlTimer(HardwareInterfacePtr hwInterface);
 
-    virtual ~ControlTimer(){std::cout << "DESTRUCTOR" << std::endl;}
+    virtual ~ControlTimer(){this->close();}
 
     bool setHardwareInterface(HardwareInterfacePtr hwInterface);
 

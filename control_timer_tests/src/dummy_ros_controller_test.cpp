@@ -20,12 +20,23 @@ int main(int argc, char** argv){
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    DummyHardwareInterface hw;
+    auto hw = std::make_shared<DummyHardwareInterface>();
 
-    hw.setMsg("message");
-    std::cout << hw.getMsg() << std::endl;
     ros::NodeHandle nh;
-    controller_manager::ControllerManager cm(&hw, nh);
+
+    auto cm = std::make_shared<controller_manager::ControllerManager>(hw.get(),nh);
+
+    auto cma = std::make_shared<RosControllerManagerAdapter>(cm);
+
+    ControlTimer controlTimer(hw);
+
+    controlTimer.setFrequency(1);
+
+    controlTimer.loadController("MyController",cma);
+
+    controlTimer.resumeLoop();
+
+
 
 //    cm.loadController("MyController");
 //    std::vector<std::string> controllerList;
@@ -38,15 +49,15 @@ int main(int argc, char** argv){
 //    std::cout << "FOI" << std::endl;
 
 //    cm.switchController(controllerList,outputList,2);
-    ros::Duration period(1.0);
+//    ros::Duration period(1.0);
 
-    while (ros::ok())
-    {
-        hw.read();
-        cm.update(ros::Time::now(), period);
-        hw.write();
-        period.sleep();
-    }
+//    while (ros::ok())
+//    {
+//        hw.read();
+//        cm.update(ros::Time::now(), period);
+//        hw.write();
+//        period.sleep();
+//    }
 
     //    ros::init(argc, argv, "DummyTest");
 
