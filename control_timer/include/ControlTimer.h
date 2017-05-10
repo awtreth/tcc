@@ -9,87 +9,73 @@
 #include <condition_variable> // condition_variable
 #include <IController.h>
 #include <IHardwareInterface.h>
-#include <memory>
-#include <iostream>
 #include <functional>
-
-using namespace std;
 
 class ControlTimer {
 
 private:
 
-    thread mainThread;
+    std::thread mainThread;
 
     HardwareInterfacePtr hardwareInterface;
-    map<string,ControllerPtr> controllers;
+    std::map<std::string,ControllerPtr> controllers;
+    std::map<std::string,ControllerPtr> rtControllers;
 
-    chrono::microseconds period = chrono::microseconds(long(20e3));//por padrão: 20ms
-    double periodShift = 0.5;
-    chrono::microseconds shiftDuration;
+    std::chrono::microseconds period = std::chrono::microseconds(long(20e3));//por padrão: 20ms
+    std::chrono::microseconds rtPeriod;
 
-    chrono::steady_clock::time_point resumeTime;
-
-    bool hasUpdate = true;
+    //Variable access control flags
     bool isPaused = true;
     bool isClosed = false;
 
-    mutex pauseMtx;
-    condition_variable pauseCv;
+    bool hasPeriodChange = true;
+    bool hasControllerChange = true;
 
+    std::mutex requestMtx;
 
-    chrono::steady_clock::time_point nextReadTime;
-    chrono::steady_clock::time_point nextWriteTime;
+    std::condition_variable pauseCv;
 
-    //Generic helper methods
-    void updateShiftDuration();
+    std::chrono::steady_clock::time_point resumeTime;
+    std::chrono::steady_clock::time_point nextLoopTime;
 
     //Initialization helper methods
     void defaultInit();
     bool initThread();
 
-    void read();
-    bool update();
-    void write();
-
     void loop();
-    void onReadWrite(bool evaluateMiss, chrono::steady_clock::time_point timePoint, std::function<void()> readWrite,
-                     std::function<bool (chrono::steady_clock::time_point,chrono::steady_clock::time_point)> onMiss);
-    void onWrite(bool evaluateMiss);
-
-
-protected:
-
-    virtual bool prepareRead();//entre a escrita e a leitura
-    virtual bool onReadMiss(chrono::steady_clock::time_point desired, chrono::steady_clock::time_point realization);
-    virtual bool onWriteMiss(chrono::steady_clock::time_point desired, chrono::steady_clock::time_point realization);
-
-public:
-
-    ControlTimer();
-    ControlTimer(HardwareInterfacePtr hwInterface);
-
-    virtual ~ControlTimer(){this->close();}
+    void loopUpdateCheck();//return false if it was closed
 
     bool setHardwareInterface(HardwareInterfacePtr hwInterface);
 
+protected:
+
+    virtual void prepareRead();//entre a escrita e a leitura
+
+    virtual void read();
+    virtual void update();
+    virtual void write();
+
+    virtual void onMiss(std::chrono::steady_clock::time_point desired, std::chrono::steady_clock::time_point realization);
+
+public:
+
+//    ControlTimer();
+    ControlTimer(HardwareInterfacePtr hwInterface);
+
+    virtual ~ControlTimer();
+
+
     //TODO: check if it works
-    bool loadController(string controllerName, ControllerPtr controller);
-    ControllerPtr unloadController(string controllerName);
-    ControllerPtr switchController(string controller_out_name, string controller_in_name, ControllerPtr controller_in);
+    bool loadController(std::string controllerName, ControllerPtr controller);
+    ControllerPtr unloadController(std::string controllerName);
+    ControllerPtr switchController(std::string controller_out_name, std::string controller_in_name, ControllerPtr controller_in);
 
-    bool setPeriod(const chrono::microseconds duration);
-    chrono::microseconds getPeriod() const;
-
-    bool resumeLoop(chrono::microseconds readWaitTime = chrono::microseconds(0));
-    bool pauseLoop();
-    bool close();
+    bool resumeLoop(std::chrono::microseconds readWaitTime = std::chrono::microseconds(0));
+    void pauseLoop();
+    void close();
 
     bool setFrequency(double freq);
     double getFrequency();
-
-    bool setPeriodShift(double shift);
-    double getPeriodShift() const;
 
 };
 

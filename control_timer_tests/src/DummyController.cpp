@@ -18,7 +18,7 @@ bool DummyController::update(std::chrono::steady_clock::time_point){
     auto currentMsg = getMsg();
 
     for(auto letter : currentMsg){
-        std::cout << letter;
+        std::cout << letter << std::flush;
         std::this_thread::sleep_for(getPerLetterDuration());
     }
 

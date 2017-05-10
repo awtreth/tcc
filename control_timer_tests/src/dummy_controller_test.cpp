@@ -3,7 +3,6 @@
 #include <DummyController.h>
 #include <DummyHardwareInterface.h>
 #include <stdio.h>
-#include <ros/ros.h>
 #include <memory>
 #include <unistd.h>
 #include <chrono>
@@ -11,28 +10,24 @@
 using namespace std;
 using namespace std::chrono;
 
-int main(int argc, char** argv){
+int main(){
 
-//    auto interface = std::make_shared<DummyHardwareInterface>();
+    auto interface = std::make_shared<DummyHardwareInterface>();
 
-////    ros::init(argc, argv, "DummyTest");
+    auto controller = std::make_shared<DummyController>(interface.get());
 
-////    ros::NodeHandle nh;
+    controller->setMsg("MENSAGEM MAIOR");
+    controller->setPerLetterDuration(microseconds(long(100e3)));
 
-////    bool init_success = interface.init(nh, nh);
+    ControlTimer controlTimer(interface);
 
-//    auto controller = std::make_shared<DummyController>(interface);
+    controlTimer.setFrequency(10);
 
-//    controller->setMsg("MENSAGEM MAIOR");
-//    controller->setPerLetterDuration(microseconds(long(100e3)));
+    controlTimer.loadController("DummyController",controller);
 
-//    ControlTimer controlTimer(interface);
+    controlTimer.resumeLoop();
 
-//    controlTimer.setPeriod(microseconds(long(500e3)));
-
-//    controlTimer.loadController("DummyController",controller);
-
-//    sleep(1000);
+    sleep(1000);
 
 	return 0;
 }

@@ -48,8 +48,9 @@ class DummyHardwareInterface : public hardware_interface::RobotHW, public IHardw
 public:
     DummyHardwareInterface();
 
-    void read();
-    void write();
+    //IHardwareInterface
+    void read() override;
+    void write() override;
 
     std::mutex mtx;
     std::string msg = "";
