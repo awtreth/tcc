@@ -24,9 +24,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh;
 
-    auto cm = std::make_shared<controller_manager::ControllerManager>(hw.get(),nh);
-
-    auto cma = std::make_shared<RosControllerManagerAdapter>(cm);
+    auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
 
     ControlTimer controlTimer(hw);
 
@@ -35,63 +33,6 @@ int main(int argc, char** argv){
     controlTimer.loadController("MyController",cma);
 
     controlTimer.resumeLoop();
-
-
-
-//    cm.loadController("MyController");
-//    std::vector<std::string> controllerList;
-//    std::vector<std::string> outputList;
-//    controllerList.push_back("MyController");
-
-//    ros::Duration period(1.0);
-
-//    getchar();
-//    std::cout << "FOI" << std::endl;
-
-//    cm.switchController(controllerList,outputList,2);
-//    ros::Duration period(1.0);
-
-//    while (ros::ok())
-//    {
-//        hw.read();
-//        cm.update(ros::Time::now(), period);
-//        hw.write();
-//        period.sleep();
-//    }
-
-    //    ros::init(argc, argv, "DummyTest");
-
-    //    ros::NodeHandle nh;
-
-    //    ros::AsyncSpinner spinner(1);
-    //    spinner.start();
-
-    ////    auto interface = std::make_shared<DummyHardwareInterface>();
-    //    DummyHardwareInterface iface;
-
-    //    ControllerManager controllerManager(&iface,nh);
-
-    //    controllerManager->loadController("DummyRosController");
-
-    //    auto controllerManager = std::make_shared<ControllerManager>(interface.get(),nh);
-
-    //    auto rosControllerManagerAdapter = std::make_shared<RosControllerManagerAdapter>(controllerManager);
-
-    //    ControlTimer controlTimer;
-
-    //    controlTimer.setFrequency(1);
-
-    //    controlTimer.setHardwareInterface(interface);
-
-    //    controllerManager->loadController("DummyRosController");
-
-    //    std::vector<std::string> controllerList;
-    //    controllerList.push_back("DummyRosController");
-
-    //    controllerManager->switchController(controllerList,std::vector<std::string>(),2);
-
-
-    //controlTimer.resumeLoop();
 
     sleep(9999999);
 

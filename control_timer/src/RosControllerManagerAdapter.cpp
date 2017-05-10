@@ -1,14 +1,13 @@
 #include <RosControllerManagerAdapter.h>
 
-RosControllerManagerAdapter::RosControllerManagerAdapter(){}
+RosControllerManagerAdapter::RosControllerManagerAdapter(hardware_interface::RobotHW *robot_hw, const ros::NodeHandle &nh)
+    : controllerManager(robot_hw, nh) {
 
-RosControllerManagerAdapter::RosControllerManagerAdapter(ControllerManagerPtr _controllerManager){
-    loadControllerManager(_controllerManager);
 }
 
-void RosControllerManagerAdapter::loadControllerManager(ControllerManagerPtr _controllerManager){
-//    controllerManager = ControllerManagerPtr(_controllerManager);
-    controllerManager = _controllerManager;
+ControllerManager &RosControllerManagerAdapter::getControllerManager()
+{
+    return controllerManager;
 }
 
 bool RosControllerManagerAdapter::prepareRead(std::chrono::steady_clock::time_point){return true;}
@@ -19,7 +18,7 @@ bool RosControllerManagerAdapter::update(std::chrono::steady_clock::time_point){
 
     lastUpdateTime = now;
 
-    controllerManager->update(now,duration);
+    controllerManager.update(now,duration);
 
     return true;
 }

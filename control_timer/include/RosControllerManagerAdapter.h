@@ -10,23 +10,20 @@ using namespace controller_manager;
 using namespace std;
 
 
-typedef shared_ptr<ControllerManager> ControllerManagerPtr;
-
 class RosControllerManagerAdapter : public IController{
 
 private:
 
     ros::Time lastUpdateTime = ros::Time::now();
-    ControllerManagerPtr controllerManager;
+    ControllerManager controllerManager;
 
     // IController interface
 public:
 
-    RosControllerManagerAdapter();
+    RosControllerManagerAdapter(hardware_interface::RobotHW *robot_hw,
+                                const ros::NodeHandle& nh=ros::NodeHandle());
 
-    RosControllerManagerAdapter(ControllerManagerPtr _controllerManager);
-
-    void loadControllerManager(ControllerManagerPtr _controllerManager);
+    ControllerManager& getControllerManager();
 
     virtual bool prepareRead(chrono::steady_clock::time_point);
 
