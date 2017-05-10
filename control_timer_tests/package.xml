@@ -1,0 +1,21 @@
+<package format="2">
+    <name>control_timer_tests</name>
+    <version>0.0.0</version>
+    <description>
+        Simple examples of use of control_timer.
+    </description>
+    <maintainer email="mateus.amarujo@gmail.com">Mateus Amarante</maintainer>
+    <license>BSD</license>
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>hardware_interface</depend>
+    <depend>controller_manager</depend>
+    <depend>control_timer</depend>
+    <depend>utils</depend>
+    <depend>controller_interface</depend>
+    <depend>roscpp</depend>
+
+    <export>
+        <controller_interface plugin="${prefix}/dummy_ros_controller_plugin.xml"/>
+    </export>
+</package>
