@@ -45,8 +45,6 @@ private:
     void loop();
     void loopUpdateCheck();//return false if it was closed
 
-    bool setHardwareInterface(HardwareInterfacePtr hwInterface);
-
 protected:
 
     virtual void prepareRead();//entre a escrita e a leitura

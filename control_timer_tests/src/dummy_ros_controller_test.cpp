@@ -28,7 +28,7 @@ int main(int argc, char** argv){
 
     ControlTimer controlTimer(hw);
 
-    controlTimer.setFrequency(1);
+    controlTimer.setFrequency(50);
 
     controlTimer.loadController("MyController",cma);
 

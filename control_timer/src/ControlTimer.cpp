@@ -1,6 +1,7 @@
 #include <ControlTimer.h>
 #include <iostream>
 #include <functional>
+#include <unistd.h>
 
 void ControlTimer::update()
 {    
@@ -149,6 +150,8 @@ void ControlTimer::loop()
         nextLoopTime += rtPeriod;
 
     }
+
+    sleep(1);
 }
 
 void ControlTimer::loopUpdateCheck()
@@ -182,14 +185,14 @@ bool ControlTimer::initThread()
 
     mainThread = std::thread(&ControlTimer::loop, this);
 
-    mainThread.detach();
+//    mainThread.detach();
 
     struct sched_param param;
 
     param.__sched_priority = 51;
 
     //TODO: success check
-    pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param);
+    std::cout << pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param) << std::endl;
 
     return true;
 }
@@ -209,7 +212,7 @@ void ControlTimer::close()
 
     pauseCv.notify_all();
 
-    requestMtx.unlock();
+    lck.unlock();
 
     if(mainThread.joinable())
         this->mainThread.join();

@@ -5,6 +5,9 @@
 #include <ros/ros.h>
 #include <map>
 #include <string>
+#include <ControlTimer.h>
+#include <RosControllerManagerAdapter.h>
+#include <memory>
 
 // Default setting
 #define BAUDRATE                        1000000
@@ -25,21 +28,23 @@ int main(int argc, char** argv){
 
     mapId["MyJoint"] = 5;
 
-    DxlRobotHW hw(mapId);
+    auto hw = std::make_shared<DxlRobotHW>(mapId);
 
     ros::NodeHandle nh;
 
-    controller_manager::ControllerManager cm(&hw,nh);
+    auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
 
-    ros::Duration period(.01);
+    ControlTimer ctimer(hw);
 
-    while (ros::ok())
-    {
-        hw.read();
-        cm.update(ros::Time::now(), period);
-        hw.write();
-        period.sleep();
-    }
+
+    ctimer.setFrequency(50);
+
+    ctimer.loadController("MyController",cma);
+
+    ctimer.resumeLoop();
+
+    sleep(999999);
+
 
     return 0;
 }
