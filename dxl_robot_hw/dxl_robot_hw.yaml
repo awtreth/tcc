@@ -3,6 +3,10 @@ joint_state_controller:
   publish_rate: 50
 
 joint_position_controller:
-  type: position_controllers/JointPositionController
-  joint: MyJoint
+  type: position_controllers/JointGroupPositionController
+  joints: [j1,j2]
+
+joint_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints: [j1,j2]
 

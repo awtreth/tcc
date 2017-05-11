@@ -1,10 +1,11 @@
 <launch>
   <!-- load configuration -->
   <rosparam command="load" file="$(find dxl_robot_hw)/dxl_robot_hw.yaml" />
+  <param name="robot_description" command="cat $(find dxl_robot_hw)/example.urdf" />
 
   <!-- spawn controllers -->  
-<node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="log" args="joint_state_controller" />
-  <node name="joint_position_controller_spawner" pkg="controller_manager" type="spawner" output="log" args="joint_position_controller" />
-  
+  <!-- <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" output="log" args="joint_state_controller" /> -->
+  <!-- <node name="joint_position_controller_spawner" pkg="controller_manager" type="spawner" output="log" args="joint_position_controller" /> -->
+  <node name="joint_trajectory_controller_spawner" pkg="controller_manager" type="spawner" output="log" args="joint_trajectory_controller" />
 
 </launch>

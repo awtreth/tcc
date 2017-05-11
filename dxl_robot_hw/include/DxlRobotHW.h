@@ -11,6 +11,7 @@ class DxlRobotHW : public hardware_interface::RobotHW, public IHardwareInterface
 private:
 
     struct DxlInfo {
+        std::string jointName;
         int id;
 
         double posCmd;
@@ -19,11 +20,9 @@ private:
         double vel;
 
         uint16_t posCmd_dxl;
-        uint16_t pos_dxl;
-        uint16_t eff_dxl;
-        uint16_t vel_dxl;
 
-        DxlInfo(int _id){
+        DxlInfo(std::string _jointName, int _id){
+            jointName = _jointName;
             id = _id;
         }
 
@@ -34,9 +33,6 @@ private:
     dynamixel::PacketHandler* packetHandler_;
 
     std::vector<DxlInfo> dxlInfos;
-
-//    dynamixel::GroupBulkRead readPacket_;
-//    dynamixel::GroupSyncRead writePacket_;
 
     hardware_interface::JointStateInterface    jointStateInterface_;
     hardware_interface::PositionJointInterface   positionInterface_;
@@ -49,4 +45,8 @@ public:
 public:
     void write();
     void read();
+
+    // RobotHW interface
+public:
+    bool checkForConflict(const std::list<hardware_interface::ControllerInfo> &info) const;
 };

@@ -32,18 +32,22 @@ DxlRobotHW::DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName
     else
         printf("Failed to change the baudrate!\n");
 
-    for(auto pair : dxlMap){
-        auto jointName = pair.first;
+    for(auto pair : dxlMap)
+        dxlInfos.push_back(DxlInfo(pair.first,pair.second));
 
-        dxlInfos.push_back(DxlInfo(pair.second));
-        DxlInfo& dxl = dxlInfos.back();
-
-        jointStateInterface_.registerHandle(JointStateHandle(jointName,&dxl.pos,&dxl.vel,&dxl.eff));
-        positionInterface_.registerHandle(JointHandle(jointStateInterface_.getHandle(jointName),&dxl.posCmd));
-
-        registerInterface(&jointStateInterface_);
-        registerInterface(&positionInterface_);
+    for(DxlInfo& dxl : dxlInfos){
+        dxl.posCmd = 500;
+        jointStateInterface_.registerHandle(JointStateHandle(dxl.jointName,&dxl.pos,&dxl.vel,&dxl.eff));
+        positionInterface_.registerHandle(JointHandle(jointStateInterface_.getHandle(dxl.jointName),&dxl.posCmd));
     }
+
+    registerInterface(&jointStateInterface_);
+    registerInterface(&positionInterface_);
+
+//    read();
+
+//    for(auto : dxlInfos)
+//        dxl.posCmd = dxl.pos;
 }
 
 void DxlRobotHW::write()
@@ -76,4 +80,9 @@ void DxlRobotHW::read()
         dxl.eff = double(values[2]);
         std::cout << "POS: " << dxl.pos << " VEL: " << dxl.vel << " EFF: " << dxl.eff << std::endl;
     }
+}
+
+bool DxlRobotHW::checkForConflict(const std::list<ControllerInfo> &info) const
+{
+    return false;
 }

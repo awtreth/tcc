@@ -21,12 +21,13 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "DxlRobotHWTest");
 
-    ros::AsyncSpinner spinner(1);
+    ros::AsyncSpinner spinner(2);
     spinner.start();
 
     std::map<std::string,int> mapId;
 
-    mapId["MyJoint"] = 5;
+    mapId["j2"] = 5;
+    mapId["j1"] = 3;
 
     auto hw = std::make_shared<DxlRobotHW>(mapId);
 
