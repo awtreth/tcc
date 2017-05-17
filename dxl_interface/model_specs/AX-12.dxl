@@ -1,0 +1,17 @@
+name:
+  - AX-12
+  - AX-12+
+  - AX-12A
+  - AX-18
+  - AX-18A
+  - AX-18F
+
+number:
+  - 12
+  - 18
+
+valueToPositionRatio: 0.005061455
+valueToVelocityRatio: 0.011623892
+
+zeroPositionValue: 0
+zeroVelocityValue: 1024

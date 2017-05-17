@@ -1,0 +1,14 @@
+name:
+  - MX-106
+  - MX-106T
+  - MX-106R
+	
+number:
+  - 320
+  - 321
+
+valueToPositionRatio: 0.001535890
+valueToVelocityRatio: 0.011938052
+
+zeroPositionValue: 0
+zeroVelocityValue: 1024

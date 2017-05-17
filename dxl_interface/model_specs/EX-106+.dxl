@@ -1,0 +1,8 @@
+name: "EX-106+"
+number: 107
+
+valueToPositionRatio: 0.001047198
+valueToVelocityRatio: 0.011623892
+
+zeroPositionValue: 0
+zeroVelocityValue: 1024
