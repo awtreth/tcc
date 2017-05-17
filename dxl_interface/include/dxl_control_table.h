@@ -11,7 +11,7 @@ namespace dynamixel {
 /// Classe que representa/simula a tabela de controle (EEPROM e RAM) de motores Dynamixel.
 /// Veja mais detalhes sobre a tabela para, por exemplo, os motores MX-106 no link <a href="http://support.robotis.com/en/product/dynamixel/mx_series/mx-106.htm">link</a>.
 /// \todo aprimorar gerenciamento de memória. As funções consideram que o input está correto. Implementar exceções
-class DxlControlTable {
+class ControlTable {
     private:
 
     std::vector<uint8_t> controlTableVec;
@@ -19,12 +19,12 @@ class DxlControlTable {
 
     public:
 
-    DxlControlTable(){
+    ControlTable(){
         controlTableVec.resize(CONTROL_TABLE_SIZE_1);
         controlTable = controlTableVec.data();
     }
 
-    DxlControlTable(unsigned int size){
+    ControlTable(unsigned int size){
         controlTableVec.resize(size);
         controlTable = controlTableVec.data();
     }

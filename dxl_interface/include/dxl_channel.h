@@ -3,7 +3,9 @@
 
 #include <dynamixel_sdk.h>
 #include "dxl_handle.h"
-#include "dxl_id.h"
+
+#define DEFAULT_DEVICE_NAME "/dev/ttyUSB0"
+#define DEFAULT_BAUD_RATE   1000000
 
 namespace dynamixel {
 
@@ -11,19 +13,19 @@ class DxlChannel{
 
 public:
 
-    DxlChannel();
+//    DxlChannel();
+
+    DxlChannel(const char* device = DEFAULT_DEVICE_NAME, const int baud_rate = DEFAULT_BAUD_RATE);
 
     DxlChannel(PortHandler* _portHandler);
 
-    DxlChannel(const char* device, const int baud_rate);
-
     void scan();
 
-    DxlHandle getHandle(DxlId id);
-
-    void write();
+    DxlHandle& getHandle(int id);
+    DxlHandle& getHandle(const char* name);
 
     void read();
+    void write();
 
 private:
     PortHandler* portHandler;

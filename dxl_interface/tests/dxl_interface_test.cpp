@@ -1,22 +1,23 @@
 #include <iostream>
 #include <dxl_model_spec.h>
-#include <yaml-cpp/yaml.h>
+#include <dxl_read_command.h>
+#include <dynamixel_sdk.h>
 
 using namespace dynamixel;
 using namespace std;
 
 int main(){
 
-    ModelSpec spec = ModelSpec::getByNumber(18,"../model_specs");
+    std::vector<int> v1(2);
+    std::vector<int> v2(2);
+    std::vector<int> v3(2);
+    std::vector<uint8_t*> v4(2);
 
-    std::cout << spec.toString() << std::endl;
-
-    std::cout << spec.hasName("AX-12+") << std::endl;
-    std::cout << spec.hasNameLike("AX") << std::endl;
-    std::cout << spec.hasNumber(13) << std::endl;
-    std::cout << spec.hasNameLike("18") << std::endl;
-    std::cout << spec.hasName("AX-1") << std::endl;
-
+    try{
+        DxlWriteCommand cmd(INST_BULK_WRITE,2,v1,v2,v3,v4);
+    }catch(std::exception& e){
+        std::cout << e.what() << std::endl;
+    }
 
     return 0;
 }
