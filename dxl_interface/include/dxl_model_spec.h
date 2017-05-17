@@ -62,6 +62,15 @@ public:
     std::vector<int> getNumbers() const;
 
     std::string toString();
+    double getValueToPositionRatio() const;
+    double getValueToVelocityRatio() const;
+    int getZeroPositionValue() const;
+    int getZeroVelocityValue() const;
+
+    bool hasName(const char* name);
+    bool hasNumber(const int number);
+    bool hasNameLike(const char* name);
+
 };
 
 }//namespace bracket

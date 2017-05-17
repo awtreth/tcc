@@ -3,8 +3,46 @@
 #include <yaml-cpp/yaml.h>
 #include <dirent.h>
 #include <cstring>
+#include <algorithm>
+#include <string>
 
-#include <iostream>
+using namespace dynamixel;
+
+double ModelSpec::getValueToPositionRatio() const
+{
+    return valueToPositionRatio;
+}
+
+double ModelSpec::getValueToVelocityRatio() const
+{
+    return valueToVelocityRatio;
+}
+
+int ModelSpec::getZeroPositionValue() const
+{
+    return zeroPositionValue;
+}
+
+int ModelSpec::getZeroVelocityValue() const
+{
+    return zeroVelocityValue;
+}
+
+bool ModelSpec::hasName(const char *name)
+{
+    return std::find(names.begin(),names.end(),name)!= names.end();
+}
+
+bool ModelSpec::hasNumber(const int number)
+{
+    return std::find(numbers.begin(),numbers.end(),number)!= numbers.end();
+}
+
+bool ModelSpec::hasNameLike(const char *str)
+{
+    return names.end() != std::find_if(names.begin(),names.end(),
+                        [str](std::string nm){return nm.find(str)!=std::string::npos;} );
+}
 
 std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *folder){
     DIR *dir;
@@ -98,8 +136,6 @@ dynamixel::ModelSpec dynamixel::ModelSpec::getByName(const char *modelName, cons
     auto fileNames = listFiles(folder);
 
     for(auto fileName : fileNames){
-        std::cout << fileName << std::endl;
-
         ModelSpec model(fileName.c_str());
 
         for(auto name : model.names){
