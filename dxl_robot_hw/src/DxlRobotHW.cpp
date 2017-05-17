@@ -54,10 +54,10 @@ void DxlRobotHW::write()
 {
     dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,WORD_LEN);
 
-    std::cout << "WRITE" << std::endl;
+//    std::cout << "WRITE" << std::endl;
 
     for(DxlInfo& dxl : dxlInfos){
-        std::cout << "ID: " << dxl.id << " POS: " << dxl.posCmd << std::endl;
+//        std::cout << "ID: " << dxl.id << " POS: " << dxl.posCmd << std::endl;
         dxl.posCmd_dxl = uint16_t(dxl.posCmd);
         writePacket.addParam(dxl.id,(uint8_t*)(&dxl.posCmd_dxl));
     }
@@ -68,7 +68,7 @@ void DxlRobotHW::write()
 
 void DxlRobotHW::read()
 {
-    std::cout << "READ" << std::endl;
+//    std::cout << "READ" << std::endl;
 
     uint16_t values[3];
 
@@ -78,7 +78,7 @@ void DxlRobotHW::read()
         dxl.pos = double(values[0]);
         dxl.vel = double(values[1]);
         dxl.eff = double(values[2]);
-        std::cout << "POS: " << dxl.pos << " VEL: " << dxl.vel << " EFF: " << dxl.eff << std::endl;
+//        std::cout << "POS: " << dxl.pos << " VEL: " << dxl.vel << " EFF: " << dxl.eff << std::endl;
     }
 }
 

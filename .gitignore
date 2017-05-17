@@ -1,13 +1,6 @@
-# Código da EDROM versão GitLab 11-set-2016
+# Ignore
 
 #Pessoais
-codigoEDROM/
-codigoMurilo/
-referencias/
-PropostaTCC*
-progressoTCC*
-esquemaPageSet.xlsx
-testes/
 build/
 
 # Compiled Object files
