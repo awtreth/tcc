@@ -44,6 +44,11 @@ bool ModelSpec::hasNameLike(const char *str)
                         [str](std::string nm){return nm.find(str)!=std::string::npos;} );
 }
 
+int ModelSpec::getControlTableSize() const
+{
+    return controlTableSize;
+}
+
 std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *folder){
     DIR *dir;
     struct dirent *ent;
@@ -74,46 +79,68 @@ std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *fo
 }
 
 dynamixel::ModelSpec::ModelSpec(){}
+#include <iostream>
 
 dynamixel::ModelSpec::ModelSpec(const char *fileName){
     YAML::Node model = YAML::LoadFile(fileName);
 
-    assert(model["name"]);
-    assert(model["number"]);
+    //ASSERTION STEP
+    //1st layer
+    YAML::Node spec = model["spec"];
+    YAML::Node controlTable = model["control_table"];
 
-    assert(model["valueToPositionRatio"]);
-    assert(model["valueToVelocityRatio"]);
+    //spec
+    assert(spec && controlTable);
+    assert(spec["name"]&&spec["number"]);
+    assert(spec["valueToPositionRatio"]&&spec["valueToVelocityRatio"]);
+    assert(spec["controlTableSize"]);
 
-    assert(model["zeroPositionValue"]);
-    assert(model["zeroVelocityValue"]);
+    //control_table
+    assert(controlTable[MODEL_ITEM_NAME]&&controlTable[ID_ITEM_NAME]);
+    assert(controlTable[GOAL_POSITION_ITEM_NAME]&&controlTable[MOVING_SPEED_ITEM_NAME]);
+    assert(controlTable[PRESENT_POSITION_ITEM_NAME]&&controlTable[PRESENT_SPEED_ITEM_NAME]);
 
-    if(model["name"].IsSequence()){
-        for(auto name : model["name"])
+    for(auto item : controlTable){
+        assert(item.second[ADDRESS_CT_ITEM_NAME]&&item.second[LENGTH_CT_ITEM_NAME]
+               &&item.second[ACCESS_CT_ITEM_NAME]&&item.second[SIGNED_CT_ITEM_NAME]);
+    }
+    //ASSIGNMENT STEP
+
+    //spec
+    if(spec["name"].IsSequence()){
+        for(auto name : spec["name"])
             names.push_back(name.as<std::string>());
     }else
-        names.push_back(model["name"].as<std::string>());
+        names.push_back(spec["name"].as<std::string>());
 
-    if(model["number"].IsSequence()){
-        for(auto number : model["number"])
+    if(spec["number"].IsSequence()){
+        for(auto number : spec["number"])
             numbers.push_back(number.as<int>());
     }else
-        numbers.push_back(model["number"].as<int>());
+        numbers.push_back(spec["number"].as<int>());
 
-    valueToPositionRatio = model["valueToPositionRatio"].as<double>();
-    valueToVelocityRatio = model["valueToVelocityRatio"].as<double>();
+    valueToPositionRatio = spec["valueToPositionRatio"].as<double>();
+    valueToVelocityRatio = spec["valueToVelocityRatio"].as<double>();
 
-    zeroPositionValue = model["zeroPositionValue"].as<int>();
-    zeroVelocityValue = model["zeroVelocityValue"].as<int>();
+    controlTableSize = spec["controlTableSize"].as<int>();
 
-}
+    if(spec["zeroPositionValue"])
+        zeroPositionValue = spec["zeroPositionValue"].as<int>();
+    if(spec["zeroVelocityValue"])
+        zeroVelocityValue = spec["zeroVelocityValue"].as<int>();
 
-dynamixel::ModelSpec::ModelSpec(const std::vector<std::string> _names, const std::vector<int> _numbers, const double valueToPosRatio, const double valueToVelRatio, const int zeroPosValue, const int zeroVelValue){
-    names = _names;
-    numbers = _numbers;
-    valueToPositionRatio = valueToPosRatio;
-    valueToVelocityRatio = valueToVelRatio;
-    zeroPositionValue = zeroPosValue;
-    zeroVelocityValue = zeroVelValue;
+    //control_table
+    for(auto item : controlTable){
+        ControlTableItem ctItem;
+
+        ctItem.name = item.first.as<std::string>();
+        ctItem.address = item.second[ADDRESS_CT_ITEM_NAME].as<int>();
+        ctItem.length = item.second[LENGTH_CT_ITEM_NAME].as<int>();
+        ctItem.isWritable = (item.second[ACCESS_CT_ITEM_NAME].as<std::string>()=="RW")?true:false;
+        ctItem.isSigned = item.second[SIGNED_CT_ITEM_NAME].as<bool>();
+
+        ctItems[ctItem.name] = ctItem;
+    }
 }
 
 dynamixel::ModelSpec dynamixel::ModelSpec::getByNumber(int modelNumber, const char *folder){
@@ -147,6 +174,11 @@ dynamixel::ModelSpec dynamixel::ModelSpec::getByName(const char *modelName, cons
     return ModelSpec();
 }
 
+ControlTableItem ModelSpec::getControlTableItem(const char *name)
+{
+    return ctItems[name];
+}
+
 double dynamixel::ModelSpec::valueToRadian(int posValue, bool wheelModeOrRead){
     if(wheelModeOrRead)
         return (posValue-zeroPositionValue)*valueToPositionRatio;
@@ -155,7 +187,11 @@ double dynamixel::ModelSpec::valueToRadian(int posValue, bool wheelModeOrRead){
 }
 
 double dynamixel::ModelSpec::valueToVelocity(int velValue){
-    return (velValue-zeroVelocityValue)*valueToVelocityRatio;
+    //FIXME: valido somente para 1.0
+    if(velValue>zeroVelocityValue)
+        return (velValue-zeroVelocityValue)*valueToVelocityRatio;
+    else
+        return -velValue*valueToVelocityRatio;
 }
 
 int dynamixel::ModelSpec::radianToValue(double pos){
@@ -176,21 +212,33 @@ std::vector<int> dynamixel::ModelSpec::getNumbers() const{return numbers;}
 std::string dynamixel::ModelSpec::toString(){
     std::string str;
 
-    str += "name:\n";
+    str += "spec\n";
+    str += "  name:\n";
 
     for(auto name : names)
-        str += "  - " + name + "\n";
+        str += "    - " + name + "\n";
 
-    str += "number:\n";
+    str += "  number:\n";
 
     for(auto number : numbers)
-        str += "  - " + std::to_string(number) + "\n";
+        str += "    - " + std::to_string(number) + "\n";
 
-    str += "valueToPositionRatio: " + std::to_string(valueToPositionRatio) + "\n";
-    str += "valueToVelocityRatio: " + std::to_string(valueToVelocityRatio) + "\n";
+    str += "  valueToPositionRatio: " + std::to_string(valueToPositionRatio) + "\n";
+    str += "  valueToVelocityRatio: " + std::to_string(valueToVelocityRatio) + "\n";
 
-    str += "zeroPositionValue: " + std::to_string(zeroPositionValue) + "\n";
-    str += "zeroVelocityValue: " + std::to_string(zeroVelocityValue) + "\n";
+    str += "  zeroPositionValue: " + std::to_string(zeroPositionValue) + "\n";
+    str += "  zeroVelocityValue: " + std::to_string(zeroVelocityValue) + "\n";
+
+    str += "control_table:\n";
+
+    for(auto pair : ctItems){
+        auto item = pair.second;
+        str += "  " + item.name + ": {"
+                + ADDRESS_CT_ITEM_NAME+": "+std::to_string(item.address)+", "
+                + ACCESS_CT_ITEM_NAME+": "+((item.isWritable)?("RW"):("R")) + ", "
+                + LENGTH_CT_ITEM_NAME+": "+std::to_string(item.length)+", "
+                + SIGNED_CT_ITEM_NAME+": "+((item.isSigned)?("true"):("false"))+"}\n";
+    }
 
     return str;
 }

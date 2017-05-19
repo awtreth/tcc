@@ -1,0 +1,86 @@
+#ifndef DXL_CONSTANTS_PROTOCOL_2MX_H
+#define DXL_CONSTANTS_PROTOCOL_2MX_H
+
+/*
+ * CONTROL TABLE PROTOCOL 2.0 MX Series
+ */
+#define P2MX_CONTROL_TABLE_SIZE 75
+
+//EEPROM
+#define P2MX_MODEL_NUMBER       0
+#define P2MX_MODEL_INFORMATION  2
+#define P2MX_VERSION_FIRMWARE	6
+#define P2MX_ID                 7
+#define P2MX_BAUD_RATE         4
+#define P2MX_RETURN_DELAY_TIME	5
+#define P2MX_CW_ANGLE_LIMIT_L	6
+#define P2MX_CW_ANGLE_LIMIT_H	7
+#define P2MX_CCW_ANGLE_LIMIT_L	8
+#define P2MX_CCW_ANGLE_LIMIT_H	9
+#define P2MX_DRIVE_MODE        10
+
+#define P2MX_LIMIT_TEMPERATURE     11
+#define P2MX_LOW_LIMIT_VOLTAGE     12
+#define P2MX_HIGH_LIMIT_VOLTAGE    13
+#define P2MX_MAX_TORQUE_L          14
+#define P2MX_MAX_TORQUE_H          15
+#define P2MX_RETURN_LEVEL          16
+#define P2MX_ALARM_LED             17
+#define P2MX_ALARM_SHUTDOWN        18
+
+//MX ONLY
+#define P2MX_MULTI_TURN_OFFSET_L   20
+#define P2MX_MULTI_TURN_OFFSET_H   21
+#define P2MX_RESOLUTION_DIVIDER    22
+
+//RAM
+#define P2MX_TORQUE_ENABLE         24
+#define P2MX_LED                   25
+
+//EX, AX, RX and DX Series
+#define P2MX_CW_COMPLIANCE_MARGIN	26
+#define P2MX_CCW_COMPLIANCE_MARGIN	27
+#define P2MX_CW_COMPLIANCE_SLOPE	28
+#define P2MX_CCW_COMPLIANCE_SLOPE	29
+
+//MX ONLY
+#define P2MX_D_GAIN		26
+#define P2MX_I_GAIN		27
+#define P2MX_P_GAIN		28
+
+#define P2MX_GOAL_POSITION_L       30
+#define P2MX_GOAL_POSITION_H       31
+#define P2MX_GOAL_SPEED_L          32
+#define P2MX_GOAL_SPEED_H          33
+#define P2MX_TORQUE_LIMIT_L        34
+#define P2MX_TORQUE_LIMIT_H        35
+
+#define P2MX_PRESENT_POSITION_L	36
+#define P2MX_PRESENT_POSITION_H	37
+#define P2MX_PRESENT_SPEED_L       38
+#define P2MX_PRESENT_SPEED_H       39
+#define P2MX_PRESENT_LOAD_L        40
+#define P2MX_PRESENT_LOAD_H        41
+#define P2MX_PRESENT_VOLTAGE       42
+#define P2MX_PRESENT_TEMPERATURE	43
+
+#define P2MX_REGISTERED        44
+
+#define P2MX_MOVING            46
+#define P2MX_LOCK          	47
+#define P2MX_PUNCH_L       	48
+#define P2MX_PUNCH_H   		49
+
+//EX106 ONLY
+#define P2MX_SENSED_CURRENT_L  56
+#define P2MX_SENSED_CURRENT_H  57
+
+//MX106 ONLY
+#define P2MX_CURRENT_L             68
+#define P2MX_CURRENT_H             69
+#define P2MX_TORQUE_MODE_ENABLE    70
+#define P2MX_GOAL_TORQUE_L         71
+#define P2MX_GOAL_TORQUE_H         72
+#define P2MX_GOAL_ACCELERATION     73
+
+#endif

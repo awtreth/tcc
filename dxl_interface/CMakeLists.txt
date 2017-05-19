@@ -8,8 +8,11 @@ include_directories(include)
 
 set(dxl_interface_srcs
     src/dxl_handle.cpp
+    src/dxl_handle_group.cpp
     src/dxl_channel.cpp
-    src/dxl_model_spec.cpp)
+    src/dxl_model_spec.cpp
+    src/dxl_command.cpp
+    src/dxl_control_table.cpp)
 
 set(dxl_libs dxl_x64_cpp rt pthread)
 

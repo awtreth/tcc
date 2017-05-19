@@ -1,17 +1,31 @@
-name:
-  - AX-12
-  - AX-12+
-  - AX-12A
-  - AX-18
-  - AX-18A
-  - AX-18F
+spec:
+    # Model Names
+    name:
+        - "AX-12"
+        - "AX-12+"
+        - "AX-12A"
+        - "AX-18"
+        - "AX-18A"
+        - "AX-18F"
 
-number:
-  - 12
-  - 18
+    # Model numbers in control table
+    number:
+        - 12
+        - 18
 
-valueToPositionRatio: 0.005061455
-valueToVelocityRatio: 0.011623892
 
-zeroPositionValue: 0
-zeroVelocityValue: 1024
+    # Conversion parameters
+    valueToPositionRatio: 0.005061455
+    valueToVelocityRatio: 0.011623892
+
+    zeroPositionValue: 0
+    zeroVelocityValue: 1024
+
+control_table:
+    model:            {address: 0,    access: R,      length: 2,    signed: false}
+    id:               {address: 3,    access: RW,     length: 1,    signed: false}
+    torque_enable:    {address: 24,   access: RW,     length: 1,    signed: false}
+    goal_position:    {address: 30,   access: RW,     length: 2,    signed: false}
+    moving_speed:     {address: 32,   access: RW,     length: 2,    signed: false}
+    present_position: {address: 36,   access: R,      length: 2,    signed: false}
+    present_speed:    {address: 38,   access: R,      length: 2,    signed: false}

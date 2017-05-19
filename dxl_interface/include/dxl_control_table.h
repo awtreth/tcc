@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <string>
-#include "dxl_constants_protocol_1.h"
 #include <algorithm>
+#include <dxl_model_spec.h>
 
 namespace dynamixel {
 
@@ -16,18 +16,23 @@ class ControlTable {
 
     std::vector<uint8_t> controlTableVec;
     uint8_t* controlTable;
+    ModelSpec spec;
 
     public:
 
-    ControlTable(){
-        controlTableVec.resize(CONTROL_TABLE_SIZE_1);
-        controlTable = controlTableVec.data();
-    }
+    ControlTable();
 
-    ControlTable(unsigned int size){
-        controlTableVec.resize(size);
-        controlTable = controlTableVec.data();
-    }
+    ControlTable(ModelSpec modelSpec);
+
+    ControlTable(int size);
+
+    void setParam(const char* paramName, uint8_t* data);
+
+    void getParam(const char* paramName, uint8_t* data);
+
+    int getParam(const char* paramName);
+
+    ModelSpec getModelSpec() const;
 
     /// Altera valores da tabela de controle C Style.
     /// Esta versão foi criada por motivos históricos, semelhante ao código atual da EDROM. Possui um estilo mais C.
@@ -35,8 +40,10 @@ class ControlTable {
     /// \param length Número de bytes a serem alterados a partir do startAddress
     /// \param inValuesPtr Ponteiro para os dados de entrada. A função considera que esteja devidamente alocado e de acordo com o tamanho (length passado).O usuário deve tomar cuidado com o gerenciamento de memória
     /// \see set()
-    void set(int startAddress, int length, uint8_t* inValuesPtr){
-        std::copy(inValuesPtr, inValuesPtr+length, &controlTable[startAddress]);
+    template<typename T>
+    void set(int startAddress, int length, T* inValuesPtr){
+        std::copy(reinterpret_cast<uint8_t*>(inValuesPtr), reinterpret_cast<uint8_t*>(inValuesPtr)+length,
+                  &controlTable[startAddress]);
     }
 
     /// Lê valores da tabela de controle C Style.
@@ -45,10 +52,14 @@ class ControlTable {
     /// \param length Número de bytes a serem lidos a partir de startAddress
     /// \param outValuesPtrPonteiro para os dados de saída. A função considera que esteja devidamente alocado e de acordo com o tamanho (length passado).O usuário deve tomar cuidado com o gerenciamento de memória
     /// \see get()
-    void get(int startAddress, int length, char* outValuesPtr){
-        std::copy(&controlTable[startAddress],&controlTable[startAddress+length], outValuesPtr);
+    template<typename T>
+    void get(int startAddress, int length, T* outValuesPtr){
+        std::copy(&controlTable[startAddress],&controlTable[startAddress+length], reinterpret_cast<uint8_t*>(outValuesPtr));
     }
 
+    uint8_t* getPtr(int address);
+
+    size_t size();
 };
 
 }
