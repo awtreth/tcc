@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-dynamixel::DxlHandle &dynamixel::DxlHandleGroup::get(int id)
+dxl_interface::DxlHandle &dxl_interface::DxlHandleGroup::get(int id)
 {
     for(DxlHandle& handle : handles){
         if(handle.getId()==id)
@@ -12,7 +12,7 @@ dynamixel::DxlHandle &dynamixel::DxlHandleGroup::get(int id)
     throw std::invalid_argument("No DxlHandle with id " + std::to_string(id));
 }
 
-bool dynamixel::DxlHandleGroup::hasHandle(int id)
+bool dxl_interface::DxlHandleGroup::hasHandle(int id)
 {
     for(auto handle : handles){
         if(handle.getId()==id)
@@ -21,7 +21,7 @@ bool dynamixel::DxlHandleGroup::hasHandle(int id)
     return false;
 }
 
-bool dynamixel::DxlHandleGroup::addHandle(dynamixel::DxlHandle newHandle)
+bool dxl_interface::DxlHandleGroup::addHandle(dxl_interface::DxlHandle newHandle)
 {
     if(hasHandle(newHandle.getId()))
         return false;
@@ -30,7 +30,7 @@ bool dynamixel::DxlHandleGroup::addHandle(dynamixel::DxlHandle newHandle)
     return true;
 }
 
-std::vector<dynamixel::DxlHandle>& dynamixel::DxlHandleGroup::getHandles()
+std::vector<dxl_interface::DxlHandle>& dxl_interface::DxlHandleGroup::getHandles()
 {
     return handles;
 }

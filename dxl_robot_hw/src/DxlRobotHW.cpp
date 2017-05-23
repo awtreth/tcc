@@ -14,7 +14,6 @@ using namespace hardware_interface;
 #define PRESENT_EFF_ADDR    40
 
 DxlRobotHW::DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName, const float protocol, const int baud_rate)
-    //:readPacket_(portHandler,packetHandler)
 {
 
     portHandler_ = dynamixel::PortHandler::getPortHandler(deviceName);
@@ -32,57 +31,93 @@ DxlRobotHW::DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName
     else
         printf("Failed to change the baudrate!\n");
 
-    for(auto pair : dxlMap)
-        dxlInfos.push_back(DxlInfo(pair.first,pair.second));
+    size_t i = 0;
+    for(auto pair : dxlMap){
+
+        uint16_t model_number;
+
+        if(packetHandler_->ping(portHandler_,uint8_t(pair.second),&model_number)==COMM_SUCCESS){
+            DxlInfo dxl(pair.first,pair.second,dxl_interface::ModelSpec::getByNumber(model_number));
+            dxlInfos.push_back(dxl);
+            dxlNameIdxMap[pair.first] = i++;
+        }
+    }
+
+    read();
 
     for(DxlInfo& dxl : dxlInfos){
-        dxl.posCmd = 500;
         jointStateInterface_.registerHandle(JointStateHandle(dxl.jointName,&dxl.pos,&dxl.vel,&dxl.eff));
+        dxl.posCmd = uint16_t(dxl.spec.radianToValue(dxl.posCmd));
+        dxl.velCmd = 1;//non-zero to avoid maximum speed
         positionInterface_.registerHandle(JointHandle(jointStateInterface_.getHandle(dxl.jointName),&dxl.posCmd));
+        posVelInterface_.registerHandle(PosVelJointHandle(jointStateInterface_.getHandle(dxl.jointName),&dxl.posCmd,&dxl.velCmd));
     }
 
     registerInterface(&jointStateInterface_);
     registerInterface(&positionInterface_);
+    registerInterface(&posVelInterface_);
 
-//    read();
-
-//    for(auto : dxlInfos)
-//        dxl.posCmd = dxl.pos;
 }
 
 void DxlRobotHW::write()
 {
-    dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,WORD_LEN);
+    //FIXME: restrito a protocolo 1.0
 
-//    std::cout << "WRITE" << std::endl;
+    if(positionInterface_.getClaims().size() > 0){
+        std::cout << "WRITE POSITION:" << std::endl;
 
-    for(DxlInfo& dxl : dxlInfos){
-//        std::cout << "ID: " << dxl.id << " POS: " << dxl.posCmd << std::endl;
-        dxl.posCmd_dxl = uint16_t(dxl.posCmd);
-        writePacket.addParam(dxl.id,(uint8_t*)(&dxl.posCmd_dxl));
+        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,2);
+
+        for(auto joint : positionInterface_.getClaims()){
+            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
+            dxl.posCmd_dxl = uint16_t(dxl.spec.radianToValue(dxl.posCmd));
+            writePacket.addParam(uint8_t(dxl.id),reinterpret_cast<uint8_t*>(&dxl.posCmd_dxl));
+            std::cout << "name: " << dxl.jointName << " posCmd: " << dxl.posCmd << std::endl;
+        }
+
+        writePacket.txPacket();
     }
 
-    writePacket.txPacket();
+    if(posVelInterface_.getClaims().size() > 0){
+
+        std::cout << "WRITE POSVEL:" << std::endl;
+
+        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,4);
+
+        for(auto joint : posVelInterface_.getClaims()){
+            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
+
+            dxl.posVelCmd_dxl[0] = uint16_t(dxl.spec.radianToValue(dxl.posCmd));
+            dxl.posVelCmd_dxl[1] = uint16_t(dxl.spec.velocityToValue(dxl.velCmd));
+
+            dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
+
+            writePacket.addParam(uint8_t(dxl.id),reinterpret_cast<uint8_t*>(dxl.posVelCmd_dxl));
+            std::cout << "name: " << dxl.jointName << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd  << std::endl;
+        }
+
+        writePacket.txPacket();
+    }
 
 }
 
 void DxlRobotHW::read()
 {
-//    std::cout << "READ" << std::endl;
+    // FIXME: restrito a protocol 1.0
 
     uint16_t values[3];
 
+    std::cout << "READ" << std::endl;
+
     for(DxlInfo& dxl : dxlInfos){
-        auto result = packetHandler_->readTxRx(portHandler_,dxl.id,PRESENT_POS_ADDR,6,(uint8_t*)values);
 
-        dxl.pos = double(values[0]);
-        dxl.vel = double(values[1]);
-        dxl.eff = double(values[2]);
-//        std::cout << "POS: " << dxl.pos << " VEL: " << dxl.vel << " EFF: " << dxl.eff << std::endl;
+        packetHandler_->readTxRx(portHandler_,uint8_t(dxl.id),PRESENT_POS_ADDR,6,reinterpret_cast<uint8_t*>(values));
+
+        dxl.pos = dxl.spec.valueToRadian(values[0]);
+        dxl.vel = dxl.spec.valueToVelocity(values[1]);
+        dxl.eff = values[2]/1024.;
+
+        std::cout << "name: " << dxl.jointName << " pos: " << dxl.pos << " vel: " << dxl.vel << " eff: " << dxl.eff << std::endl;
+
     }
-}
-
-bool DxlRobotHW::checkForConflict(const std::list<ControllerInfo> &info) const
-{
-    return false;
 }

@@ -1,6 +1,6 @@
 #include <dxl_channel.h>
 
-dynamixel::DxlChannel::DxlChannel(const char *device, const int baud_rate){
+dxl_interface::DxlChannel::DxlChannel(const char *device, const int baud_rate){
     portHandler = dynamixel::PortHandler::getPortHandler(device);
 
     packetHandler1 = dynamixel::PacketHandler::getPacketHandler(1);
@@ -21,7 +21,7 @@ dynamixel::DxlChannel::DxlChannel(const char *device, const int baud_rate){
     }
 }
 
-dynamixel::DxlHandle &dynamixel::DxlChannel::getHandle(uint8_t id){
+dxl_interface::DxlHandle &dxl_interface::DxlChannel::getHandle(uint8_t id){
 
     if(!handleGroup.hasHandle(id))
         scan(id);
@@ -29,13 +29,13 @@ dynamixel::DxlHandle &dynamixel::DxlChannel::getHandle(uint8_t id){
     return handleGroup.get(id);
 }
 
-dynamixel::DxlHandleGroup &dynamixel::DxlChannel::getHandleGroup()
+dxl_interface::DxlHandleGroup &dxl_interface::DxlChannel::getHandleGroup()
 {
     return handleGroup;
 }
 
 
-void dynamixel::DxlChannel::read(dynamixel::ReadCommand &cmd){
+void dxl_interface::DxlChannel::read(dxl_interface::ReadCommand &cmd){
 
     switch(cmd.getInstruction()){
 
@@ -69,7 +69,7 @@ void dynamixel::DxlChannel::read(dynamixel::ReadCommand &cmd){
     }//switch bracket
 }
 
-void dynamixel::DxlChannel::write(dynamixel::WriteCommand &cmd){
+void dxl_interface::DxlChannel::write(dxl_interface::WriteCommand &cmd){
     switch(cmd.getInstruction()){
 
     case INST_WRITE:
@@ -108,7 +108,7 @@ void dynamixel::DxlChannel::write(dynamixel::WriteCommand &cmd){
     }//switch bracket
 }
 
-void dynamixel::DxlChannel::read(dynamixel::CommandUnit &unit, float protocol){
+void dxl_interface::DxlChannel::read(dxl_interface::CommandUnit &unit, float protocol){
     auto packetHandler = getPacketHandlerByProtocolNumber(protocol);
 
     uint8_t* ptr = (unit.getData()==NULL)?handleGroup.get(unit.id).controlTable.getPtr(unit.address):unit.getData();
@@ -123,26 +123,26 @@ void dynamixel::DxlChannel::read(dynamixel::CommandUnit &unit, float protocol){
     }
 }
 
-void dynamixel::DxlChannel::write(dynamixel::CommandUnit &unit, float protocol){
+void dxl_interface::DxlChannel::write(dxl_interface::CommandUnit &unit, float protocol){
     auto packetHandler = getPacketHandlerByProtocolNumber(protocol);
     packetHandler->writeTxOnly(portHandler,uint8_t(unit.id),uint16_t(unit.address),uint16_t(unit.getLength()),unit.getData());
     handleGroup.get(unit.id).
             controlTable.set(unit.address, unit.getLength(), unit.getData());
 }
 
-void dynamixel::DxlChannel::read(dynamixel::CommandUnit &unit)
+void dxl_interface::DxlChannel::read(dxl_interface::CommandUnit &unit)
 {
     read(unit,handleGroup.get(unit.id).getProtocol());
 }
 
-void dynamixel::DxlChannel::write(dynamixel::CommandUnit &unit)
+void dxl_interface::DxlChannel::write(dxl_interface::CommandUnit &unit)
 {
     write(unit,handleGroup.get(unit.id).getProtocol());
 }
 
-bool dynamixel::DxlChannel::scan(uint8_t id, float protocol){
+bool dxl_interface::DxlChannel::scan(uint8_t id, float protocol){
 
-    PacketHandler* packetHandler;
+    dynamixel::PacketHandler* packetHandler;
 
     if(int(protocol)==1)
         packetHandler = packetHandler1;
@@ -169,18 +169,18 @@ bool dynamixel::DxlChannel::scan(uint8_t id, float protocol){
     }
 }
 
-bool dynamixel::DxlChannel::scan(uint8_t id){
+bool dxl_interface::DxlChannel::scan(uint8_t id){
     return scan(id,1) || scan(id,2);
 }
 
-bool dynamixel::DxlChannel::scan(){
+bool dxl_interface::DxlChannel::scan(){
     bool res = false;
     for(uint8_t id = 1; id < 253; id++)
         res = res || scan(id);
     return res;
 }
 
-dynamixel::PacketHandler *dynamixel::DxlChannel::getPacketHandlerByProtocolNumber(float protocol){
+dynamixel::PacketHandler *dxl_interface::DxlChannel::getPacketHandlerByProtocolNumber(float protocol){
     if(int(protocol)==1)
         return packetHandler1;
     else if(int(protocol)==2)

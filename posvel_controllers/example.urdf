@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot name="MyRobot">
+  <link name="base_link"></link>
+  <link name="link1"></link>
+  <link name="link2"></link>
+
+  <joint name="j1" type="fixed">
+    <parent link="base_link"/>
+    <child link="link1"/>
+  </joint>
+
+  <joint name="j2" type="fixed">
+    <parent link="base_link"/>
+    <child link="link2"/>
+  </joint>
+
+</robot>

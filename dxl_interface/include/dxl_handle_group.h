@@ -1,11 +1,11 @@
 #ifndef DXL_HANDLE_GROUP_H
 #define DXL_HANDLE_GROUP_H
 
-#include <dxl_handle.h>
-#include <dxl_command.h>
+#include <dxl_interface/dxl_handle.h>
+#include <dxl_interface/dxl_command.h>
 #include <vector>
 
-namespace dynamixel {
+namespace dxl_interface {
 
 class DxlHandleGroup {
 

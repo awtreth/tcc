@@ -1,27 +1,27 @@
 #include <dxl_control_table.h>
 
-dynamixel::ControlTable::ControlTable(){}
+dxl_interface::ControlTable::ControlTable(){}
 
-dynamixel::ControlTable::ControlTable(dynamixel::ModelSpec modelSpec):ControlTable(modelSpec.getControlTableSize()){
+dxl_interface::ControlTable::ControlTable(dxl_interface::ModelSpec modelSpec):ControlTable(modelSpec.getControlTableSize()){
     spec = modelSpec;
 }
 
-dynamixel::ControlTable::ControlTable(int size){
+dxl_interface::ControlTable::ControlTable(int size){
     controlTableVec.resize(static_cast <unsigned int>(size));
     controlTable = controlTableVec.data();
 }
 
-void dynamixel::ControlTable::setParam(const char *paramName, uint8_t *data){
+void dxl_interface::ControlTable::setParam(const char *paramName, uint8_t *data){
     auto item = spec.getControlTableItem(paramName);
     set(item.address,item.length,data);
 }
 
-void dynamixel::ControlTable::getParam(const char *paramName, uint8_t *data){
+void dxl_interface::ControlTable::getParam(const char *paramName, uint8_t *data){
     auto item = spec.getControlTableItem(paramName);
     get(item.address,item.length,data);
 }
 
-int dynamixel::ControlTable::getParam(const char *paramName){
+int dxl_interface::ControlTable::getParam(const char *paramName){
     auto item = spec.getControlTableItem(paramName);
 
     int data = 0;
@@ -36,12 +36,12 @@ int dynamixel::ControlTable::getParam(const char *paramName){
     return data;
 }
 
-dynamixel::ModelSpec dynamixel::ControlTable::getModelSpec() const {return spec;}
+dxl_interface::ModelSpec dxl_interface::ControlTable::getModelSpec() const {return spec;}
 
-uint8_t *dynamixel::ControlTable::getPtr(int address){
+uint8_t *dxl_interface::ControlTable::getPtr(int address){
     return &controlTable[address];
 }
 
-size_t dynamixel::ControlTable::size(){
+size_t dxl_interface::ControlTable::size(){
     return controlTableVec.size();
 }

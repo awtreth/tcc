@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <dxl_command.h>
+#include <dxl_interface/dxl_command.h>
 
-#define DEFAULT_MODEL_SPEC_RELATIVE_FOLDER  "model_specs/"
+#define DEFAULT_MODEL_SPEC_FOLDER  "model_specs/"
 #define DEFAULT_MODEL_SPEC_FILE_EXTENSION   ".dxl"
 
 #define MODEL_ITEM_NAME             "model"
@@ -19,16 +19,14 @@
 #define ADDRESS_CT_ITEM_NAME    "address"
 #define LENGTH_CT_ITEM_NAME     "length"
 #define ACCESS_CT_ITEM_NAME     "access"
-#define SIGNED_CT_ITEM_NAME     "signed"
 
-namespace dynamixel {
+namespace dxl_interface {
 
 struct ControlTableItem{
     std::string name = "";
     int address = -1;
     int length = -1;
     bool isWritable = false;
-    bool isSigned = false;
 
     bool setWriteCommandUnit(CommandUnit& unit, int value){
 
@@ -56,15 +54,13 @@ private:
     std::vector<std::string> names;
     std::vector<int> numbers;
 
-    double valueToPositionRatio;
-    double valueToVelocityRatio;
+    double valueToPositionRatio = 0;
+    double valueToVelocityRatio = 0;
 
-    int zeroPositionValue = 0;
-    int zeroVelocityValue = 1024;//for wheel mode and read operations
+    int controlTableSize = 0;
+    float protocol = 1.0;
 
-    int controlTableSize;
-
-    static std::vector<std::string> listFiles(const char* folder);
+    static std::vector<std::string> listFiles(const char* folder, const char *file_extension);
 
 public:
 
@@ -72,9 +68,10 @@ public:
 
     ModelSpec(const char* fileName);
 
-    static ModelSpec getByNumber(int modelNumber, const char* folder = DEFAULT_MODEL_SPEC_RELATIVE_FOLDER);
+    bool isValid();
 
-    static ModelSpec getByName(const char* modelName, const char* folder = DEFAULT_MODEL_SPEC_RELATIVE_FOLDER);
+    static ModelSpec getByNumber(int modelNumber, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
+    static ModelSpec getByName(const char* modelName, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
 
     ControlTableItem getControlTableItem(const char* name);
 
@@ -84,7 +81,7 @@ public:
          * @param pos Posição em unidade de motor
          * @return double Posição em radianos
          */
-    double valueToRadian(int posValue, bool wheelModeOrRead = true);
+    double valueToRadian(int posValue);
 
     /**
          * @brief Converte velocidade em unidade de motor para radianos por segundo
@@ -105,8 +102,6 @@ public:
     std::string toString();
     double getValueToPositionRatio() const;
     double getValueToVelocityRatio() const;
-    int getZeroPositionValue() const;
-    int getZeroVelocityValue() const;
 
     bool hasName(const char* name);
     bool hasNumber(const int number);
@@ -115,5 +110,6 @@ public:
 };
 
 }//namespace bracket
+
 
 #endif

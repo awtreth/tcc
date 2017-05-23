@@ -1,0 +1,41 @@
+name: 
+    - MX-64
+    - MX-64T
+    - MX-64R
+    - MX-64AT
+    - MX-64AR
+    - MX-106
+    - MX-106T
+    - MX-106R
+    - MX-28
+    - MX-28T
+    - MX-28R
+
+number:
+    - 310
+    - 311
+    - 320
+    - 321
+    - 29
+
+protocol: 2.0
+
+# rad
+valueToPositionRatio: 0.001535890
+# rad/s
+valueToVelocityRatio: 0.023980823
+
+control_table_size: 700
+
+control_table:
+    
+    # item_name:      {address: uint  access: R[W]    length: (1,2 or 4)
+    
+    model:            {address: 0,    access: R,      length: 2}
+    id:               {address: 7,    access: RW,     length: 1}
+    torque_enable:    {address: 64,   access: RW,     length: 1}
+    goal_position:    {address: 116,  access: RW,     length: 4}
+    moving_speed:     {address: 32,   access: RW,     length: 4}
+    present_position: {address: 132,  access: R,      length: 4}
+    present_speed:    {address: 128,  access: R,      length: 4}
+    

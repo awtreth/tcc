@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace dynamixel {
+namespace dxl_interface {
 
 class CommandUnit {
 

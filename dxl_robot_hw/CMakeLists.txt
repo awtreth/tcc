@@ -20,8 +20,8 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${control_timer_INCLUDE_DIRS}
 add_library(dxl_robot_hw SHARED src/DxlRobotHW.cpp)
 add_executable(dxl_robot_hw_test src/dxl_robot_hw_test.cpp)
 
-target_link_libraries(dxl_robot_hw ${catkin_LIBRARIES} dxl_x64_cpp rt pthread)
-target_link_libraries(dxl_robot_hw_test ${catkin_LIBRARIES} dxl_robot_hw dxl_x64_cpp rt pthread)
+target_link_libraries(dxl_robot_hw ${catkin_LIBRARIES} dxl_x64_cpp rt pthread dxl_interface)
+target_link_libraries(dxl_robot_hw_test ${catkin_LIBRARIES} dxl_robot_hw)
 
 #Somente para exibir os headers na arvore do Qt Creator
 FILE(GLOB_RECURSE headers "*.h")

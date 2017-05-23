@@ -1,13 +1,13 @@
 #ifndef DXL_HANDLE_H
 #define DXL_HANDLE_H
 
-#include <dxl_model_spec.h>
-#include <dxl_control_table.h>
-#include <dxl_command.h>
+#include <dxl_interface/dxl_model_spec.h>
+#include <dxl_interface/dxl_control_table.h>
+#include <dxl_interface/dxl_command.h>
 #include <string>
 #include <list>
 
-namespace dynamixel {
+namespace dxl_interface {
 
 class DxlHandle {
 

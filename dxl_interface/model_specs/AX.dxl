@@ -1,19 +1,26 @@
+# contain all fitable model names
+name: 
+    - "AX-12"
+    - "AX-12+"
+    - "AX-12A"
+    - "AX-18"
+    - "AX-18A"
+    - "AX-18F"
 
-name: # contain all fitable model names 
-    - "EX-106+"
+# contain all fitable model numbers (control table value)
+number:
+    - 12
+    - 18
 
-number: # contain all fitable model numbers (control table value)
-    - 107
-    
 protocol: 1.0
 
 # rad
-valueToPositionRatio: 0.001047198
+valueToPositionRatio: 0.005061455
 
 # rad/s
 valueToVelocityRatio: 0.011623892
 
-control_table_size: 58
+control_table_size: 50
 
 control_table:
     # item_name:      {address: uint  access: R[W]    length: (1,2 or 4)

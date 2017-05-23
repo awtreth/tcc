@@ -17,3 +17,5 @@ posvel_joint_trajectory_controller:
 joint_posvel_controller:
   type: posvel_controllers/JointGroupPosVelController
   joints: [j1,j2]
+
+

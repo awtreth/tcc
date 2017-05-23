@@ -2,10 +2,10 @@
 #define DXL_CHANNEL_H
 
 #include <dynamixel_sdk.h>
-#include <dxl_handle.h>
-#include <dxl_handle_group.h>
-#include <dxl_command.h>
-#include <dxl_model_spec.h>
+#include <dxl_interface/dxl_handle.h>
+#include <dxl_interface/dxl_handle_group.h>
+#include <dxl_interface/dxl_command.h>
+#include <dxl_interface/dxl_model_spec.h>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -14,7 +14,7 @@
 #define DEFAULT_DEVICE_NAME "/dev/ttyUSB0"
 #define DEFAULT_BAUD_RATE   1000000
 
-namespace dynamixel {
+namespace dxl_interface {
 
 class DxlChannel{
 
@@ -37,24 +37,24 @@ public:
     bool scan(uint8_t id);
     bool scan();
 
-    PacketHandler *getPacketHandler1() const;
-    PacketHandler *getPacketHandler2() const;
-    PortHandler *getPortHandler() const;
+    dynamixel::PacketHandler *getPacketHandler1() const;
+    dynamixel::PacketHandler *getPacketHandler2() const;
+    dynamixel::PortHandler *getPortHandler() const;
 
 private:
 
     //CLASS MEMBERS
 
-    PortHandler* portHandler;
-    PacketHandler* packetHandler1;
-    PacketHandler* packetHandler2;
+    dynamixel::PortHandler* portHandler;
+    dynamixel::PacketHandler* packetHandler1;
+    dynamixel::PacketHandler* packetHandler2;
 
     DxlHandleGroup handleGroup;
 
 
     //HELPER METHODS
 
-    PacketHandler* getPacketHandlerByProtocolNumber(float protocol);
+    dynamixel::PacketHandler* getPacketHandlerByProtocolNumber(float protocol);
 
     template<typename ReadGroup>
     void readGroupData(ReadGroup& group,ReadCommand& cmd){

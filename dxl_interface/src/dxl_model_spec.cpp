@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <string>
 
-using namespace dynamixel;
+using namespace dxl_interface;
 
 double ModelSpec::getValueToPositionRatio() const
 {
@@ -16,16 +16,6 @@ double ModelSpec::getValueToPositionRatio() const
 double ModelSpec::getValueToVelocityRatio() const
 {
     return valueToVelocityRatio;
-}
-
-int ModelSpec::getZeroPositionValue() const
-{
-    return zeroPositionValue;
-}
-
-int ModelSpec::getZeroVelocityValue() const
-{
-    return zeroVelocityValue;
 }
 
 bool ModelSpec::hasName(const char *name)
@@ -49,7 +39,7 @@ int ModelSpec::getControlTableSize() const
     return controlTableSize;
 }
 
-std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *folder){
+std::vector<std::__cxx11::string> dxl_interface::ModelSpec::listFiles(const char *folder, const char* file_extension){
     DIR *dir;
     struct dirent *ent;
     dir = opendir (folder);
@@ -63,13 +53,13 @@ std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *fo
     if(filePath.back() != '/')
         filePath.append("/");
 
-    const int extensionSize = strlen(DEFAULT_MODEL_SPEC_FILE_EXTENSION);
+    size_t extensionSize = strlen(file_extension);
 
     while ((ent = readdir (dir)) != NULL) {
         //if the file ends with DEFAULT_MODEL_SPEC_FILE_EXTENSION
 
         if( strlen(ent->d_name) > extensionSize &&
-                std::string(ent->d_name).substr(strlen(ent->d_name)-extensionSize, extensionSize)==DEFAULT_MODEL_SPEC_FILE_EXTENSION )
+                std::string(ent->d_name).substr(strlen(ent->d_name)-extensionSize, extensionSize)==file_extension )
             list.push_back(filePath + ent->d_name);
     }
 
@@ -78,89 +68,89 @@ std::vector<std::__cxx11::string> dynamixel::ModelSpec::listFiles(const char *fo
     return list;
 }
 
-dynamixel::ModelSpec::ModelSpec(){}
-#include <iostream>
+dxl_interface::ModelSpec::ModelSpec(){}
 
-dynamixel::ModelSpec::ModelSpec(const char *fileName){
+dxl_interface::ModelSpec::ModelSpec(const char *fileName){
     YAML::Node model = YAML::LoadFile(fileName);
 
     //ASSERTION STEP
-    //1st layer
-    YAML::Node spec = model["spec"];
-    YAML::Node controlTable = model["control_table"];
+
+    //model_id
+    assert(model["name"] && model["number"] && model["protocol"]);
 
     //spec
-    assert(spec && controlTable);
-    assert(spec["name"]&&spec["number"]);
-    assert(spec["valueToPositionRatio"]&&spec["valueToVelocityRatio"]);
-    assert(spec["controlTableSize"]);
+    assert(model["valueToPositionRatio"] && model["valueToVelocityRatio"]);
 
     //control_table
-    assert(controlTable[MODEL_ITEM_NAME]&&controlTable[ID_ITEM_NAME]);
-    assert(controlTable[GOAL_POSITION_ITEM_NAME]&&controlTable[MOVING_SPEED_ITEM_NAME]);
-    assert(controlTable[PRESENT_POSITION_ITEM_NAME]&&controlTable[PRESENT_SPEED_ITEM_NAME]);
+    YAML::Node control_table = model["control_table"];
+    assert(model["control_table_size"] && control_table);
+    assert(control_table[MODEL_ITEM_NAME] && control_table[ID_ITEM_NAME]);
+    assert(control_table[GOAL_POSITION_ITEM_NAME] && control_table[MOVING_SPEED_ITEM_NAME]);
+    assert(control_table[PRESENT_POSITION_ITEM_NAME] && control_table[PRESENT_SPEED_ITEM_NAME]);
 
-    for(auto item : controlTable){
-        assert(item.second[ADDRESS_CT_ITEM_NAME]&&item.second[LENGTH_CT_ITEM_NAME]
-               &&item.second[ACCESS_CT_ITEM_NAME]&&item.second[SIGNED_CT_ITEM_NAME]);
-    }
+    for(auto item : control_table)
+        assert(item.second[ADDRESS_CT_ITEM_NAME] && item.second[LENGTH_CT_ITEM_NAME] && item.second[ACCESS_CT_ITEM_NAME]);
+
+
     //ASSIGNMENT STEP
 
     //spec
-    if(spec["name"].IsSequence()){
-        for(auto name : spec["name"])
+    if(model["name"].IsSequence()){
+        for(auto name : model["name"])
             names.push_back(name.as<std::string>());
     }else
-        names.push_back(spec["name"].as<std::string>());
+        names.push_back(model["name"].as<std::string>());
 
-    if(spec["number"].IsSequence()){
-        for(auto number : spec["number"])
+    if(model["number"].IsSequence()){
+        for(auto number : model["number"])
             numbers.push_back(number.as<int>());
     }else
-        numbers.push_back(spec["number"].as<int>());
+        numbers.push_back(model["number"].as<int>());
 
-    valueToPositionRatio = spec["valueToPositionRatio"].as<double>();
-    valueToVelocityRatio = spec["valueToVelocityRatio"].as<double>();
+    protocol = model["protocol"].as<float>();
 
-    controlTableSize = spec["controlTableSize"].as<int>();
+    valueToPositionRatio = model["valueToPositionRatio"].as<double>();
+    valueToVelocityRatio = model["valueToVelocityRatio"].as<double>();
 
-    if(spec["zeroPositionValue"])
-        zeroPositionValue = spec["zeroPositionValue"].as<int>();
-    if(spec["zeroVelocityValue"])
-        zeroVelocityValue = spec["zeroVelocityValue"].as<int>();
+    controlTableSize = model["control_table_size"].as<int>();
 
     //control_table
-    for(auto item : controlTable){
+    for(auto item : control_table){
         ControlTableItem ctItem;
 
         ctItem.name = item.first.as<std::string>();
         ctItem.address = item.second[ADDRESS_CT_ITEM_NAME].as<int>();
         ctItem.length = item.second[LENGTH_CT_ITEM_NAME].as<int>();
         ctItem.isWritable = (item.second[ACCESS_CT_ITEM_NAME].as<std::string>()=="RW")?true:false;
-        ctItem.isSigned = item.second[SIGNED_CT_ITEM_NAME].as<bool>();
 
         ctItems[ctItem.name] = ctItem;
     }
 }
 
-dynamixel::ModelSpec dynamixel::ModelSpec::getByNumber(int modelNumber, const char *folder){
+bool ModelSpec::isValid()
+{
+    return valueToPositionRatio <= 0;
+}
 
-    auto fileNames = listFiles(folder);
+dxl_interface::ModelSpec dxl_interface::ModelSpec::getByNumber(int modelNumber, const char *folder, const char* file_extension){
+
+    auto fileNames = listFiles(folder, file_extension);
 
     for(auto fileName : fileNames){
         ModelSpec model(fileName.c_str());
 
         for(auto number : model.numbers){
-            if(number == modelNumber)
+            if(number == modelNumber){
                 return model;
+            }
         }
     }
 
     return ModelSpec();
 }
 
-dynamixel::ModelSpec dynamixel::ModelSpec::getByName(const char *modelName, const char *folder){
-    auto fileNames = listFiles(folder);
+dxl_interface::ModelSpec dxl_interface::ModelSpec::getByName(const char *modelName, const char *folder, const char* file_extension){
+    auto fileNames = listFiles(folder, file_extension);
 
     for(auto fileName : fileNames){
         ModelSpec model(fileName.c_str());
@@ -179,55 +169,56 @@ ControlTableItem ModelSpec::getControlTableItem(const char *name)
     return ctItems[name];
 }
 
-double dynamixel::ModelSpec::valueToRadian(int posValue, bool wheelModeOrRead){
-    if(wheelModeOrRead)
-        return (posValue-zeroPositionValue)*valueToPositionRatio;
+double dxl_interface::ModelSpec::valueToRadian(int posValue){
+    return posValue*valueToPositionRatio;
+}
+
+double dxl_interface::ModelSpec::valueToVelocity(int velValue){
+
+    if(velValue < 1024)
+        return velValue*valueToVelocityRatio;
     else
-        return posValue*valueToPositionRatio;
+        return (1024 - velValue)*valueToVelocityRatio;
 }
 
-double dynamixel::ModelSpec::valueToVelocity(int velValue){
-    //FIXME: valido somente para 1.0
-    if(velValue>zeroVelocityValue)
-        return (velValue-zeroVelocityValue)*valueToVelocityRatio;
-    else
-        return -velValue*valueToVelocityRatio;
+int dxl_interface::ModelSpec::radianToValue(double pos){
+    return int(pos/valueToPositionRatio);
 }
 
-int dynamixel::ModelSpec::radianToValue(double pos){
-    return int(pos/valueToPositionRatio+zeroPositionValue);
+int dxl_interface::ModelSpec::velocityToValue(double vel, bool wheelMode){
+
+    auto baseValue = int(vel/valueToVelocityRatio);
+
+    if(wheelMode){
+        if(int(protocol) == 1 && vel >= 0)
+            return baseValue+1024;
+        else
+            return baseValue;
+    }else
+        return abs(baseValue);
 }
 
-int dynamixel::ModelSpec::velocityToValue(double vel, bool wheelMode){
-    if(wheelMode)
-        return int(vel/valueToVelocityRatio+zeroVelocityValue);
-    else
-        return int(vel/valueToVelocityRatio);
-}
+std::vector<std::string> dxl_interface::ModelSpec::getNames() const{return names;}
 
-std::vector<std::string> dynamixel::ModelSpec::getNames() const{return names;}
+std::vector<int> dxl_interface::ModelSpec::getNumbers() const{return numbers;}
 
-std::vector<int> dynamixel::ModelSpec::getNumbers() const{return numbers;}
-
-std::string dynamixel::ModelSpec::toString(){
+std::string dxl_interface::ModelSpec::toString(){
     std::string str;
 
-    str += "spec\n";
-    str += "  name:\n";
+    str += "name:\n";
 
     for(auto name : names)
-        str += "    - " + name + "\n";
+        str += "  - " + name + "\n";
 
-    str += "  number:\n";
+    str += "number:\n";
 
     for(auto number : numbers)
-        str += "    - " + std::to_string(number) + "\n";
+        str += "  - " + std::to_string(number) + "\n";
 
-    str += "  valueToPositionRatio: " + std::to_string(valueToPositionRatio) + "\n";
-    str += "  valueToVelocityRatio: " + std::to_string(valueToVelocityRatio) + "\n";
+    str += "valueToPositionRatio: " + std::to_string(valueToPositionRatio) + "\n";
+    str += "valueToVelocityRatio: " + std::to_string(valueToVelocityRatio) + "\n";
 
-    str += "  zeroPositionValue: " + std::to_string(zeroPositionValue) + "\n";
-    str += "  zeroVelocityValue: " + std::to_string(zeroVelocityValue) + "\n";
+    str += "control_table_size:" + std::to_string(controlTableSize) + "\n";
 
     str += "control_table:\n";
 
@@ -236,8 +227,7 @@ std::string dynamixel::ModelSpec::toString(){
         str += "  " + item.name + ": {"
                 + ADDRESS_CT_ITEM_NAME+": "+std::to_string(item.address)+", "
                 + ACCESS_CT_ITEM_NAME+": "+((item.isWritable)?("RW"):("R")) + ", "
-                + LENGTH_CT_ITEM_NAME+": "+std::to_string(item.length)+", "
-                + SIGNED_CT_ITEM_NAME+": "+((item.isSigned)?("true"):("false"))+"}\n";
+                + LENGTH_CT_ITEM_NAME+": "+std::to_string(item.length)+"}\n";
     }
 
     return str;

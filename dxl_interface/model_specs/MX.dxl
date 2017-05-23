@@ -1,19 +1,27 @@
+name: 
+  - MX-64
+  - MX-64T
+  - MX-64R
+  - MX-64AT
+  - MX-64AR
+  - MX-106
+  - MX-106T
+  - MX-106R
 
-name: # contain all fitable model names 
-    - "EX-106+"
+number:
+  - 310
+  - 311
+  - 320
+  - 321
 
-number: # contain all fitable model numbers (control table value)
-    - 107
-    
 protocol: 1.0
 
 # rad
-valueToPositionRatio: 0.001047198
-
+valueToPositionRatio: 0.001535890
 # rad/s
-valueToVelocityRatio: 0.011623892
+valueToVelocityRatio: 0.011938052
 
-control_table_size: 58
+control_table_size: 75
 
 control_table:
     # item_name:      {address: uint  access: R[W]    length: (1,2 or 4)

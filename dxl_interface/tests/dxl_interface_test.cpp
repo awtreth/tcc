@@ -2,54 +2,58 @@
 #include <dxl_interface.h>
 #include <unistd.h>
 
-using namespace dynamixel;
+using namespace dxl_interface;
 using namespace std;
 
 int main(){
 
-    DxlChannel channel;
+    auto spec = ModelSpec::getByName("AX-12","../model_specs/");
 
-    channel.scan(1,1);
-    channel.scan(3,1);
+    std::cout << spec.toString() << std::endl;
 
-    auto handleGroup = channel.getHandleGroup();
+//    DxlChannel channel;
 
-    DxlHandle& handle1 = handleGroup.get(1);
-    DxlHandle& handle3 = handleGroup.get(3);
+//    channel.scan(1,1);
+//    channel.scan(3,1);
 
-    handle1.setPositionVelocity(1.2,1);
-    handle3.setPositionVelocity(2.0,1);
+//    auto handleGroup = channel.getHandleGroup();
 
-    WriteCommand cmd(INST_SYNC_WRITE,1);
+//    DxlHandle& handle1 = handleGroup.get(1);
+//    DxlHandle& handle3 = handleGroup.get(3);
 
-    for(DxlHandle& handle : handleGroup.getHandles()){
-        for(auto cmdUnit : handle.getWriteCommandUnits())
-            cmd.addCommandUnit(cmdUnit);
-    }
+//    handle1.setPositionVelocity(1.2,1);
+//    handle3.setPositionVelocity(2.0,1);
 
-    channel.write(cmd);
+//    WriteCommand cmd(INST_SYNC_WRITE,1);
 
-//    sleep(3);
+//    for(DxlHandle& handle : handleGroup.getHandles()){
+//        for(auto cmdUnit : handle.getWriteCommandUnits())
+//            cmd.addCommandUnit(cmdUnit);
+//    }
 
-    handle1.requestPosition();
-    handle1.requestVelocity();
+//    channel.write(cmd);
 
-    handle3.requestPosition();
-    handle3.requestVelocity();
+////    sleep(3);
 
-    ReadCommand cmdRead(INST_READ,1);
+//    handle1.requestPosition();
+//    handle1.requestVelocity();
 
-    for(DxlHandle& handle : handleGroup.getHandles()){
-        for(auto cmdUnit : handle.getReadCommandUnits())
-            cmdRead.addCommandUnit(cmdUnit);
-    }
+//    handle3.requestPosition();
+//    handle3.requestVelocity();
 
-    channel.read(cmdRead);
+//    ReadCommand cmdRead(INST_READ,1);
 
-    std::cout << handle1.getPosition() << std::endl;
-    std::cout << handle1.getVelocity() << std::endl;
-    std::cout << handle3.getPosition() << std::endl;
-    std::cout << handle3.getVelocity() << std::endl;
+//    for(DxlHandle& handle : handleGroup.getHandles()){
+//        for(auto cmdUnit : handle.getReadCommandUnits())
+//            cmdRead.addCommandUnit(cmdUnit);
+//    }
+
+//    channel.read(cmdRead);
+
+//    std::cout << handle1.getPosition() << std::endl;
+//    std::cout << handle1.getVelocity() << std::endl;
+//    std::cout << handle3.getPosition() << std::endl;
+//    std::cout << handle3.getVelocity() << std::endl;
 
     return 0;
 }

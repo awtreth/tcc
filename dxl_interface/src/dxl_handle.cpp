@@ -1,63 +1,63 @@
 #include <dxl_handle.h>
 
-void dynamixel::DxlHandle::setPosition(double pos){
+void dxl_interface::DxlHandle::setPosition(double pos){
     set(GOAL_POSITION_ITEM_NAME,spec.radianToValue(pos+posRef));
 }
 
-void dynamixel::DxlHandle::setPositionVelocity(double pos, double vel){
+void dxl_interface::DxlHandle::setPositionVelocity(double pos, double vel){
     setPosition(pos);
     set(MOVING_SPEED_ITEM_NAME,spec.velocityToValue(vel));
 }
 
-void dynamixel::DxlHandle::set(const char *paramName, int value){
+void dxl_interface::DxlHandle::set(const char *paramName, int value){
     auto ctItem = spec.getControlTableItem(paramName);
     CommandUnit unit(id,uint16_t(ctItem.address));
     ctItem.setWriteCommandUnit(unit,value);
     writeCommandUnits.push_back(unit);
 }
 
-void dynamixel::DxlHandle::request(uint16_t addr, uint16_t length){
+void dxl_interface::DxlHandle::request(uint16_t addr, uint16_t length){
     readCommandUnits.push_back(CommandUnit(id,addr,length));
 }
 
-void dynamixel::DxlHandle::request(const char *paramName){
+void dxl_interface::DxlHandle::request(const char *paramName){
     auto ctItem = spec.getControlTableItem(paramName);
     request(uint16_t(ctItem.address),uint16_t(ctItem.length));
 }
 
-void dynamixel::DxlHandle::requestPosition()
+void dxl_interface::DxlHandle::requestPosition()
 {
     request(PRESENT_POSITION_ITEM_NAME);
 }
 
-void dynamixel::DxlHandle::requestVelocity()
+void dxl_interface::DxlHandle::requestVelocity()
 {
     request(PRESENT_SPEED_ITEM_NAME);
 }
 
-double dynamixel::DxlHandle::getPosition(){
+double dxl_interface::DxlHandle::getPosition(){
     auto posValue = controlTable.getParam(PRESENT_POSITION_ITEM_NAME);
     return spec.valueToRadian(posValue)-posRef;
 }
 
-double dynamixel::DxlHandle::getVelocity() {
+double dxl_interface::DxlHandle::getVelocity() {
     auto velValue = controlTable.getParam(PRESENT_SPEED_ITEM_NAME);
     return spec.valueToVelocity(velValue);
 }
 
-void dynamixel::DxlHandle::setReference(const double ref){posRef = ref;}
+void dxl_interface::DxlHandle::setReference(const double ref){posRef = ref;}
 
-double dynamixel::DxlHandle::getReference() const{return posRef;}
+double dxl_interface::DxlHandle::getReference() const{return posRef;}
 
-dynamixel::ModelSpec dynamixel::DxlHandle::getModelSpec() const{return spec;}
+dxl_interface::ModelSpec dxl_interface::DxlHandle::getModelSpec() const{return spec;}
 
-uint8_t dynamixel::DxlHandle::getId() const{return id;}
+uint8_t dxl_interface::DxlHandle::getId() const{return id;}
 
-float dynamixel::DxlHandle::getProtocol() const{return protocol;}
+float dxl_interface::DxlHandle::getProtocol() const{return protocol;}
 
-std::string dynamixel::DxlHandle::getName() const{return name;}
+std::string dxl_interface::DxlHandle::getName() const{return name;}
 
-std::vector<dynamixel::CommandUnit> dynamixel::DxlHandle::getWriteCommandUnits(bool clear)
+std::vector<dxl_interface::CommandUnit> dxl_interface::DxlHandle::getWriteCommandUnits(bool clear)
 {
     auto ans =  joinCommandUnits(writeCommandUnits);
     if(clear)
@@ -66,7 +66,7 @@ std::vector<dynamixel::CommandUnit> dynamixel::DxlHandle::getWriteCommandUnits(b
     return ans;
 }
 
-std::vector<dynamixel::CommandUnit> dynamixel::DxlHandle::getReadCommandUnits(bool clear)
+std::vector<dxl_interface::CommandUnit> dxl_interface::DxlHandle::getReadCommandUnits(bool clear)
 {
     auto ret = joinCommandUnits(readCommandUnits);
     if(clear)
@@ -74,17 +74,17 @@ std::vector<dynamixel::CommandUnit> dynamixel::DxlHandle::getReadCommandUnits(bo
     return ret;
 }
 
-void dynamixel::DxlHandle::clearReadCommandUnits()
+void dxl_interface::DxlHandle::clearReadCommandUnits()
 {
     readCommandUnits.clear();
 }
 
-void dynamixel::DxlHandle::clearWriteCommandUnits()
+void dxl_interface::DxlHandle::clearWriteCommandUnits()
 {
     writeCommandUnits.clear();
 }
 
-dynamixel::DxlHandle::DxlHandle(uint8_t _id, float _protocol, dynamixel::ControlTable initControlTable){
+dxl_interface::DxlHandle::DxlHandle(uint8_t _id, float _protocol, dxl_interface::ControlTable initControlTable){
     id = _id;
 //    handleGroup = mainHandleGroup;
     protocol = _protocol;
@@ -93,7 +93,7 @@ dynamixel::DxlHandle::DxlHandle(uint8_t _id, float _protocol, dynamixel::Control
     name = spec.getNames()[0] + "_" + std::to_string(id);
 }
 
-bool dynamixel::DxlHandle::joinCommandUnits(dynamixel::CommandUnit &first, dynamixel::CommandUnit &second){
+bool dxl_interface::DxlHandle::joinCommandUnits(dxl_interface::CommandUnit &first, dxl_interface::CommandUnit &second){
     CommandUnit& before = first;
     CommandUnit& after = second;
 
@@ -121,8 +121,8 @@ bool dynamixel::DxlHandle::joinCommandUnits(dynamixel::CommandUnit &first, dynam
     return false;
 }
 
-std::vector<dynamixel::CommandUnit> dynamixel::DxlHandle::joinCommandUnits(std::list<dynamixel::CommandUnit> list){
-    std::vector<dynamixel::CommandUnit> vec;
+std::vector<dxl_interface::CommandUnit> dxl_interface::DxlHandle::joinCommandUnits(std::list<dxl_interface::CommandUnit> list){
+    std::vector<dxl_interface::CommandUnit> vec;
 
     while(list.size()>0){
         auto unit = list.front();
