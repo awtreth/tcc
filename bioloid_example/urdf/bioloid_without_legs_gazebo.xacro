@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!-- gazebo_ros_control plugin for URDF -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+<!--
+            <robotNamespace>/bioloid_without_legs</robotNamespace>
+-->
+            <robotNamespace>/</robotNamespace>
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+
+    <xacro:macro name="shoulder_swing_joint_gazebo" params="prefix">
+        <transmission name="${prefix}_shoulder_swing_joint_tran">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_shoulder_swing_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_shoulder_swing_joint_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+    <xacro:macro name="shoulder_lateral_joint_gazebo" params="prefix">
+        <transmission name="${prefix}_shoulder_lateral_joint_tran">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_shoulder_lateral_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_shoulder_lateral_joint_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+    <xacro:macro name="elbow_joint_gazebo" params="prefix">
+        <transmission name="${prefix}_elbow_joint_tran">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_elbow_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_elbow_joint_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+    <xacro:macro name="hand_joint_gazebo" params="prefix">
+        <transmission name="${prefix}_elbow_joint_tran">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_elbow_joint">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_elbow_joint_motor">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <shoulder_swing_joint_gazebo prefix="right"/>
+    <shoulder_swing_joint_gazebo prefix="left"/>
+    <shoulder_lateral_joint_gazebo prefix="right"/>
+    <shoulder_lateral_joint_gazebo prefix="left"/>
+    <elbow_joint_gazebo prefix="right"/>
+    <elbow_joint_gazebo prefix="left"/>
+    <hand_joint_gazebo prefix="right"/>
+    <hand_joint_gazebo prefix="left"/>
+
+</robot>

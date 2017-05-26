@@ -1,0 +1,10 @@
+<package format="2">
+    <name>bioloid_example</name>
+    <version>0.0.0</version>
+    <description>
+        Example with a bioloid robot without legs 
+    </description>
+    <maintainer email="mateus.amarujo@gmail.com">Mateus Amarante</maintainer>
+    <license>BSD</license>
+    <buildtool_depend>catkin</buildtool_depend>
+</package>

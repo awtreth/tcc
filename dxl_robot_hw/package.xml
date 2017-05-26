@@ -9,4 +9,5 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>hardware_interface</depend>
   <depend>controller_manager</depend>
+  <depend>realtime_tools</depend>
 </package>

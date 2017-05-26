@@ -5,14 +5,15 @@ project(dxl_robot_hw CXX)
 find_package(catkin REQUIRED COMPONENTS
     hardware_interface
     controller_manager
-    control_timer)
+    control_timer
+    realtime_tools)
 
 add_definitions(-std=c++11 -Wall)
 
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS hardware_interface controller_manager
+   CATKIN_DEPENDS hardware_interface controller_manager realtime_tools
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${control_timer_INCLUDE_DIRS})

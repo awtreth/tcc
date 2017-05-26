@@ -7,35 +7,67 @@
 #include <map>
 #include <string>
 #include <dxl_interface/dxl_model_spec.h>
+#include <utility>
+#include <realtime_tools/realtime_buffer.h>
+
+class JointID{
+public:
+    std::string name;
+    int id;
+    double reference = 0;
+
+    JointID(){}
+    JointID(std::string _name, int _id, double _reference, int _direction){
+        name = _name;
+        id = _id;
+        reference = _reference;
+        setDirection(_direction);
+    }
+
+    int getDirection() const{
+        return direction;
+    }
+
+    void setDirection(int value){
+        direction = (value >= 0)?1:-1;
+    }
+
+private:
+    int direction = 1;
+};
+
 
 class DxlRobotHW : public hardware_interface::RobotHW, public IHardwareInterface{
 
 private:
 
     struct DxlInfo {
-        std::string jointName;
-        int id;
+//        std::string jointName;
+//        int id;
+//        double posRef = 0;
+
+        JointID jointID;
+
         dxl_interface::ModelSpec spec;
 
         double pos;
         double vel;
         double eff;
 
-        double posCmd;
-        double velCmd;
+        double posCmd = 0;
+        double velCmd = 1;
 
         uint16_t posCmd_dxl;
         uint16_t posVelCmd_dxl[2];
 
-        DxlInfo(std::string _jointName, int _id){
-            jointName = _jointName;
-            id = _id;
+
+        DxlInfo(JointID _jointID){
+            jointID = _jointID;
         }
 
 
-        DxlInfo(std::string _jointName, int _id, dxl_interface::ModelSpec _spec){
-            jointName = _jointName;
-            id = _id;
+        DxlInfo(JointID _jointID, dxl_interface::ModelSpec _spec){
+            jointID = _jointID;
             spec = _spec;
         }
 
@@ -52,9 +84,13 @@ private:
     hardware_interface::PositionJointInterface   positionInterface_;
     hardware_interface::PosVelJointInterface   posVelInterface_;
 
+    std::vector<std::string> posIfaceCaimsNonRT;
+//    std::vector<std::string> posVelInterfaceClaims;
+
+    realtime_tools::RealtimeBuffer<std::vector<std::string> > posIfaceClaimBuffer;
 
 public:
-    DxlRobotHW(std::map<std::string, int> dxlMap, const char* deviceName = "/dev/ttyUSB0", const float protocol = 1.0, const int baud_rate = 1000000);
+    DxlRobotHW(std::vector<JointID> jointIDs, const char* deviceName = "/dev/ttyUSB0", const float protocol = 1.0, const int baud_rate = 1000000);
 
     // IHardwareInterface interface
 
@@ -62,4 +98,9 @@ public:
     void write();
     void read();
 
+
+    // RobotHW interface
+public:
+    void doSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,
+                  const std::list<hardware_interface::ControllerInfo> & stop_list);
 };

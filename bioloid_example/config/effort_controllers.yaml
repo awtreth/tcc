@@ -1,0 +1,59 @@
+bioloid_without_legs:
+
+    # JointPositionController
+    left_sholder_swing_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: left_shoulder_swing_joint
+      pid: {p: -0.08, i: 0.0, d: 0.0}
+      
+    left_sholder_lateral_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: left_shoulder_lateral_joint
+      pid: {p: -0.2, i: 0.0, d: 0.0}
+    
+    left_elbow_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: left_elbow_joint
+      pid: {p: 0.1, i: 0.0, d: 0.0}
+
+    
+    right_sholder_swing_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: right_shoulder_swing_joint
+      pid: {p: -0.08, i: 0.0, d: 0.0}
+
+    right_sholder_lateral_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: right_shoulder_lateral_joint
+      pid: {p: -0.2, i: 0.0, d: 0.0}
+    
+    right_elbow_position_controller:
+      type: effort_controllers/JointPositionController
+      joint: right_elbow_joint
+      pid: {p: 0.1, i: 0.0, d: 0.0}
+
+    # JointTrajectoryController
+    
+    left_arm_position_trajectory_controller:
+      type: effort_controllers/JointTrajectoryController
+      joints:
+        - left_shoulder_swing_joint
+        - left_shoulder_lateral_joint
+        - left_elbow_joint
+
+    right_arm_position_trajectory_controller:
+      type: effort_controllers/JointTrajectoryController
+      joints:
+        - right_shoulder_swing_joint
+        - right_shoulder_lateral_joint
+        - right_elbow_joint
+
+    arms_position_trajectory_controller:
+      type: effort_controllers/JointTrajectoryController
+      joints:
+        - left_shoulder_swing_joint
+        - left_shoulder_lateral_joint
+        - left_elbow_joint
+        - right_shoulder_swing_joint
+        - right_shoulder_lateral_joint
+        - right_elbow_joint

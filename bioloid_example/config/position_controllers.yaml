@@ -1,0 +1,23 @@
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+joint_groupposition_controller:
+  type: position_controllers/JointGroupPositionController
+  joints:
+    - left_shoulder_swing_joint
+    - left_shoulder_lateral_joint
+    - left_elbow_joint
+    - right_shoulder_swing_joint
+    - right_shoulder_lateral_joint
+    - right_elbow_joint
+
+position_joint_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - left_shoulder_swing_joint
+    - left_shoulder_lateral_joint
+    - left_elbow_joint
+    - right_shoulder_swing_joint
+    - right_shoulder_lateral_joint
+    - right_elbow_joint

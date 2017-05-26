@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- Start controller spawner for robot limbs - Load and start controllers -->
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" args="bioloid_without_legs/joint_state_controller"/>
+	<!-- ns="/bioloid_without_legs" -->
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+  <!-- <remap from="/joint_states" to="/bioloid_without_legs/joint_states" /> -->
+  </node>
+  
+  
+
+</launch>
