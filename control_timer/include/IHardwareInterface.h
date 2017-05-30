@@ -5,6 +5,7 @@
 
 using namespace std;
 
+//TODO: change to IHardware
 class IHardwareInterface {
 
     public:

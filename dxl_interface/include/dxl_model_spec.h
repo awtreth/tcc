@@ -60,6 +60,7 @@ private:
     int controlTableSize = 0;
     float protocol = 1.0;
 
+
     static std::vector<std::string> listFiles(const char* folder, const char *file_extension);
 
 public:

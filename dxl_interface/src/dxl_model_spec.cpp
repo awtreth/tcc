@@ -5,6 +5,7 @@
 #include <cstring>
 #include <algorithm>
 #include <string>
+#include <cmath>
 
 using namespace dxl_interface;
 
@@ -182,20 +183,28 @@ double dxl_interface::ModelSpec::valueToVelocity(int velValue){
 }
 
 int dxl_interface::ModelSpec::radianToValue(double pos){
-    return int(pos/valueToPositionRatio);
+    return int(round(pos/valueToPositionRatio));
 }
 
 int dxl_interface::ModelSpec::velocityToValue(double vel, bool wheelMode){
 
-    auto baseValue = int(vel/valueToVelocityRatio);
+    auto baseValue = int(round(vel/valueToVelocityRatio));
 
     if(wheelMode){
         if(int(protocol) == 1 && vel >= 0)
-            return baseValue+1024;
+            return (baseValue+1024)>2047?2047:(baseValue+1024);
         else
-            return baseValue;
-    }else
-        return abs(baseValue);
+            return (-baseValue)>1023?1023:-baseValue;
+    }else{
+        auto absValue = abs(baseValue);
+
+        if(absValue >= 1024)
+            return 1023;
+        else if(absValue == 0)
+            return 1;
+        else
+            return absValue;
+    }
 }
 
 std::vector<std::string> dxl_interface::ModelSpec::getNames() const{return names;}

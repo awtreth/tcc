@@ -37,7 +37,7 @@ DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, co
     size_t i = 0;
     for(auto jointID : jointIDs){
 
-        uint16_t model_number;
+        uint16_t model_number = 12;
 
         if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
             DxlInfo dxl(jointID,dxl_interface::ModelSpec::getByNumber(model_number));
@@ -67,6 +67,7 @@ void DxlRobotHW::write()
     //FIXME: restrito a protocolo 1.0
 
     std::vector<std::string> & posIfaceClaimsRT = *posIfaceClaimBuffer.readFromRT();
+    std::vector<std::string>& posVelIfaceClaimsRT = *posVelIfaceClaimBuffer.readFromRT();
 
     if(posIfaceClaimsRT.size() > 0){
 //        std::cout << "WRITE POSITION:" << std::endl;
@@ -77,28 +78,29 @@ void DxlRobotHW::write()
             DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
             dxl.posCmd_dxl = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
             writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(&dxl.posCmd_dxl));
-//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << std::endl;
+//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << "posCmd_dxl: " << dxl.posCmd_dxl << std::endl;
         }
 
         writePacket.txPacket();
     }
 
-    if(posVelInterface_.getClaims().size() > 0){
+    if(posVelIfaceClaimsRT.size() > 0){
 
 //        std::cout << "WRITE POSVEL:" << std::endl;
 
         dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,4);
 
-        for(auto joint : posVelInterface_.getClaims()){
+        for(auto joint : posVelIfaceClaimsRT){
             DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
 
             dxl.posVelCmd_dxl[0] = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
             dxl.posVelCmd_dxl[1] = uint16_t(dxl.spec.velocityToValue(dxl.velCmd));
 
-            dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
+            //dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
 
             writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(dxl.posVelCmd_dxl));
-//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd  << std::endl;
+            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd;
+            std::cout << " posCmd_dxl: " << dxl.posVelCmd_dxl[0] <<  " velCmd_dxl: " << dxl.posVelCmd_dxl[1] << std::endl;
         }
 
         writePacket.txPacket();
@@ -110,23 +112,24 @@ void DxlRobotHW::read()
 {
     // FIXME: restrito a protocol 1.0
 
-    uint16_t values[3];
+    uint16_t values[3] = {512,0,0};
 
 //    std::cout << "READ" << std::endl;
 
     for(DxlInfo& dxl : dxlInfos){
 
-        packetHandler_->readTxRx(portHandler_,uint8_t(dxl.jointID.id),PRESENT_POS_ADDR,6,reinterpret_cast<uint8_t*>(values));
+        packetHandler_->readTxRx(portHandler_,uint8_t(dxl.jointID.id),PRESENT_POS_ADDR,6,reinterpret_cast<uint8_t*>(&values[0]));
 
         dxl.pos = dxl.jointID.getDirection()*(dxl.spec.valueToRadian(values[0])-dxl.jointID.reference);
-        dxl.vel = dxl.spec.valueToVelocity(values[1]);
+        dxl.vel = dxl.jointID.getDirection()*dxl.spec.valueToVelocity(values[1]);
 
         if(values[2] < 1024)
             dxl.eff = values[2]/1024.;
         else
             dxl.eff = (1024 - values[2])/1024.;
 
-//        std::cout << "name: " << dxl.jointID.name << " pos: " << dxl.pos << " vel: " << dxl.vel << " eff: " << dxl.eff << std::endl;
+//        std::cout << "name: " << dxl.jointID.name << " pos: " << dxl.pos << " vel: " << dxl.vel << " eff: " << dxl.eff;
+//        std::cout << " pos_dxl: " << values[0] << " vel_dxl: " << values[1] << " eff_dxl: " << values[2] << std::endl;
 
     }
 }
@@ -136,9 +139,15 @@ void DxlRobotHW::doSwitch(const std::list<ControllerInfo> &start_list, const std
 
     for(auto stopInfo : stop_list){
         for(auto ifaceRes : stopInfo.claimed_resources){
+
             if(ifaceRes.hardware_interface == "hardware_interface::PositionJointInterface"){
                 for(auto res : ifaceRes.resources)
-                    std::remove(posIfaceCaimsNonRT .begin(),posIfaceCaimsNonRT .end(),res);
+                    std::remove(posIfaceClaimsNonRT .begin(),posIfaceClaimsNonRT .end(),res);
+            }
+
+            if(ifaceRes.hardware_interface == "hardware_interface::PosVelJointInterface"){
+                for(auto res : ifaceRes.resources)
+                    std::remove(posVelIfaceClaimsNonRT.begin(),posVelIfaceClaimsNonRT.end(),res);
             }
         }
     }
@@ -147,10 +156,16 @@ void DxlRobotHW::doSwitch(const std::list<ControllerInfo> &start_list, const std
         for(auto ifaceRes : startInfo.claimed_resources){
             if(ifaceRes.hardware_interface == "hardware_interface::PositionJointInterface"){
                 for(auto res : ifaceRes.resources)
-                    posIfaceCaimsNonRT.push_back(res);
+                    posIfaceClaimsNonRT.push_back(res);
+            }
+            if(ifaceRes.hardware_interface == "hardware_interface::PosVelJointInterface"){
+                for(auto res : ifaceRes.resources)
+                    posVelIfaceClaimsNonRT.push_back(res);
             }
         }
     }
 
-    posIfaceClaimBuffer.writeFromNonRT(posIfaceCaimsNonRT);
+    posIfaceClaimBuffer.writeFromNonRT(posIfaceClaimsNonRT);
+    posVelIfaceClaimBuffer.writeFromNonRT(posVelIfaceClaimsNonRT);
 }
+

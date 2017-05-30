@@ -84,10 +84,11 @@ private:
     hardware_interface::PositionJointInterface   positionInterface_;
     hardware_interface::PosVelJointInterface   posVelInterface_;
 
-    std::vector<std::string> posIfaceCaimsNonRT;
-//    std::vector<std::string> posVelInterfaceClaims;
+    std::vector<std::string> posIfaceClaimsNonRT;
+    std::vector<std::string> posVelIfaceClaimsNonRT;
 
     realtime_tools::RealtimeBuffer<std::vector<std::string> > posIfaceClaimBuffer;
+    realtime_tools::RealtimeBuffer<std::vector<std::string> > posVelIfaceClaimBuffer;
 
 public:
     DxlRobotHW(std::vector<JointID> jointIDs, const char* deviceName = "/dev/ttyUSB0", const float protocol = 1.0, const int baud_rate = 1000000);
@@ -103,4 +104,5 @@ public:
 public:
     void doSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,
                   const std::list<hardware_interface::ControllerInfo> & stop_list);
+
 };

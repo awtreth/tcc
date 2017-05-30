@@ -11,6 +11,7 @@
 #include <IHardwareInterface.h>
 #include <functional>
 
+//TODO: change to ControlLoop
 class ControlTimer {
 
 private:
