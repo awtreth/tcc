@@ -1,0 +1,11 @@
+<library path="lib/libsingle_joint_ilc_controller">
+
+  <class name="ilc_feedforward_controllers/SingleJointILCController"
+         type="SingleJointILCController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+
+    </description>
+  </class>
+
+</library>

@@ -57,7 +57,7 @@ def doneCallBack(status, result):
 if __name__ == '__main__':
     rospy.init_node('jtPub')
 
-    client = actionlib.SimpleActionClient('/posvel_joint_trajectory_controller/follow_joint_trajectory',
+    client = actionlib.SimpleActionClient('/position_joint_trajectory_controller/follow_joint_trajectory',
                                           FollowJointTrajectoryAction)
     print 'Waiting For Server'
     client.wait_for_server()

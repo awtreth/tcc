@@ -39,11 +39,11 @@ DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, co
 
         uint16_t model_number = 12;
 
-        if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
+//        if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
             DxlInfo dxl(jointID,dxl_interface::ModelSpec::getByNumber(model_number));
             dxlInfos.push_back(dxl);
             dxlNameIdxMap[jointID.name] = i++;
-        }
+//        }
     }
 
     read();

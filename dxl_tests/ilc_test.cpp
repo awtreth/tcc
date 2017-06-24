@@ -36,12 +36,12 @@
 #define LAMBDA              2
 #define UBAT                12.
 
-//#define RAD_PER_MOTOR       (.088*M_PI/180.)
-//#define RADS_PER_MOTOR      (0.114*2*M_PI/60.)
+#define RAD_PER_MOTOR       (.088*M_PI/180.)
+#define RADS_PER_MOTOR      (0.114*2*M_PI/60.)
 
 //AX-12
-#define RAD_PER_MOTOR       (.29*M_PI/180.)
-#define RADS_PER_MOTOR       (.111*2*M_PI/60.)
+//#define RAD_PER_MOTOR       (.29*M_PI/180.)
+//#define RADS_PER_MOTOR       (.111*2*M_PI/60.)
 
 
 
@@ -56,11 +56,14 @@ inline double motor2rad(uint16_t motor){
 }
 
 inline uint16_t rads2motor(double rads){
-    return uint16_t(MY_ABS(rads)/RADS_PER_MOTOR);
+    return uint16_t(fabs(rads)/RADS_PER_MOTOR);
 }
 
 inline double motor2rads(uint16_t motor){
-    return (motor-1024)*RADS_PER_MOTOR;
+    if(motor>1023)
+        return (1024-motor)*RADS_PER_MOTOR;
+    else
+        return motor*RADS_PER_MOTOR;
 }
 
 

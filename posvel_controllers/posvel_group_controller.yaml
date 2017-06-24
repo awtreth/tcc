@@ -1,0 +1,3 @@
+joint_posvel_controller:
+  type: posvel_controllers/JointGroupPosVelController
+  joints: [joint]

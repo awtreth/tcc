@@ -21,8 +21,8 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 set(posvel_controllers_srcs
-    src/posvel_joint_trajectory_controller.cpp)
-    #src/joint_group_posvel_controller.cpp)
+    src/posvel_joint_trajectory_controller.cpp
+    src/joint_group_posvel_controller.cpp)
 
 add_library(${PROJECT_NAME} ${posvel_controllers_srcs})
 

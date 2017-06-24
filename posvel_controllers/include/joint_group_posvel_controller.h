@@ -7,17 +7,10 @@
 namespace posvel_controllers
 {
 
-class JointGroupPosVelController:
-        public forward_trajectory_point_controller::ForwardJointTrajectoryPointController<hardware_interface::PosVelJointInterface>
-{
-    // ControllerBase interface
-public:
-    void update(const ros::Time &, const ros::Duration &);
-//    void starting(const ros::Time& time);
-    // ForwardJointGroupTrajectoryPointController interface
-private:
-    void commandCB(const trajectory_msgs::JointTrajectoryPointConstPtr& msg);
-};
+
+typedef forward_trajectory_point_controller::ForwardJointTrajectoryPointController<hardware_interface::PosVelJointInterface>
+        JointGroupPosVelController;
+
 
 }
 
