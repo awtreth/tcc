@@ -66,7 +66,7 @@ public:
     }
 
 //    void starting(const ros::Time& time);
-    void update(const ros::Time &, const ros::Duration &);
+//    virtual void update(const ros::Time &, const ros::Duration &) = 0;
 
     std::vector< std::string > joint_names_;
     std::vector< HandleType > joints_;
@@ -76,7 +76,7 @@ public:
 protected:
     ros::Subscriber sub_command_;
 
-    virtual void commandCB(const trajectory_msgs::JointTrajectoryPointConstPtr&){}
+    virtual void commandCB(const trajectory_msgs::JointTrajectoryPointConstPtr&) = 0;
 
 };
 

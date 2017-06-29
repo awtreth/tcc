@@ -39,11 +39,11 @@ DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, co
 
         uint16_t model_number = 12;
 
-//        if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
+        if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
             DxlInfo dxl(jointID,dxl_interface::ModelSpec::getByNumber(model_number));
             dxlInfos.push_back(dxl);
             dxlNameIdxMap[jointID.name] = i++;
-//        }
+        }
     }
 
     read();
@@ -66,7 +66,7 @@ void DxlRobotHW::write()
 {
     //FIXME: restrito a protocolo 1.0
 
-    std::vector<std::string> & posIfaceClaimsRT = *posIfaceClaimBuffer.readFromRT();
+    std::vector<std::string>& posIfaceClaimsRT = *posIfaceClaimBuffer.readFromRT();
     std::vector<std::string>& posVelIfaceClaimsRT = *posVelIfaceClaimBuffer.readFromRT();
 
     if(posIfaceClaimsRT.size() > 0){
@@ -99,8 +99,8 @@ void DxlRobotHW::write()
             //dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
 
             writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(dxl.posVelCmd_dxl));
-            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd;
-            std::cout << " posCmd_dxl: " << dxl.posVelCmd_dxl[0] <<  " velCmd_dxl: " << dxl.posVelCmd_dxl[1] << std::endl;
+//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd;
+//            std::cout << " posCmd_dxl: " << dxl.posVelCmd_dxl[0] <<  " velCmd_dxl: " << dxl.posVelCmd_dxl[1] << std::endl;
         }
 
         writePacket.txPacket();
@@ -137,23 +137,43 @@ void DxlRobotHW::read()
 void DxlRobotHW::doSwitch(const std::list<ControllerInfo> &start_list, const std::list<ControllerInfo> & stop_list)
 {
 
+    std::cout << "DO SWITCH" << std::endl;
+
+
+    std::cout << "Stop List" << std::endl;
     for(auto stopInfo : stop_list){
         for(auto ifaceRes : stopInfo.claimed_resources){
 
+            std::cout << ifaceRes.hardware_interface << ":";
+
+            for(auto res : ifaceRes.resources)
+                std::cout << " " << res;
+
+            std::cout << std::endl;
+
             if(ifaceRes.hardware_interface == "hardware_interface::PositionJointInterface"){
                 for(auto res : ifaceRes.resources)
-                    std::remove(posIfaceClaimsNonRT .begin(),posIfaceClaimsNonRT .end(),res);
+                    posIfaceClaimsNonRT.erase(std::remove(posIfaceClaimsNonRT.begin(),posIfaceClaimsNonRT .end(),res));
             }
 
             if(ifaceRes.hardware_interface == "hardware_interface::PosVelJointInterface"){
                 for(auto res : ifaceRes.resources)
-                    std::remove(posVelIfaceClaimsNonRT.begin(),posVelIfaceClaimsNonRT.end(),res);
+                    posVelIfaceClaimsNonRT.erase(std::remove(posVelIfaceClaimsNonRT.begin(),posVelIfaceClaimsNonRT.end(),res));
             }
         }
     }
 
+    std::cout << "Start List" << std::endl;
     for(auto startInfo : start_list){
         for(auto ifaceRes : startInfo.claimed_resources){
+
+            std::cout << ifaceRes.hardware_interface << ":";
+
+            for(auto res : ifaceRes.resources)
+                std::cout << " " << res;
+
+            std::cout << std::endl;
+
             if(ifaceRes.hardware_interface == "hardware_interface::PositionJointInterface"){
                 for(auto res : ifaceRes.resources)
                     posIfaceClaimsNonRT.push_back(res);
@@ -164,6 +184,16 @@ void DxlRobotHW::doSwitch(const std::list<ControllerInfo> &start_list, const std
             }
         }
     }
+
+    std::cout << "posIfaceClaims:";
+    for(auto res : posIfaceClaimsNonRT)
+        std::cout << " " << res;
+    std::cout << std::endl;
+
+    std::cout << "posVelIfaceClaims:";
+    for(auto res : posVelIfaceClaimsNonRT)
+        std::cout << " " << res;
+    std::cout << std::endl;
 
     posIfaceClaimBuffer.writeFromNonRT(posIfaceClaimsNonRT);
     posVelIfaceClaimBuffer.writeFromNonRT(posVelIfaceClaimsNonRT);

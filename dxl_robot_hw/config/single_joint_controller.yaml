@@ -10,6 +10,6 @@ posvel_joint_trajectory_controller:
   type: posvel_controllers/JointTrajectoryController
   joints: [joint]
 
-# joint_posvel_controller:
-#  type: posvel_controllers/JointGroupPosVelController
-#  joints: [j1,j2]
+joint_posvel_controller:
+  type: posvel_controllers/JointGroupPosVelController
+  joints: [joint]
