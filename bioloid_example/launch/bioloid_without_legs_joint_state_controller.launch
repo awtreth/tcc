@@ -1,8 +1,12 @@
 <launch>
 
-    <!-- Start controller spawner for robot limbs - Load and start controllers -->
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" args="bioloid_without_legs/joint_state_controller"/>
-	<!-- ns="/bioloid_without_legs" -->
+  <arg name="model" default="$(find bioloid_example)/urdf/bioloid_without_legs.xacro"/>
+  <arg name="gui" default="true" />
+  <arg name="rvizconfig" default="$(find bioloid_example)/config/bioloid_without_legs.rviz" />
+
+  <!-- Start controller spawner for robot limbs - Load and start controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn joint_state_controller"/>
+  <!-- ns="/bioloid_without_legs" -->
 
   <!-- convert joint states to TF transforms for rviz, etc -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
@@ -10,6 +14,10 @@
   <!-- <remap from="/joint_states" to="/bioloid_without_legs/joint_states" /> -->
   </node>
   
+  <param name="robot_description" command="$(find xacro)/xacro -i $(arg model)" />
+  <param name="use_gui" value="$(arg gui)"/>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
   
 
 </launch>

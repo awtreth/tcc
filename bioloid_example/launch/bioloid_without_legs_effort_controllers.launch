@@ -1,6 +1,0 @@
-<launch>
-
-  <!-- Load joint controller configurations from YAML file to parameter server -->
-  <rosparam file="$(find bioloid_example)/config/effort_controllers.yaml" command="load"/>
-
-</launch>

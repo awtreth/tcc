@@ -12,15 +12,20 @@
             <xacro:default_geometry cad_file="BPF-CHEST-B"/>
             <origin rpy="${pi/2} 0 0"/>
         </visual>
+         
         <visual>
             <xacro:default_geometry cad_file="CM-5"/>
             <origin xyz="0 0.032 -0.015" rpy="0 ${pi} 0"/>
         </visual>
+        
         <!-- Sensor 100 -->
+        <!--
         <visual>
             <xacro:default_geometry cad_file="AX-S1"/>
             <origin xyz="0 0 0.025" rpy="${-pi/2} 0 ${pi}"/>
         </visual>
+        -->
+        
         <!-- Motor 1 -->
         <visual>
             <xacro:default_geometry cad_file="AX-12"/>
