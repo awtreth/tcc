@@ -5,7 +5,7 @@ project(dxl_robot_hw CXX)
 find_package(catkin REQUIRED COMPONENTS
     hardware_interface
     controller_manager
-    control_timer
+    control_loop
     realtime_tools)
 
 add_definitions(-std=c++11 -Wall)
@@ -13,10 +13,10 @@ add_definitions(-std=c++11 -Wall)
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS hardware_interface controller_manager realtime_tools
+   CATKIN_DEPENDS hardware_interface realtime_tools
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${control_timer_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(dxl_robot_hw SHARED src/DxlRobotHW.cpp)
 add_executable(dxl_robot_hw_test src/dxl_robot_hw_test.cpp)

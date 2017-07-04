@@ -1,5 +1,5 @@
 #include <iostream>
-#include <ControlTimer.h>
+#include <control_loop.h>
 #include <DummyController.h>
 #include <DummyHardwareInterface.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@ int main(){
     controller->setMsg("MENSAGEM MAIOR");
     controller->setPerLetterDuration(microseconds(long(100e3)));
 
-    ControlTimer controlTimer(interface);
+    control_loop::ControlLoop controlTimer(interface);
 
     controlTimer.setFrequency(10);
 

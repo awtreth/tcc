@@ -5,11 +5,11 @@ project(bioloid_example CXX)
 find_package(catkin REQUIRED
     dxl_robot_hw
     controller_manager
-    control_timer)
+    control_loop)
 
 add_definitions(-std=c++11 -Wall)
 
-catkin_package(CATKIN_DEPENDS dxl_robot_hw controller_manager control_timer)
+catkin_package(CATKIN_DEPENDS dxl_robot_hw controller_manager control_loop)
 
 include_directories(${catkin_INCLUDE_DIRS})
 

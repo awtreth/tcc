@@ -1,4 +1,4 @@
 # Trabalho de Conclusão de Curso
 
-## Implementação de controle de posição e velocidade das juntas de robô humanoide em ambiente de simulação
+## Desenvolvimento de Sistema de Controle de Tempo Real Integrado com ROS para Robôs Equipados com Motores _Dynamixel_
 

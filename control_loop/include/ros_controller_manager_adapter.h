@@ -2,13 +2,14 @@
 #define ROS_CONTROLLER_MANAGER_ADAPTER
 
 #include <controller_manager/controller_manager.h>
-#include <IController.h>
+#include <icontroller.h>
 #include <ros/ros.h>
 #include <memory>
 
 using namespace controller_manager;
 using namespace std;
 
+namespace control_loop{
 
 class RosControllerManagerAdapter : public IController{
 
@@ -31,4 +32,5 @@ public:
 
 };
 
+}
 #endif

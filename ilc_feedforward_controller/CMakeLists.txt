@@ -10,13 +10,13 @@ find_package(catkin REQUIRED COMPONENTS
     realtime_tools
     roscpp
     dxl_robot_hw
-    control_timer)
+    control_loop)
 
 add_definitions(-std=c++11 -Wall)
 
 catkin_package(
     INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME}
+    #LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS
         controller_interface
         hardware_interface
@@ -25,7 +25,7 @@ catkin_package(
         realtime_tools
         roscpp
         dxl_robot_hw
-        control_timer
+        control_loop
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})

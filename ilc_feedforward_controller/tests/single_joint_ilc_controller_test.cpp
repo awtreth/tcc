@@ -1,8 +1,8 @@
 #include <single_joint_ilc_controller.h>
 #include <iostream>
 #include <vector>
-#include <ControlTimer.h>
-#include <RosControllerManagerAdapter.h>
+#include <control_loop.h>
+#include <ros_controller_manager_adapter.h>
 #include <DxlRobotHW.h>
 #include <controller_manager/controller_manager.h>
 #include <cmath>
@@ -65,9 +65,9 @@ int main(int argc, char** argv){
 
     auto hw = std::make_shared<DxlRobotHW>(jointIDs);
 
-    auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
+    auto cma = std::make_shared<control_loop::RosControllerManagerAdapter>(hw.get(),nh);
 
-    ControlTimer ctimer(hw);
+    control_loop::ControlLoop ctimer(hw);
 
     ctimer.setFrequency(FREQUENCY);
     ctimer.loadController("MyController",cma);

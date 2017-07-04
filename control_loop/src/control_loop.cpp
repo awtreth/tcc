@@ -1,33 +1,35 @@
-#include <ControlTimer.h>
+#include <control_loop.h>
 #include <iostream>
 #include <functional>
 #include <unistd.h>
 
-void ControlTimer::update()
+using namespace control_loop;
+
+void ControlLoop::update()
 {    
     for(auto controller : controllers)
         controller.second->update(std::chrono::steady_clock::now());
 }
 
-void ControlTimer::write()
+void ControlLoop::write()
 {
     hardwareInterface->write();
 }
 
-void ControlTimer::defaultInit()
+void ControlLoop::defaultInit()
 {
     setFrequency(50);
     initThread();
 }
 
 
-void ControlTimer::prepareRead()
+void ControlLoop::prepareRead()
 {
     for(auto controller : controllers)
         controller.second->prepareRead(std::chrono::steady_clock::now());
 }
 
-void ControlTimer::onMiss(std::chrono::steady_clock::time_point desire, std::chrono::_V2::steady_clock::time_point realization){
+void ControlLoop::onMiss(std::chrono::steady_clock::time_point desire, std::chrono::_V2::steady_clock::time_point realization){
 
     std::cout << "ON MISS:"
               << "\tDelay="<< std::chrono::duration_cast<std::chrono::microseconds>(realization-desire).count()/1e3 << "ms\t"
@@ -37,18 +39,18 @@ void ControlTimer::onMiss(std::chrono::steady_clock::time_point desire, std::chr
 }
 
 
-ControlTimer::ControlTimer(HardwareInterfacePtr hwInterface)
+ControlLoop::ControlLoop(HardwarePtr hwInterface)
 {
     defaultInit();
     hardwareInterface = hwInterface;
 }
 
-ControlTimer::~ControlTimer(){
+ControlLoop::~ControlLoop(){
     this->close();
 }
 
 
-bool ControlTimer::loadController(std::string controllerName, ControllerPtr controller)
+bool ControlLoop::loadController(std::string controllerName, ControllerPtr controller)
 {
     //TODO: fazer tratamentos adequados para nao substituir existentes
     std::lock_guard<std::mutex> lck(requestMtx);
@@ -59,7 +61,7 @@ bool ControlTimer::loadController(std::string controllerName, ControllerPtr cont
 }
 
 
-ControllerPtr ControlTimer::unloadController(std::string controllerName)
+ControllerPtr ControlLoop::unloadController(std::string controllerName)
 {
     //TODO: fazer tratamentos adequados para retirar um controller
 
@@ -73,7 +75,7 @@ ControllerPtr ControlTimer::unloadController(std::string controllerName)
 }
 
 
-ControllerPtr ControlTimer::switchController(std::string controller_out_name, std::string controller_in_name, ControllerPtr controller_in)
+ControllerPtr ControlLoop::switchController(std::string controller_out_name, std::string controller_in_name, ControllerPtr controller_in)
 {
     //TODO: fazer tratamentos adequados do switch
     std::lock_guard<std::mutex> lck(requestMtx);
@@ -88,18 +90,22 @@ ControllerPtr ControlTimer::switchController(std::string controller_out_name, st
 }
 
 
-bool ControlTimer::resumeLoop(std::chrono::microseconds readWaitTime)
+bool ControlLoop::resumeLoop(std::chrono::microseconds readWaitTime)
 {
 
     std::unique_lock<std::mutex> lck(requestMtx);
 
+    //The loop is resumed just when there is a hardware loaded
     if(this->hardwareInterface){
+
         this->resumeTime = std::chrono::steady_clock::now();
 
+        //Sets the first iterations one period from the resume time
         this->nextLoopTime = this->resumeTime + readWaitTime;
 
         this->isPaused = false;
 
+        //Notify the main thread
         pauseCv.notify_all();
 
         lck.unlock();
@@ -114,11 +120,11 @@ bool ControlTimer::resumeLoop(std::chrono::microseconds readWaitTime)
 
 
 
-void ControlTimer::loop()
+void ControlLoop::loop()
 {
     std::chrono::steady_clock::time_point now;
 
-    //Verifica se esta pausado
+    //Check if the loop is paused
     std::unique_lock<std::mutex> lck(requestMtx);
     while(isPaused)
         pauseCv.wait(lck);
@@ -127,21 +133,23 @@ void ControlTimer::loop()
 
     while(true) {
 
+        //Process external commands, such as frequency update
         loopUpdateCheck();
 
-        //Sai se o ControlTimer for fechado
         if (isClosed)
             break;
 
+        //Right after the last write()
         prepareRead();
 
         auto now = std::chrono::steady_clock::now();
 
         std::this_thread::sleep_until(nextLoopTime);
 
+        //Without the first condition, the method could be called on the first iteration
         if(nextLoopTime > resumeTime && now > nextLoopTime){
             onMiss(nextLoopTime,now);
-            nextLoopTime = now;
+            nextLoopTime = now;//update the current deadline
         }
 
         read();
@@ -152,12 +160,14 @@ void ControlTimer::loop()
 
     }
 
+    //This command is needed to give time to close() method to join this thread
     sleep(1);
 }
 
-void ControlTimer::loopUpdateCheck()
+void ControlLoop::loopUpdateCheck()
 {
-    //Verifica se esta pausado
+
+    //try_lock is used to be real-time safe, otherwise it could depend on other non-realtime threads
     std::unique_lock<std::mutex> lck(requestMtx,std::try_to_lock);
 
     if(lck.owns_lock()){
@@ -178,19 +188,22 @@ void ControlTimer::loopUpdateCheck()
     }
 }
 
-bool ControlTimer::initThread()
+bool ControlLoop::initThread()
 {
     this->isPaused = true;
 
     this->isClosed = false;
 
-    mainThread = std::thread(&ControlTimer::loop, this);
+    mainThread = std::thread(&ControlLoop::loop, this);
 
 //    mainThread.detach();
 
+    //TODO:: make scheduler policy and priority settable on construction
+
     struct sched_param param;
 
-    param.__sched_priority = 51;
+    //It can't be greater than 98
+    param.__sched_priority = 98;
 
     //TODO: success check
     std::cout << pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param) << std::endl;
@@ -198,30 +211,32 @@ bool ControlTimer::initThread()
     return true;
 }
 
-void ControlTimer::read()
+void ControlLoop::read()
 {
     hardwareInterface->read();
 }
 
 
-void ControlTimer::close()
+void ControlLoop::close()
 {
     std::unique_lock<std::mutex> lck(requestMtx);
 
     isClosed = true;
     isPaused = false;
 
+    //Unpause loop
     pauseCv.notify_all();
 
     lck.unlock();
 
+    //Wait mainThread to finish
     if(mainThread.joinable())
         this->mainThread.join();
 
 }
 
 
-bool ControlTimer::setFrequency(double freq)
+bool ControlLoop::setFrequency(double freq)
 {
     //TODO: exception?
     if(freq<=0)
@@ -237,13 +252,13 @@ bool ControlTimer::setFrequency(double freq)
 }
 
 
-double ControlTimer::getFrequency()
+double ControlLoop::getFrequency()
 {
     return (1./(period.count()/double(1e6)));
 }
 
 
-void ControlTimer::pauseLoop()
+void ControlLoop::pauseLoop()
 {
     std::lock_guard<std::mutex> lck(requestMtx);
 

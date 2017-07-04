@@ -1,8 +1,8 @@
 #include <iostream>
 #include <DummyRosController.h>
 #include <controller_manager/controller_manager.h>
-#include <RosControllerManagerAdapter.h>
-#include <ControlTimer.h>
+#include <ros_controller_manager_adapter.h>
+#include <control_loop.h>
 #include <DummyHardwareInterface.h>
 #include <ros/ros.h>
 
@@ -24,9 +24,9 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh;
 
-    auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
+    auto cma = std::make_shared<control_loop::RosControllerManagerAdapter>(hw.get(),nh);
 
-    ControlTimer controlTimer(hw);
+    control_loop::ControlLoop controlTimer(hw);
 
     controlTimer.setFrequency(50);
 

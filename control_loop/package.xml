@@ -1,10 +1,12 @@
 <package format="2">
-  <name>utils</name>
+  <name>control_loop</name>
   <version>0.0.0</version>
   <description>
-    Helper ROS independent libraries.
+    This package offers a real-time control loop to any control system. Optionally it can be used with ros_control.
   </description>
   <maintainer email="mateus.amarujo@gmail.com">Mateus Amarante</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>hardware_interface</depend>
+  <depend>controller_manager</depend>
 </package>

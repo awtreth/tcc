@@ -9,5 +9,5 @@
     <buildtool_depend>catkin</buildtool_depend>
     <depend>dxl_robot_hw</depend>
     <depend>controller_manager</depend>
-    <depend>control_timer</depend>
+    <depend>control_loop</depend>
 </package>

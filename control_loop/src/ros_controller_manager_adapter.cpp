@@ -1,4 +1,6 @@
-#include <RosControllerManagerAdapter.h>
+#include <ros_controller_manager_adapter.h>
+
+using namespace control_loop;
 
 RosControllerManagerAdapter::RosControllerManagerAdapter(hardware_interface::RobotHW *robot_hw, const ros::NodeHandle &nh)
     : controllerManager(robot_hw, nh) {

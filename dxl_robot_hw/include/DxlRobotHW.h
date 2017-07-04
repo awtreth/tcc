@@ -1,5 +1,5 @@
 #include <dynamixel_sdk.h>
-#include <IHardwareInterface.h>
+#include <ihardware.h>//control_loop package (FIXME: install control_loop)
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -37,7 +37,7 @@ private:
 };
 
 
-class DxlRobotHW : public hardware_interface::RobotHW, public IHardwareInterface{
+class DxlRobotHW : public hardware_interface::RobotHW, public control_loop::IHardware{
 
 private:
 

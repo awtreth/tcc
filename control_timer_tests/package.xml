@@ -2,7 +2,7 @@
     <name>control_timer_tests</name>
     <version>0.0.0</version>
     <description>
-        Simple examples of use of control_timer.
+        This package shows how the package "control\_loop" can be used without/with _ros\_control_. It contains very simple examples.
     </description>
     <maintainer email="mateus.amarujo@gmail.com">Mateus Amarante</maintainer>
     <license>BSD</license>
@@ -10,8 +10,7 @@
 
     <depend>hardware_interface</depend>
     <depend>controller_manager</depend>
-    <depend>control_timer</depend>
-    <depend>utils</depend>
+    <depend>control_loop</depend>
     <depend>controller_interface</depend>
     <depend>roscpp</depend>
 

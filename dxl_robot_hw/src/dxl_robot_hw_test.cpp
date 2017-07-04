@@ -5,8 +5,8 @@
 #include <ros/ros.h>
 #include <map>
 #include <string>
-#include <ControlTimer.h>
-#include <RosControllerManagerAdapter.h>
+#include <control_loop.h> //control_loop package (FIXME: install control_loop)
+#include <ros_controller_manager_adapter.h>  //control_loop package (FIXME: install control_loop)
 #include <memory>
 #include <chrono>
 #include <cmath>
@@ -48,8 +48,8 @@ int main(int argc, char** argv){
 
     auto hw = std::make_shared<DxlRobotHW>(jointIDs);
 
-    auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
-    ControlTimer ctimer(hw);
+    auto cma = std::make_shared<control_loop::RosControllerManagerAdapter>(hw.get(),nh);
+    control_loop::ControlLoop ctimer(hw);
 
     ctimer.setFrequency(30);
 
