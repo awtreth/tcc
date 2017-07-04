@@ -9,7 +9,7 @@
 #include <thread>
 
 void help() {
-    std::cout << "rt_test [sleep_time] [n_iterations] [rt_option]" << std::endl;
+    std::cout << "\nrt_test [sleep_time] [n_iterations] [rt_option]" << "\n\n";
 
     std::cout << "sleep_time: default 1000 [us]" << std::endl;
 
@@ -26,20 +26,25 @@ int main(int argc, char** argv){
     bool show_help = false;
 
     if(argc >= 2){
-        sleep_time = std::stol(argv[1]);
 
-        if(argc >= 4)
-            n_iterations = std::stol(argv[2]);
-
-        if(argc >= 4){
-            if(strcmp(argv[3],"-rt") == 0)
-                real_time = true;
-            else if(strcmp(argv[3],"-nonrt") == 0)
-                real_time = false;
-            else
-                show_help = true;
-        }else if(argc > 4)
+        if(std::string(argv[1]).find("help")!=std::string::npos)
             show_help = true;
+        else {
+            sleep_time = std::stol(argv[1]);
+
+            if(argc >= 4)
+                n_iterations = std::stol(argv[2]);
+
+            if(argc >= 4){
+                if(strcmp(argv[3],"-rt") == 0)
+                    real_time = true;
+                else if(strcmp(argv[3],"-nonrt") == 0)
+                    real_time = false;
+                else
+                    show_help = true;
+            }else if(argc > 4)
+                show_help = true;
+        }
     }
 
     if(show_help){

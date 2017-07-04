@@ -44,8 +44,8 @@ posvel_joint_trajectory_controller:
     - left_shoulder_swing_joint
     - left_shoulder_lateral_joint
     - left_elbow_joint
-    - right_shoulder_swing_joint
-    - right_shoulder_lateral_joint
-    - right_elbow_joint
-    - head_pitch_joint
-    - head_yaw_joint
+    #- right_shoulder_swing_joint
+    #- right_shoulder_lateral_joint
+    #- right_elbow_joint
+    #- head_pitch_joint
+    #- head_yaw_joint

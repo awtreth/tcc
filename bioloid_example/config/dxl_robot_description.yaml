@@ -1,0 +1,20 @@
+dxl_robot_description:
+    joint_names: 
+        - head_pitch_joint
+        - head_yaw_joint
+        - left_shoulder_swing_joint
+        - left_shoulder_lateral_joint
+        - left_elbow_joint
+        - right_shoulder_swing_joint
+        - right_shoulder_lateral_joint
+        - right_elbow_joint
+    joint_ids: [20,21,  1,3,5,  6,2,4]
+    joint_references:
+        - 2.617993878 # 150 degrees
+        - 2.617993878
+        - 1.047197551 #  60 degrees
+        - 2.617993878 # 150 degrees
+        - 2.617993878
+        - 4.188790205 # 240 degrees
+        - 4.188790205
+    joint_directions: [-1,+1,  -1,-1,-1,  +1,+1,+1]

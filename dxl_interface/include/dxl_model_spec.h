@@ -6,7 +6,7 @@
 #include <map>
 #include <dxl_interface/dxl_command.h>
 
-#define DEFAULT_MODEL_SPEC_FOLDER  "model_specs/"
+#define DEFAULT_MODEL_SPEC_FOLDER  "/usr/local/share/dxl_interface/model_specs"
 #define DEFAULT_MODEL_SPEC_FILE_EXTENSION   ".dxl"
 
 #define MODEL_ITEM_NAME             "model"

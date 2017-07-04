@@ -38,6 +38,10 @@ install(DIRECTORY include/
     DESTINATION include/${PROJECT_NAME}
     FILES_MATCHING PATTERN "*.h")
 
+install(DIRECTORY model_specs/
+    DESTINATION share/${PROJECT_NAME}/model_specs
+    FILES_MATCHING PATTERN "*.dxl")
+
 #Somente para exibir os headers na arvore do Qt Creator
 FILE(GLOB_RECURSE headers "*.h")
 add_custom_target("${PROJECT_NAME}_headers" SOURCES ${headers})

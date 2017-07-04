@@ -141,6 +141,7 @@ void ControlTimer::loop()
 
         if(nextLoopTime > resumeTime && now > nextLoopTime){
             onMiss(nextLoopTime,now);
+            nextLoopTime = now;
         }
 
         read();

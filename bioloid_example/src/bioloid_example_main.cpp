@@ -19,7 +19,7 @@
 // Protocol version
 #define PROTOCOL_VERSION                1.0                 // See which protocol version is used in the Dynamixel
 
-#define RAD_DEGREE_RATIO    M_PI/180.
+#define RAD_DEGREE_RATIO    (M_PI/180.)
 
 
 int main(int argc, char** argv){
@@ -33,25 +33,25 @@ int main(int argc, char** argv){
 
     std::vector<JointID> jointIDs;
 
-    //~ jointIDs.push_back(JointID("left_shoulder_swing_joint",     1,  60*RAD_DEGREE_RATIO,  -1));
-    //~ jointIDs.push_back(JointID("left_shoulder_lateral_joint",   3,  150*RAD_DEGREE_RATIO,  -1));
-    //~ jointIDs.push_back(JointID("left_elbow_joint",              5,  150*RAD_DEGREE_RATIO,  -1));
+    jointIDs.push_back(JointID("left_shoulder_swing_joint",     1,  60*RAD_DEGREE_RATIO,  -1));
+    jointIDs.push_back(JointID("left_shoulder_lateral_joint",   3,  150*RAD_DEGREE_RATIO,  -1));
+    jointIDs.push_back(JointID("left_elbow_joint",              5,  150*RAD_DEGREE_RATIO,  -1));
 
-    //~ jointIDs.push_back(JointID("right_shoulder_swing_joint",    6,  240*RAD_DEGREE_RATIO,  +1));
-    //~ jointIDs.push_back(JointID("right_shoulder_lateral_joint",  2,  240*RAD_DEGREE_RATIO,  +1));
-    //~ jointIDs.push_back(JointID("right_elbow_joint",             4,  150*RAD_DEGREE_RATIO,  +1));
+    jointIDs.push_back(JointID("right_shoulder_swing_joint",    6,  240*RAD_DEGREE_RATIO,  +1));
+    jointIDs.push_back(JointID("right_shoulder_lateral_joint",  2,  240*RAD_DEGREE_RATIO,  +1));
+    jointIDs.push_back(JointID("right_elbow_joint",             4,  150*RAD_DEGREE_RATIO,  +1));
 
-    //~ jointIDs.push_back(JointID("head_pitch_joint",  20,  150*RAD_DEGREE_RATIO,  -1));
-    //~ jointIDs.push_back(JointID("head_yaw_joint",    21,  150*RAD_DEGREE_RATIO,  +1));
+    jointIDs.push_back(JointID("head_pitch_joint",  20,  150*RAD_DEGREE_RATIO,  -1));
+    jointIDs.push_back(JointID("head_yaw_joint",    21,  150*RAD_DEGREE_RATIO,  +1));
 
-    jointIDs.push_back(JointID("joint",   3,  150*RAD_DEGREE_RATIO,  -1));
+//    jointIDs.push_back(JointID("joint",   1,  180*RAD_DEGREE_RATIO,  -1));
 
     auto hw = std::make_shared<DxlRobotHW>(jointIDs);
 
     auto cma = std::make_shared<RosControllerManagerAdapter>(hw.get(),nh);
     ControlTimer ctimer(hw);
 
-    ctimer.setFrequency(30);
+    ctimer.setFrequency(50);
 
     ctimer.loadController("MyController",cma);
 

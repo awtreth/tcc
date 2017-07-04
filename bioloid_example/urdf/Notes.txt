@@ -1,0 +1,1 @@
+URDF files were based on 'ros-bioloid' project, available on https://github.com/dxydas/ros-bioloid, by Dimitris Xydas

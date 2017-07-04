@@ -1,0 +1,3 @@
+.dae files were taken from 'ros-bioloid' project, available on https://github.com/dxydas/ros-bioloid, by Dimitris Xydas
+
+F100 Genius webcam cad file was taken from https://grabcad.com/library/widecam-f100-mockup-1, by Ashwin Sira

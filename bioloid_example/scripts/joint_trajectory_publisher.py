@@ -8,8 +8,16 @@ from trajectory_msgs.msg import *
 from control_msgs.msg import *
 
 # Global variables
-joint_names = ['joint']
-first_time = True
+joint_names = [ 'left_shoulder_swing_joint','left_shoulder_lateral_joint','left_elbow_joint']#,\
+                #'right_shoulder_swing_joint','right_shoulder_lateral_joint','right_elbow_joint',\
+                #'head_pitch_joint','head_yaw_joint']
+
+def get_position(joint_name, t):
+    return {
+        'left_shoulder_swing_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+        'left_shoulder_lateral_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+        'left_elbow_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+    }.get(joint_name, 0)    # 9 is default if x not found
 
 desiredPositions = [[]] * len(joint_names)
 actualPositions = [[]] * len(joint_names)
@@ -26,16 +34,15 @@ def buildMsg():
 
     msg.joint_names = joint_names
 
-    time = np.linspace(0, 60, 1000)
+    time = np.linspace(0, 10, 500)
 
-    for t in time:
+    for t in time:            
         traj = JointTrajectoryPoint()
-
-        traj.positions.append(0.5*(np.sin(2*t) - np.sin(4*t)))
-        #~ traj.velocities.append(np.cos(2*t) - np.cos(4*t)*2)
+        
+        for joint in joint_names:        
+            traj.positions.append(get_position(joint,t))
 
         traj.time_from_start = rospy.Duration(t+wait_time)
-
         msg.points.append(traj)
 
     return msg
@@ -57,7 +64,7 @@ def doneCallBack(status, result):
 if __name__ == '__main__':
     rospy.init_node('jtPub')
 
-    client = actionlib.SimpleActionClient('/position_joint_trajectory_controller/follow_joint_trajectory',
+    client = actionlib.SimpleActionClient('/posvel_joint_trajectory_controller/follow_joint_trajectory',
                                           FollowJointTrajectoryAction)
     print 'Waiting For Server'
     client.wait_for_server()
@@ -70,6 +77,3 @@ if __name__ == '__main__':
     result = client.get_result()
 
     print result
-    
-    #~ print desired_timestamps
-
