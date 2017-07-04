@@ -39,6 +39,11 @@ void ControlLoop::onMiss(std::chrono::steady_clock::time_point desire, std::chro
 }
 
 
+//ControlLoop::ControlLoop()
+//{
+//    defaultInit();
+//}
+
 ControlLoop::ControlLoop(HardwarePtr hwInterface)
 {
     defaultInit();

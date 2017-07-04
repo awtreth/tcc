@@ -13,7 +13,7 @@ add_definitions(-std=c++11 -Wall)
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
-   CATKIN_DEPENDS hardware_interface realtime_tools
+   CATKIN_DEPENDS hardware_interface realtime_tools control_loop
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})

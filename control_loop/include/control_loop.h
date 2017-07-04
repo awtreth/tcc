@@ -25,7 +25,7 @@ class ControlLoop {
 
 public:
 
-    //    ControlTimer();
+//    ControlLoop();
     ControlLoop(HardwarePtr hwInterface);
 
     virtual ~ControlLoop();

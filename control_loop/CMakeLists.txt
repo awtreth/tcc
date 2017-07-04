@@ -18,7 +18,9 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 set(control_loop_srcs
     src/control_loop.cpp
-    src/ros_controller_manager_adapter.cpp)
+    src/ros_controller_manager_adapter.cpp
+    src/robot_hw_adapter.cpp
+    src/ros_control_loop.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${control_loop_srcs})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
