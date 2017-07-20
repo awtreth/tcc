@@ -1,0 +1,52 @@
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+single_joint_position_controller:
+  type: position_controllers/JointGroupPositionController
+  joints:
+    - head_yaw_joint
+    
+single_joint_posvel_controller:
+  type: posvel_controllers/JointGroupPosVelController
+  joints:
+    - head_yaw_joint
+    
+single_joint_position_joint_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - head_yaw_joint
+
+head_posvel_controller:
+  type: posvel_controllers/JointGroupPosVelController
+  joints:
+    - head_pitch_joint
+    - head_yaw_joint
+
+position_trajectory_controller_left:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - left_shoulder_swing_joint
+    - left_shoulder_lateral_joint
+    - left_elbow_joint
+
+position_trajectory_controller_right:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - right_shoulder_swing_joint
+    - right_shoulder_lateral_joint
+    - right_elbow_joint
+    
+posvel_controller_left:
+  type: posvel_controllers/JointGroupPosVelController
+  joints:
+    - left_shoulder_swing_joint
+    - left_shoulder_lateral_joint
+    - left_elbow_joint
+
+posvel_controller_right:
+  type: posvel_controllers/JointGroupPosVelController
+  joints:
+    - right_shoulder_swing_joint
+    - right_shoulder_lateral_joint
+    - right_elbow_joint

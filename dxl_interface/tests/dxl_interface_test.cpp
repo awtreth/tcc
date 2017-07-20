@@ -1,5 +1,5 @@
 #include <iostream>
-#include <dxl_interface.h>
+#include <dxl_interface/dxl_interface.h>
 #include <unistd.h>
 
 using namespace dxl_interface;
@@ -7,9 +7,10 @@ using namespace std;
 
 int main(){
 
-    auto spec = ModelSpec::getByName("AX-12","../model_specs/");
+    auto spec = ModelSpec::getByName("AX-12");
 
-    std::cout << spec.toString() << std::endl;
+//    std::cout << spec.toString() << std::endl;
+
 
 //    DxlChannel channel;
 

@@ -9,7 +9,7 @@ from trajectory_msgs.msg import *
 from control_msgs.msg import *
 
 # Global variables
-joint_names = ['joint']
+joint_names = ['head_yaw_joint']
 first_time = True
 
 desiredPositions = [[]] * len(joint_names)
@@ -27,7 +27,7 @@ def buildMsg():
 
     msg.joint_names = joint_names
 
-    time = np.linspace(0, 30, 1000)
+    time = np.linspace(0, 20, 300)
 
     for t in time:
         traj = JointTrajectoryPoint()
@@ -57,9 +57,9 @@ def doneCallBack(status, result):
     print 'done'
 
 if __name__ == '__main__':
-    rospy.init_node('jtPub')
+    rospy.init_node('single_joint_controller')
 
-    client = actionlib.SimpleActionClient('/posvel_joint_trajectory_controller/follow_joint_trajectory',
+    client = actionlib.SimpleActionClient('/single_joint_position_joint_trajectory_controller/follow_joint_trajectory',
                                           FollowJointTrajectoryAction)
     print 'Waiting For Server'
     client.wait_for_server()

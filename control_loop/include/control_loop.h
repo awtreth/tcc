@@ -30,6 +30,8 @@ public:
 
     virtual ~ControlLoop();
 
+//    void setHardware(HardwarePtr hw);
+
 
     //TODO: check if it works
     /**

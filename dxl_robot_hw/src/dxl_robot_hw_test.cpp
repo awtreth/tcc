@@ -5,7 +5,10 @@
 #include <ros/ros.h>
 #include <map>
 #include <string>
+#include <control_loop.h>
 #include <ros_control_loop.h> //control_loop package (FIXME: install control_loop)
+#include <robot_hw_adapter.h>
+#include <ros_controller_manager_adapter.h>
 #include <memory>
 #include <chrono>
 #include <cmath>
@@ -32,16 +35,19 @@ int main(int argc, char** argv){
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
-    //JOINTS CONFIGURATION
+    //Joint Configuration
     std::vector<JointID> jointIDs;
 
-    jointIDs.push_back(JointID("joint",   3,  150*RAD_DEGREE_RATIO,  -1));
+    //joint name, Dynamixel ID, reference, direction
+    jointIDs.push_back(JointID("joint", 1,  180*RAD_DEGREE_RATIO,  1));
 
+    //RobotHW Initialization
     auto hw = std::make_shared<DxlRobotHW>(jointIDs);
 
+    //ControlLoop + ControllerManager initialization
     control_loop::RosControlLoop ctimer(hw,nh);
 
-    ctimer.setFrequency(30);
+    ctimer.setFrequency(320);//in Hz
 
     ctimer.resumeLoop();
 

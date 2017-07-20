@@ -3,6 +3,11 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <algorithm>
+#include <pthread.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <thread>
 
 using namespace hardware_interface;
 
@@ -18,6 +23,14 @@ using namespace hardware_interface;
 
 DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, const float protocol, const int baud_rate)
 {
+
+//    struct sched_param param;
+
+//    //It can't be greater than 98
+//    param.__sched_priority = 98;
+
+//    //TODO: success check
+//    std::cout << pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) << std::endl;
 
     portHandler_ = dynamixel::PortHandler::getPortHandler(deviceName);
     packetHandler_ = dynamixel::PacketHandler::getPacketHandler(protocol);
@@ -40,7 +53,7 @@ DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, co
         uint16_t model_number = 12;
 
         if(packetHandler_->ping(portHandler_,uint8_t(jointID.id),&model_number)==COMM_SUCCESS){
-            DxlInfo dxl(jointID,dxl_interface::ModelSpec::getByNumber(model_number,DEFAULT_MODEL_SPEC_FOLDER,DEFAULT_MODEL_SPEC_FILE_EXTENSION));
+            DxlInfo dxl(jointID,dxl_interface::ModelSpec::getByNumber(model_number,protocol, DEFAULT_MODEL_SPEC_FOLDER,DEFAULT_MODEL_SPEC_FILE_EXTENSION));
             dxlInfos.push_back(dxl);
             dxlNameIdxMap[jointID.name] = i++;
         }
@@ -62,51 +75,7 @@ DxlRobotHW::DxlRobotHW(std::vector<JointID> jointIDs, const char *deviceName, co
 
 }
 
-void DxlRobotHW::write()
-{
-    //FIXME: restrito a protocolo 1.0
 
-    std::vector<std::string>& posIfaceClaimsRT = *posIfaceClaimBuffer.readFromRT();
-    std::vector<std::string>& posVelIfaceClaimsRT = *posVelIfaceClaimBuffer.readFromRT();
-
-    if(posIfaceClaimsRT.size() > 0){
-//        std::cout << "WRITE POSITION:" << std::endl;
-
-        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,2);
-
-        for(auto joint : posIfaceClaimsRT){
-            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
-            dxl.posCmd_dxl = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
-            writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(&dxl.posCmd_dxl));
-//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << "posCmd_dxl: " << dxl.posCmd_dxl << std::endl;
-        }
-
-        writePacket.txPacket();
-    }
-
-    if(posVelIfaceClaimsRT.size() > 0){
-
-//        std::cout << "WRITE POSVEL:" << std::endl;
-
-        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,4);
-
-        for(auto joint : posVelIfaceClaimsRT){
-            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
-
-            dxl.posVelCmd_dxl[0] = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
-            dxl.posVelCmd_dxl[1] = uint16_t(dxl.spec.velocityToValue(dxl.velCmd));
-
-            //dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
-
-            writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(dxl.posVelCmd_dxl));
-//            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd;
-//            std::cout << " posCmd_dxl: " << dxl.posVelCmd_dxl[0] <<  " velCmd_dxl: " << dxl.posVelCmd_dxl[1] << std::endl;
-        }
-
-        writePacket.txPacket();
-    }
-
-}
 
 void DxlRobotHW::read()
 {
@@ -114,11 +83,24 @@ void DxlRobotHW::read()
 
     uint16_t values[3] = {512,0,0};
 
-//    std::cout << "READ" << std::endl;
+//    int policy;
+//    struct sched_param param;
+
+//    auto tid = std::this_thread::get_id();
+//    pthread_getschedparam(pthread_self(),&policy,&param);
+
+//    std::cout << tid << " " << policy << " " << param.sched_priority << std::endl;
+
+    //    std::cout << "READ" << std::endl;
+
+    uint8_t error;
 
     for(DxlInfo& dxl : dxlInfos){
 
-        packetHandler_->readTxRx(portHandler_,uint8_t(dxl.jointID.id),PRESENT_POS_ADDR,6,reinterpret_cast<uint8_t*>(&values[0]));
+        auto res = packetHandler_->readTxRx(portHandler_,uint8_t(dxl.jointID.id),PRESENT_POS_ADDR,6,reinterpret_cast<uint8_t*>(&values[0]),&error);
+
+//        packetHandler_->printRxPacketError(error);
+//        packetHandler_->printTxRxResult(res);
 
         dxl.pos = dxl.jointID.getDirection()*(dxl.spec.valueToRadian(values[0])-dxl.jointID.reference);
         dxl.vel = dxl.jointID.getDirection()*dxl.spec.valueToVelocity(values[1]);
@@ -132,6 +114,59 @@ void DxlRobotHW::read()
 //        std::cout << " pos_dxl: " << values[0] << " vel_dxl: " << values[1] << " eff_dxl: " << values[2] << std::endl;
 
     }
+}
+
+void DxlRobotHW::write()
+{
+    //FIXME: restrito a protocolo 1.0
+
+    std::vector<std::string>& posIfaceClaimsRT = *posIfaceClaimBuffer.readFromRT();
+    std::vector<std::string>& posVelIfaceClaimsRT = *posVelIfaceClaimBuffer.readFromRT();
+
+    if(posIfaceClaimsRT.size() > 0){
+        //        std::cout << "WRITE POSITION:" << std::endl;
+
+        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,2);
+
+        for(auto joint : posIfaceClaimsRT){
+            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
+            dxl.posCmd_dxl = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
+            writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(&dxl.posCmd_dxl));
+            //            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << "posCmd_dxl: " << dxl.posCmd_dxl << std::endl;
+        }
+
+        writePacket.txPacket();
+    }
+
+    if(posVelIfaceClaimsRT.size() > 0){
+
+        //        std::cout << "WRITE POSVEL:" << std::endl;
+
+        dynamixel::GroupSyncWrite writePacket(portHandler_,packetHandler_,GOAL_POS_ADDR,4);
+
+        for(auto joint : posVelIfaceClaimsRT){
+            DxlInfo& dxl = dxlInfos[dxlNameIdxMap[joint]];
+
+            dxl.posVelCmd_dxl[0] = uint16_t(dxl.spec.radianToValue(dxl.jointID.getDirection()*dxl.posCmd+dxl.jointID.reference));
+            dxl.posVelCmd_dxl[1] = uint16_t(dxl.spec.velocityToValue(dxl.velCmd));
+
+            //dxl.posVelCmd_dxl[1] = (dxl.posVelCmd_dxl[1]==0)?1:dxl.posVelCmd_dxl[1];
+
+            writePacket.addParam(uint8_t(dxl.jointID.id),reinterpret_cast<uint8_t*>(dxl.posVelCmd_dxl));
+            //            std::cout << "name: " << dxl.jointID.name << " posCmd: " << dxl.posCmd << " velCmd: " << dxl.velCmd;
+            //            std::cout << " posCmd_dxl: " << dxl.posVelCmd_dxl[0] <<  " velCmd_dxl: " << dxl.posVelCmd_dxl[1] << std::endl;
+        }
+
+        writePacket.txPacket();
+    }
+}
+
+void DxlRobotHW::read(const ros::Time&, const ros::Duration&) {
+    read();
+}
+
+void DxlRobotHW::write(const ros::Time&, const ros::Duration&) {
+    write();
 }
 
 void DxlRobotHW::doSwitch(const std::list<ControllerInfo> &start_list, const std::list<ControllerInfo> & stop_list)

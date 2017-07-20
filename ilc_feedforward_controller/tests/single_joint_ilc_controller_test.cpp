@@ -5,6 +5,7 @@
 #include <ros_controller_manager_adapter.h>
 #include <DxlRobotHW.h>
 #include <controller_manager/controller_manager.h>
+#include <robot_hw_adapter.h>
 #include <cmath>
 #include <limits.h>
 
@@ -67,7 +68,7 @@ int main(int argc, char** argv){
 
     auto cma = std::make_shared<control_loop::RosControllerManagerAdapter>(hw.get(),nh);
 
-    control_loop::ControlLoop ctimer(hw);
+    control_loop::ControlLoop ctimer(std::make_shared<control_loop::RobotHWAdapter>(hw.get()));
 
     ctimer.setFrequency(FREQUENCY);
     ctimer.loadController("MyController",cma);

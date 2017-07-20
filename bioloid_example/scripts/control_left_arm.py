@@ -1,7 +1,6 @@
 import rospy
 import actionlib
 import numpy as np
-import math as mh
 
 import std_msgs.msg
 
@@ -9,8 +8,16 @@ from trajectory_msgs.msg import *
 from control_msgs.msg import *
 
 # Global variables
-joint_names = ['joint']
-first_time = True
+joint_names = [ 'left_shoulder_swing_joint','left_shoulder_lateral_joint','left_elbow_joint']#,\
+                #'right_shoulder_swing_joint','right_shoulder_lateral_joint','right_elbow_joint',\
+                #'head_pitch_joint','head_yaw_joint']
+
+def get_position(joint_name, t):
+    return {
+        'left_shoulder_swing_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+        'left_shoulder_lateral_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+        'left_elbow_joint': 0.2*(np.sin(2*t) - np.sin(4*t))-0.4,
+    }.get(joint_name, 0)    # 9 is default if x not found
 
 desiredPositions = [[]] * len(joint_names)
 actualPositions = [[]] * len(joint_names)
@@ -27,17 +34,15 @@ def buildMsg():
 
     msg.joint_names = joint_names
 
-    time = np.linspace(0, 30, 1000)
+    time = np.linspace(0, 30, 500)
 
-    for t in time:
+    for t in time:            
         traj = JointTrajectoryPoint()
-        traj.positions.append(0.5*(np.sin(2*t) - np.sin(4*t)))
-        traj.velocities.append(0.5*(np.cos(2*t)*2 - np.cos(4*t)*4))
-        #traj.positions.append(0.5*(mh.pow(np.sin(2*t+mh.pi/3),3)+np.sin(4*t))-0.25)
-        #traj.velocities.append(0.5*(3*mh.pow(np.cos(2*t+mh.pi/3),2)*2+np.cos(4*t)*4))
         
-        traj.time_from_start = rospy.Duration(t+wait_time)
+        for joint in joint_names:        
+            traj.positions.append(get_position(joint,t))
 
+        traj.time_from_start = rospy.Duration(t+wait_time)
         msg.points.append(traj)
 
     return msg
@@ -57,10 +62,11 @@ def doneCallBack(status, result):
     print 'done'
 
 if __name__ == '__main__':
-    rospy.init_node('jtPub')
+    rospy.init_node('control_left_arm')
 
-    client = actionlib.SimpleActionClient('/posvel_joint_trajectory_controller/follow_joint_trajectory',
-                                          FollowJointTrajectoryAction)
+    #client = actionlib.SimpleActionClient('/posvel_joint_trajectory_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
+    client = actionlib.SimpleActionClient('/position_trajectory_controller_left/follow_joint_trajectory', FollowJointTrajectoryAction)
+    
     print 'Waiting For Server'
     client.wait_for_server()
     print 'Connected'
@@ -72,6 +78,3 @@ if __name__ == '__main__':
     result = client.get_result()
 
     print result
-    
-    #~ print desired_timestamps
-

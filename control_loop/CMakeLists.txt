@@ -6,6 +6,8 @@ find_package(catkin REQUIRED COMPONENTS
     hardware_interface
     controller_manager)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 add_definitions(-std=c++11 -Wall)
 
 catkin_package(
@@ -23,7 +25,7 @@ set(control_loop_srcs
     src/ros_control_loop.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${control_loop_srcs})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} pthread cap)
 
 #Only to show the headers on Qt Creator's Project Panel
 FILE(GLOB_RECURSE headers "*.h")

@@ -60,7 +60,6 @@ private:
     int controlTableSize = 0;
     float protocol = 1.0;
 
-
     static std::vector<std::string> listFiles(const char* folder, const char *file_extension);
 
 public:
@@ -71,8 +70,8 @@ public:
 
     bool isValid();
 
-    static ModelSpec getByNumber(int modelNumber, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
-    static ModelSpec getByName(const char* modelName, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
+    static ModelSpec getByNumber(int modelNumber, float protocol = 1.0, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
+    static ModelSpec getByName(const char* modelName, float protocol = 1.0, const char* folder = DEFAULT_MODEL_SPEC_FOLDER, const char* file_extension = DEFAULT_MODEL_SPEC_FILE_EXTENSION);
 
     ControlTableItem getControlTableItem(const char* name);
 

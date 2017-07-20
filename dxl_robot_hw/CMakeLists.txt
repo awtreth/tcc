@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     control_loop
     realtime_tools)
 
+set(CMAKE_BUILD_TYPE Debug)
 add_definitions(-std=c++11 -Wall)
 
 catkin_package(

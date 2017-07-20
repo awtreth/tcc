@@ -72,6 +72,7 @@ std::vector<std::__cxx11::string> dxl_interface::ModelSpec::listFiles(const char
 dxl_interface::ModelSpec::ModelSpec(){}
 
 dxl_interface::ModelSpec::ModelSpec(const char *fileName){
+
     YAML::Node model = YAML::LoadFile(fileName);
 
     //ASSERTION STEP
@@ -133,12 +134,15 @@ bool ModelSpec::isValid()
     return valueToPositionRatio <= 0;
 }
 
-dxl_interface::ModelSpec dxl_interface::ModelSpec::getByNumber(int modelNumber, const char *folder, const char* file_extension){
+dxl_interface::ModelSpec dxl_interface::ModelSpec::getByNumber(int modelNumber, float protocol, const char *folder, const char* file_extension){
 
     auto fileNames = listFiles(folder, file_extension);
 
     for(auto fileName : fileNames){
         ModelSpec model(fileName.c_str());
+
+        if(roundf(model.protocol) != roundf(protocol))
+            continue;
 
         for(auto number : model.numbers){
             if(number == modelNumber){
@@ -150,11 +154,14 @@ dxl_interface::ModelSpec dxl_interface::ModelSpec::getByNumber(int modelNumber, 
     return ModelSpec();
 }
 
-dxl_interface::ModelSpec dxl_interface::ModelSpec::getByName(const char *modelName, const char *folder, const char* file_extension){
+dxl_interface::ModelSpec dxl_interface::ModelSpec::getByName(const char *modelName, float protocol, const char *folder, const char* file_extension){
     auto fileNames = listFiles(folder, file_extension);
 
     for(auto fileName : fileNames){
         ModelSpec model(fileName.c_str());
+
+        if(roundf(model.protocol) != roundf(protocol))
+            continue;
 
         for(auto name : model.names){
             if(name == modelName)

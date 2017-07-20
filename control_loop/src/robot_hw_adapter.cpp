@@ -19,3 +19,8 @@ control_loop::RobotHWAdapter::RobotHWAdapter(hardware_interface::RobotHW *rh){
     lastReadTime = ros::Time::now();
 }
 
+hardware_interface::RobotHW *control_loop::RobotHWAdapter::getRobotHW()
+{
+    return robotHW;
+}
+

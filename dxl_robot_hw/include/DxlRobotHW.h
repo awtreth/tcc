@@ -37,7 +37,7 @@ private:
 };
 
 
-class DxlRobotHW : public hardware_interface::RobotHW, public control_loop::IHardware{
+class DxlRobotHW : public hardware_interface::RobotHW{
 
 private:
 
@@ -93,16 +93,18 @@ private:
 public:
     DxlRobotHW(std::vector<JointID> jointIDs, const char* deviceName = "/dev/ttyUSB0", const float protocol = 1.0, const int baud_rate = 1000000);
 
-    // IHardwareInterface interface
-
-public:
-    void write();
-    void read();
-
-
     // RobotHW interface
 public:
     void doSwitch(const std::list<hardware_interface::ControllerInfo> & start_list,
                   const std::list<hardware_interface::ControllerInfo> & stop_list);
 
+
+    // RobotHW interface
+public:
+    void read(const ros::Time &, const ros::Duration &);
+    void write(const ros::Time &, const ros::Duration &);
+
+private:
+    void read();
+    void write();
 };

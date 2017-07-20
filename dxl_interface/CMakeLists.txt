@@ -25,7 +25,7 @@ set(dxl_interface_headers
 
 set(dxl_libs dxl_x64_cpp rt pthread)
 
-add_library(dxl_interface SHARED ${dxl_interface_srcs} ${dxl_interface_headers})
+add_library(dxl_interface SHARED ${dxl_interface_srcs})
 target_link_libraries(dxl_interface ${dxl_libs} yaml-cpp)
 
 add_executable(dxl_interface_test tests/dxl_interface_test.cpp)
@@ -43,5 +43,6 @@ install(DIRECTORY model_specs/
     FILES_MATCHING PATTERN "*.dxl")
 
 #Somente para exibir os headers na arvore do Qt Creator
-FILE(GLOB_RECURSE headers "*.h")
+FILE(GLOB_RECURSE headers "*.h" modelspecs "*.dxl")
 add_custom_target("${PROJECT_NAME}_headers" SOURCES ${headers})
+add_custom_target("${PROJECT_NAME}_modelspecs" SOURCES ${modelspecs})

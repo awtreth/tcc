@@ -56,9 +56,11 @@ int main(int argc, char** argv){
         mlockall(MCL_FUTURE);
 
         struct sched_param param;
-        param.__sched_priority = 51;
+        //param.__sched_priority = 98;
+        param.__sched_priority = 31;
 
-        if(pthread_setschedparam(pthread_self(), SCHED_FIFO, &param)){
+        //if(pthread_setschedparam(pthread_self(), SCHED_FIFO, &param)){
+        if(pthread_setschedparam(pthread_self(), SCHED_RR, &param)){
             std::cout << "No permission to set real_time scheduler" << std::endl;
             exit(-1);
         }

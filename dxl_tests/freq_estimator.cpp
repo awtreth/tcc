@@ -34,14 +34,14 @@ int main(int argc, char** argv){
 
 
     struct sched_param param;
-    param.__sched_priority = 98;
+    param.__sched_priority = 21;
 
     bool realtime = pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) == 0;
 
-    if(realtime)
-        mlockall(MCL_FUTURE);
+    //~ if(realtime)
+        //~ mlockall(MCL_FUTURE);
 
-    const uint8_t ids[] = {27,29,31,35,38,56};
+    const uint8_t ids[] = {1};//{27,29,31,35,38,56};
     uint8_t data[] = {1,0,1,0,1,0};
     uint8_t read_buff[20];
 
@@ -118,8 +118,8 @@ int main(int argc, char** argv){
     }
 
 
-    if(realtime)
-        munlockall();
+    //~ if(realtime)
+        //~ munlockall();
 
     double sum = 0;
 

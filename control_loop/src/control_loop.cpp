@@ -2,6 +2,8 @@
 #include <iostream>
 #include <functional>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <sys/capability.h>
 
 using namespace control_loop;
 
@@ -53,6 +55,11 @@ ControlLoop::ControlLoop(HardwarePtr hwInterface)
 ControlLoop::~ControlLoop(){
     this->close();
 }
+
+//void ControlLoop::setHardware(HardwarePtr hw)
+//{
+//    this->hardwareInterface = hw;
+//}
 
 
 bool ControlLoop::loadController(std::string controllerName, ControllerPtr controller)
@@ -127,7 +134,20 @@ bool ControlLoop::resumeLoop(std::chrono::microseconds readWaitTime)
 
 void ControlLoop::loop()
 {
+    cap_t cap = cap_get_pid(getpid());
+    cap_flag_value_t pFlag = CAP_CLEAR, eFlag = CAP_CLEAR;
+
+    cap_get_flag(cap,CAP_IPC_LOCK,CAP_PERMITTED,&pFlag);
+    cap_get_flag(cap,CAP_IPC_LOCK,CAP_EFFECTIVE,&eFlag);
+
+    bool mlock = pFlag==CAP_SET && eFlag == CAP_SET;
+
+    if(mlock)
+        std::cout << "mlock: " << mlockall(MCL_FUTURE) << std::endl;;
+
+
     std::chrono::steady_clock::time_point now;
+
 
     //Check if the loop is paused
     std::unique_lock<std::mutex> lck(requestMtx);
@@ -165,6 +185,9 @@ void ControlLoop::loop()
 
     }
 
+    if(mlock)
+        munlockall();
+
     //This command is needed to give time to close() method to join this thread
     sleep(1);
 }
@@ -201,17 +224,19 @@ bool ControlLoop::initThread()
 
     mainThread = std::thread(&ControlLoop::loop, this);
 
-//    mainThread.detach();
+    //    mainThread.detach();
 
     //TODO:: make scheduler policy and priority settable on construction
 
     struct sched_param param;
 
     //It can't be greater than 98
-    param.__sched_priority = 98;
+    param.__sched_priority = 31;
+
+    std::cout << "realtime: " << pthread_setschedparam(mainThread.native_handle(), SCHED_RR, &param) << std::endl;
 
     //TODO: success check
-    std::cout << pthread_setschedparam(mainThread.native_handle(), SCHED_FIFO, &param) << std::endl;
+
 
     return true;
 }

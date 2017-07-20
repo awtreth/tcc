@@ -23,6 +23,8 @@ public:
 
     RobotHWAdapter(hardware_interface::RobotHW *rh);
 
+    hardware_interface::RobotHW* getRobotHW();
+
 };
 
 }
