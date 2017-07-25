@@ -16,18 +16,18 @@ For now, only the ModelSpec class is working properly and it's used in _dxl\_rob
 
 In project's root folder run:
 
-'''
+```
 mkdir build
 cmake ..
 make
-'''
+```
 
 ### Installing
 
-'''
+```
 sudo make install
 sudo ldconfig
-'''
+```
 
 ### Checking
 
