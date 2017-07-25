@@ -1,7 +1,9 @@
 # Aplicação do ROS no Controle de Movimento de Robôs Equipados com Motores Dynamixel em Linux de Tempo Real 
 
 __Categoria do Trabalho:__ Projeto de Fim de Curso
+
 __Instituição:__ Universidade Federal de Uberlândia
+
 __Curso:__ Engenharia Mecatrônica
 
 __Aluno:__ Mateus Amarante Araújo
@@ -38,13 +40,9 @@ Em breve, o texto final será disponibilizado.
 
 ## Dependências
 
-Além dos pacotes "padrão" do ROS, como a tf e o rviz, estes projeto depende dos seguintes *ROS packages*:
+Além dos pacotes "padrão" do ROS, como a tf e o rviz, estes projeto depende dos seguintes *ROS packages*: `ros_control ros_controllers realtime_tools imu_filter_madgwick phidget_drivers ros-bioloid`
 
-'''
-ros_control ros_controllers realtime_tools imu_filter_madgwick phidget_drivers ros-bioloid
-'''
-
-Todos podem ser encontrados no repositório ROS, exceto o *ros-bioloid*, encontrado em <https://github.com/dxydas/ros-bioloid> (ressalta-se que este projeto só faz uso dos desenhos CAD)
+Todos podem ser encontrados no repositório ROS, exceto o `ros-bioloid`, encontrado em <https://github.com/dxydas/ros-bioloid> (ressalta-se que este projeto só faz uso dos desenhos CAD)
 
 Também é necessário instalar a *Dynamixel SDK* (<https://github.com/ROBOTIS-GIT/DynamixelSDK>) e a *dxl_interface* desenvolvida (o README.md da pasta do projeto contém instruções de instalação)
 
